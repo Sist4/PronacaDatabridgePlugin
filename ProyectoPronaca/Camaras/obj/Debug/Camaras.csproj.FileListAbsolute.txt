@@ -1,0 +1,17 @@
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\Camaras\bin\Debug\Camaras.dll
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\Camaras\bin\Debug\Camaras.pdb
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\Camaras\obj\Debug\Camaras.csprojAssemblyReference.cache
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.CoreCompileInputs.cache
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\Camaras\obj\Debug\Camaras.dll
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\Camaras\obj\Debug\Camaras.pdb
+C:\Users\User\Documents\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\Camaras\bin\Debug\Camaras.dll
+C:\Users\User\Documents\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\Camaras\bin\Debug\Camaras.pdb
+C:\Users\User\Documents\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.CoreCompileInputs.cache
+C:\Users\User\Documents\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\Camaras\obj\Debug\Camaras.dll
+C:\Users\User\Documents\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\Camaras\obj\Debug\Camaras.pdb
+C:\Users\User\Documents\ProyectoPronaca - Diego\Camaras\bin\Debug\Camaras.dll
+C:\Users\User\Documents\ProyectoPronaca - Diego\Camaras\bin\Debug\Camaras.pdb
+C:\Users\User\Documents\ProyectoPronaca - Diego\Camaras\obj\Debug\Camaras.csproj.CoreCompileInputs.cache
+C:\Users\User\Documents\ProyectoPronaca - Diego\Camaras\obj\Debug\Camaras.dll
+C:\Users\User\Documents\ProyectoPronaca - Diego\Camaras\obj\Debug\Camaras.pdb
+C:\Users\User\Documents\ProyectoPronaca - Diego\Camaras\obj\Debug\Camaras.csproj.AssemblyReference.cache

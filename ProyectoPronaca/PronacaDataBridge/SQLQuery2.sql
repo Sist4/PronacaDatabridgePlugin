@@ -1,0 +1,1 @@
+﻿EXECUTE P_TBVehiculos N'-1',N'',N'ABC-1234',N'1723047021',N'8956',N'',N'0',N'3981',N'',N'',N'',N'IP'

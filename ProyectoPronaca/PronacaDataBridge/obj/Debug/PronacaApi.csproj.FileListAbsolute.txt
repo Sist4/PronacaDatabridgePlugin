@@ -1,0 +1,36 @@
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Api\PronacaApi\bin\Debug\PronacaApi.dll
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Api\PronacaApi\bin\Debug\PronacaApi.pdb
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Api\PronacaApi\bin\Debug\DataBridge.Core.Entities.dll
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Api\PronacaApi\bin\Debug\DataBridge.Core.Entities.dll.config
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Api\PronacaApi\obj\Debug\PronacaApi.csproj.AssemblyReference.cache
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Api\PronacaApi\obj\Debug\PronacaApi.csproj.CoreCompileInputs.cache
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Api\PronacaApi\obj\Debug\PronacaApi.csproj.CopyComplete
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Api\PronacaApi\obj\Debug\PronacaApi.dll
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Api\PronacaApi\obj\Debug\PronacaApi.pdb
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.dll.config
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.dll
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.pdb
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.csproj.CoreCompileInputs.cache
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.dll
+D:\Users\SISTEMAS PRECITROL\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.pdb
+C:\Users\User\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.dll.config
+C:\Users\User\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.dll
+C:\Users\User\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.pdb
+C:\Users\User\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.csproj.AssemblyReference.cache
+C:\Users\User\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.csproj.CoreCompileInputs.cache
+C:\Users\User\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.dll
+C:\Users\User\Desktop\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.pdb
+C:\Users\User\Documents\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.csproj.CoreCompileInputs.cache
+C:\Users\User\Documents\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.dll.config
+C:\Users\User\Documents\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.dll
+C:\Users\User\Documents\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.pdb
+C:\Users\User\Documents\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.dll
+C:\Users\User\Documents\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.pdb
+C:\Users\User\Documents\Proyectos Precitrol\Databridge\Pronaca\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.csproj.AssemblyReference.cache
+C:\Users\User\Documents\ProyectoPronaca - Diego\PronacaDataBridge\obj\Debug\PronacaApi.csproj.AssemblyReference.cache
+C:\Users\User\Documents\ProyectoPronaca - Diego\PronacaDataBridge\obj\Debug\PronacaApi.csproj.CoreCompileInputs.cache
+C:\Users\User\Documents\ProyectoPronaca - Diego\PronacaDataBridge\obj\Debug\PronacaApi.dll
+C:\Users\User\Documents\ProyectoPronaca - Diego\PronacaDataBridge\obj\Debug\PronacaApi.pdb
+C:\Users\User\Documents\ProyectoPronaca - Diego\PronacaDataBridge\bin\Debug\PronacaApi.dll.config
+C:\Users\User\Documents\ProyectoPronaca - Diego\PronacaDataBridge\bin\Debug\PronacaApi.dll
+C:\Users\User\Documents\ProyectoPronaca - Diego\PronacaDataBridge\bin\Debug\PronacaApi.pdb
