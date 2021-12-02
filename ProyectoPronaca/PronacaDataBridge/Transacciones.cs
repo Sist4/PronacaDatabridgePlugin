@@ -17,7 +17,11 @@ using System.IO;
 using System.Collections.Generic;
 using DataBridge.ScaleLibrary.ScaleData;
 using DataBridge.ScaleLibrary.Events;
-
+using Caliburn.Micro;
+using DataBridge.Attended.ViewModel;
+using Ninject;
+using static System.Net.Mime.MediaTypeNames;
+using Application = System.Windows.Application;
 namespace PronacaApi
 {
    public class Transacciones : TransactionProcessing
@@ -559,7 +563,7 @@ namespace PronacaApi
 
                     byte[] myImageAsBytes = Convert.FromBase64String(sb.ToString());
 
-                    using (Image image = Image.FromStream(new MemoryStream(myImageAsBytes)))
+                    using (System.Drawing.Image image = System.Drawing.Image.FromStream(new MemoryStream(myImageAsBytes)))
                     {
                         image.Save(@"C:\CAMARA\"+ Nombre_Archivo + ".jpg", ImageFormat.Jpeg);  // Or Png
                     }
@@ -576,6 +580,37 @@ namespace PronacaApi
 
             return Nombre_Archivo;
 
+        }
+
+        private void ventanaNueva(String texto)
+        {
+            try
+            {
+                // Get singleton
+                IWindowManager windowManager = ServiceLocator.GetKernel().Get<IWindowManager>();
+
+                CustomInputDialogViewModel viewModel = new CustomInputDialogViewModel();
+                viewModel.CustomWindowTitle = "Custom Data Entry Plugin";
+                viewModel.DisplayText = texto;
+                viewModel.WatermarkValue = "Enter PO Number";
+                viewModel.YesButtonText = "OK";
+                viewModel.NoButtonText = "Cancel";
+                Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    windowManager.ShowDialog(viewModel);
+
+                });
+
+                if (viewModel.DialogResult)
+                {
+                    // Do something with textbox result
+                    string myTextboxResult = viewModel.InputValue;
+                }
+            }
+            catch (Exception ex)
+            {
+                ServiceManager.LogMgr.WriteError("Error", ex);
+            }
         }
 
 

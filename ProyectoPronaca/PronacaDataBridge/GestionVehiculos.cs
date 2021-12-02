@@ -11,6 +11,7 @@ using System.Configuration;
 using System.Reflection;
 using System.Data.SqlClient;
 using System.Data;
+using Renci.SshNet;
 
 namespace PronacaApi
 {
@@ -79,20 +80,31 @@ namespace PronacaApi
             FtpWebResponse response = (FtpWebResponse)ftpRequest.GetResponse();
             StreamReader streamReader = new StreamReader(response.GetResponseStream());
 
-            List<string> directories = new List<string>();
+            using(SftpClient cliente=new SftpClient(new PasswordConnectionInfo(Direccion_Ftp, Usuario_Ftp, Password_Ftp)))
+            {
+                cliente.Connect();
+                buscarImagenesSFTP(cliente, "/Camara",placa_enviada, ref respuesta);
+                cliente.Disconnect();
+            }
+            
+            return respuesta;
 
-            string line = streamReader.ReadLine();
-            while (!string.IsNullOrEmpty(line))
+        }
+
+        private void buscarImagenesSFTP(SftpClient cliente,string directorioServidor, string placa_enviada, ref string respuesta)
+        {
+            var paths = cliente.ListDirectory(directorioServidor);
+            foreach (var path in paths)
             {
                 //obtenemeos el listado de los archivos ftp
                 //directories.Add(line);
-                if (line.ToString() !=  "." & line.ToString() !=".."  & line.ToString() != "test")// | line == "..")
+                if (path.ToString() != "." & path.ToString() != ".." & path.ToString() != "test")// | line == "..")
                 {
 
-                    string[] array = line.Split('_');
+                    string[] array = path.ToString().Split('_');
                     //FECHA Y HORA EN EL array[0] ;la placa en el array[1]
-                     string FEC =   array[0];
-                     string PLACA =   array[1].Replace(".jpg","");
+                    string FEC = array[0];
+                    string PLACA = array[1].Replace(".jpg", "");
                     //obtenemos la fecha y la hora 
                     string años = FEC.Substring(0, 4);
                     string mes = FEC.Substring(4, 2);
@@ -102,34 +114,21 @@ namespace PronacaApi
                     string segundos = FEC.Substring(12, 2);
                     DateTime hora_foto = Convert.ToDateTime(años + "-" + mes + "-" + dia + " " + horas + ":" + minutos + ":" + segundos);
                     DateTime Fecha_Actual = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                     DateTime Fecha_restada = (Fecha_Actual.AddMinutes(-30));
+                    DateTime Fecha_restada = (Fecha_Actual.AddMinutes(-30));
 
 
 
                     if (placa_enviada.Equals(PLACA.Replace("-", "")) && (hora_foto.CompareTo(Fecha_restada) >= 0 && hora_foto.CompareTo(Fecha_Actual) <= 0))
                     {
                         respuesta = "";
-                        return respuesta;
-                        //Hago lo que quiero aquí
-
                     }
-                    
+
                 }
 
-                line = streamReader.ReadLine();
 
             }
 
-            streamReader.Close();
-
-
-
-
-            return respuesta;
-
         }
-
-
         #endregion
 
         #region ConexionBdDataBridge
