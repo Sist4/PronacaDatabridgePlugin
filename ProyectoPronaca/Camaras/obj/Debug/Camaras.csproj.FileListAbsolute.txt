@@ -17,7 +17,6 @@ C:\Users\User\Documents\ProyectoPronaca - Diego\Camaras\obj\Debug\Camaras.pdb
 C:\Users\User\Documents\ProyectoPronaca - Diego\Camaras\obj\Debug\Camaras.csproj.AssemblyReference.cache
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\Camaras\bin\Debug\Camaras.dll
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\Camaras\bin\Debug\Camaras.pdb
-C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.AssemblyReference.cache
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.CoreCompileInputs.cache
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\Camaras\obj\Debug\Camaras.dll
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\Camaras\obj\Debug\Camaras.pdb

@@ -34,15 +34,12 @@ C:\Users\User\Documents\ProyectoPronaca - Diego\PronacaDataBridge\obj\Debug\Pron
 C:\Users\User\Documents\ProyectoPronaca - Diego\PronacaDataBridge\bin\Debug\PronacaApi.dll.config
 C:\Users\User\Documents\ProyectoPronaca - Diego\PronacaDataBridge\bin\Debug\PronacaApi.dll
 C:\Users\User\Documents\ProyectoPronaca - Diego\PronacaDataBridge\bin\Debug\PronacaApi.pdb
-C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.csproj.AssemblyReference.cache
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.csproj.CoreCompileInputs.cache
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.dll
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.pdb
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.dll.config
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.dll
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.pdb
-C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\bin\Debug\Caliburn.Micro.Platform.dll
-C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\bin\Debug\Ninject.dll
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.dll
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.xml
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.csproj.CopyComplete

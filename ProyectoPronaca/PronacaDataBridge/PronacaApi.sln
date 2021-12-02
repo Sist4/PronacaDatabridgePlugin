@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.1585
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PronacaApi", "PronacaApi.csproj", "{0594F3FB-47F3-48D5-9729-391DA16161F9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PronacaPlugin", "PronacaPlugin.csproj", "{0594F3FB-47F3-48D5-9729-391DA16161F9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Camaras", "..\Camaras\Camaras.csproj", "{82624E7C-3EF0-4BC7-A957-DC2DFC8F8566}"
 EndProject

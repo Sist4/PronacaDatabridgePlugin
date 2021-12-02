@@ -33,6 +33,7 @@
   <ItemGroup>
     <Reference Include="Caliburn.Micro.Platform">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\Caliburn.Micro.Platform.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="DataBridge">
       <HintPath>C:\Program Files (x86)\Mettler Toledo\DataBridge\Application\DataBridge.exe</HintPath>
@@ -84,6 +85,7 @@
     </Reference>
     <Reference Include="Ninject">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\Ninject.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="PresentationFramework" />
     <Reference Include="Renci.SshNet, Version=2020.0.1.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">

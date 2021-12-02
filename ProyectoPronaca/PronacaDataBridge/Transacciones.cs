@@ -148,6 +148,7 @@ namespace PronacaApi
                                 //realizamos la conexion FTP Y Revisamos que exista un archivo en el trascurso de entre la hora actual menos 10 minutos con la comparacion de la placa 
                                 if (VEH.listarFTP(Vehiculo).Equals(""))
                                 {
+                                    ventanaNueva("se empezó con la lectura del sftp");
                                     return "";
                                 }
                                 else
@@ -261,107 +262,61 @@ namespace PronacaApi
                 // si existe procedemosa verificar si se tomo la lectura en el trascuroso de los 10 minutos
                 if (VEH.consulta_BiometricoChofer(Chofer) != "")
                 {
-                    if (myTransaction.WeightCaptured.MainWeightData.GrossWeightValue < (pesoMaximo[nScaleId]))
+                    //pasa el primer filtro del chofer 
+                    //2-********************** FILTRO DE LA PLACA AL INGRESO*******************************************************************   
+                    string Ping_Ingreso = VEH.consulta_PlacaIngreso(Vehiculo);
+
+                    if (Ping_Ingreso != "")
                     {
-                        if (myTransaction.WeightCaptured.MainWeightData.GrossWeightValue >= (pesoMaximo[nScaleId] - 100))
+                        //si el vehiculo anteriormente se registro un pin el operador ya debio haber registrado 
+
+                        if (Ping_Ingreso.Equals(Nota))
                         {
-                            //pasa el primer filtro del chofer 
-                            //2-********************** FILTRO DE LA PLACA AL INGRESO*******************************************************************   
-                            string Ping_Ingreso = VEH.consulta_PlacaIngreso(Vehiculo);
+                            //  String RES = VEH.Gestion_Pesaje(nScaleId.ToString(),"",Vehiculo,Chofer, Peso_Ing,"","","","","","","IC");
+                            // si cumple con el ping se cambia el estado  IC=Ingreso Completado mandamos el update 
+                            return "";
+                        }
+                        else
+                        {
+                            return "El Ping Ingresado No Coincide";
+                        }
+                    }
+                    else
+                    {
 
-                            if (Ping_Ingreso != "")
+                        //hhacemos ping a la carpeta ftp 
+
+                        Ping HacerPing = new Ping();
+                        int iTiempoEspera = 500;
+                        PingReply RespuestaPingCamara;
+                        PingReply RespuestaPingFTP;
+                        string sDireccion;
+                        string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+                        UriBuilder uri = new UriBuilder(codeBase);
+                        string path = Uri.UnescapeDataString(uri.Path);
+                        Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
+                        sDireccion = cfg.AppSettings.Settings["IP_Camara"].Value;
+                        RespuestaPingCamara = HacerPing.Send(sDireccion, iTiempoEspera);
+
+
+
+                        if (RespuestaPingCamara.Status == IPStatus.Success)
+                        {
+                            //HACEMOS PING A LA CARPETA FTP
+
+                            sDireccion = cfg.AppSettings.Settings["IP_Ftp"].Value;
+                            RespuestaPingFTP = HacerPing.Send(sDireccion, iTiempoEspera);
+
+
+                            if (RespuestaPingFTP.Status == IPStatus.Success)
                             {
-                                //si el vehiculo anteriormente se registro un pin el operador ya debio haber registrado 
-
-                                if (Ping_Ingreso.Equals(Nota))
+                                //si la trasaccion va ser la primera vez que se verifica 
+                                //realizamos la conexion FTP Y Revisamos que exista un archivo en el trascurso de entre la hora actual menos 10 minutos con la comparacion de la placa 
+                                if (VEH.listarFTP(Vehiculo).Equals(""))
                                 {
-                                    //  String RES = VEH.Gestion_Pesaje(nScaleId.ToString(),"",Vehiculo,Chofer, Peso_Ing,"","","","","","","IC");
-                                    // si cumple con el ping se cambia el estado  IC=Ingreso Completado mandamos el update 
+                                    ventanaNueva("se empezó con la lectura del sftp");
                                     return "";
                                 }
-                                else
-                                {
-                                    return "El Ping Ingresado No Coincide";
-                                }
-                            }
-                            else
-                            {
-
-                                //hhacemos ping a la carpeta ftp 
-
-                                Ping HacerPing = new Ping();
-                                int iTiempoEspera = 500;
-                                PingReply RespuestaPingCamara;
-                                PingReply RespuestaPingFTP;
-                                string sDireccion;
-                                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-                                UriBuilder uri = new UriBuilder(codeBase);
-                                string path = Uri.UnescapeDataString(uri.Path);
-                                Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-                                sDireccion = cfg.AppSettings.Settings["IP_Camara"].Value;
-                                RespuestaPingCamara = HacerPing.Send(sDireccion, iTiempoEspera);
-
-
-
-                                if (RespuestaPingCamara.Status == IPStatus.Success)
-                                {
-                                    //HACEMOS PING A LA CARPETA FTP
-
-                                    sDireccion = cfg.AppSettings.Settings["IP_Ftp"].Value;
-                                    RespuestaPingFTP = HacerPing.Send(sDireccion, iTiempoEspera);
-
-
-                                    if (RespuestaPingFTP.Status == IPStatus.Success)
-                                    {
-                                        //si la trasaccion va ser la primera vez que se verifica 
-                                        //realizamos la conexion FTP Y Revisamos que exista un archivo en el trascurso de entre la hora actual menos 10 minutos con la comparacion de la placa 
-                                        if (VEH.listarFTP(Vehiculo).Equals(""))
-                                        {
-                                            return "";
-                                        }
-                                        else
-                                        {
-                                            //                //la informacion no coincide o no se tomo la foto se genera un pin y se lo envia 
-                                            var seed = Environment.TickCount;
-                                            var random = new Random(seed);
-                                            var Pin = random.Next(999, 9999);
-                                            String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, Peso_Ing, "", "0", Pin.ToString(), "", "", "", "IP");
-
-                                            string Obtener_ruta = CreateTransaction(1, 1, Vehiculo);
-                                            if (Obtener_ruta.Equals(""))
-                                            {
-                                                //si la imagen no se creo
-                                                string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                                            }
-                                            else
-                                            {
-                                                //si la imagen se creo se adjunta en el correo electronico 
-                                                string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, @"C:\CAMARA\" + Obtener_ruta + ".jpg");
-
-                                            }
-
-                                            //string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                                            return "La Placa Seleccionada no se encuentra en los registros de la Camara, se enviará un Pin para que siga con la Transacción";
-
-                                        }
-
-                                    }
-                                    else
-                                    {
-                                        //                //la informacion no coincide o no se tomo la foto se genera un pin y se lo envia 
-                                        var seed = Environment.TickCount;
-                                        var random = new Random(seed);
-                                        var Pin = random.Next(999, 9999);
-                                        String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, Peso_Ing, "", "0", Pin.ToString(), "", "", "", "IP");
-                                        string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                                        return "La Carpeta FTP no esta en Red";
-
-                                    }
-
-
-
-                                }
-                                //caso que no haya respuesta de la camra 
                                 else
                                 {
                                     //                //la informacion no coincide o no se tomo la foto se genera un pin y se lo envia 
@@ -369,48 +324,80 @@ namespace PronacaApi
                                     var random = new Random(seed);
                                     var Pin = random.Next(999, 9999);
                                     String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, Peso_Ing, "", "0", Pin.ToString(), "", "", "", "IP");
-                                    string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                                    return "La camara no se encuentra en la Red";
+
+                                    string Obtener_ruta = CreateTransaction(1, 1, Vehiculo);
+                                    if (Obtener_ruta.Equals(""))
+                                    {
+                                        //si la imagen no se creo
+                                        string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
+                                    }
+                                    else
+                                    {
+                                        //si la imagen se creo se adjunta en el correo electronico 
+                                        string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, @"C:\CAMARA\" + Obtener_ruta + ".jpg");
+
+                                    }
+
+                                    //string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
+                                    return "La Placa Seleccionada no se encuentra en los registros de la Camara, se enviará un Pin para que siga con la Transacción";
 
                                 }
 
-
-
-
-
+                            }
+                            else
+                            {
+                                //                //la informacion no coincide o no se tomo la foto se genera un pin y se lo envia 
+                                var seed = Environment.TickCount;
+                                var random = new Random(seed);
+                                var Pin = random.Next(999, 9999);
+                                String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, Peso_Ing, "", "0", Pin.ToString(), "", "", "", "IP");
+                                string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
+                                return "La Carpeta FTP no esta en Red";
 
                             }
-                            //para crear el  filtro de la placa consultamos primero si no existe un vehiculo registrado
-                            //2-********************** FIN FILTRO DE LA PLACA AL INGRESO*******************************************************************   
+
+
+
                         }
-                        // si el chofer no Timbro o excedio el tiempo predeterminado(10 minutos) 
+                        //caso que no haya respuesta de la camra 
                         else
                         {
-                            return "El Chofer no ha Timbrado en el Biometrico, Recuerde tener abierto el software del Biometrico y que el Tiempo de espera son 10 Minutos";
+                            //                //la informacion no coincide o no se tomo la foto se genera un pin y se lo envia 
+                            var seed = Environment.TickCount;
+                            var random = new Random(seed);
+                            var Pin = random.Next(999, 9999);
+                            String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, Peso_Ing, "", "0", Pin.ToString(), "", "", "", "IP");
+                            string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
+                            return "La camara no se encuentra en la Red";
+
                         }
+
+
+
+
+
+
                     }
-                    // FIN DEL FILTRO BIOMETRICO- CHOFER
-                    else
-                    {
-                        return "El chofer debe estar Creado en el Biometrico";
-                    }
+                    //para crear el  filtro de la placa consultamos primero si no existe un vehiculo registrado
+                    //2-********************** FIN FILTRO DE LA PLACA AL INGRESO*******************************************************************   
                 }
-                        else
-                        {
-                            return "El peso ha bajado considerablemente, porfavor obtenga denuevo el peso - peso actual: " +
-                                peso + " peso obtenido: " + myTransaction.WeightCaptured.MainWeightData.GrossWeightValue +
-                                "peso maximo: " + pesoMaximo[nScaleId];
-                        }
-                    }
-                    else
-                        return "El conductor no se ha bajado aún, porfavor obtenga denuevo el peso- peso actual: " +
-                                peso + " peso obtenido: " + myTransaction.WeightCaptured.MainWeightData.GrossWeightValue +
-                                "peso maximo: " + pesoMaximo[nScaleId];
-                    
+                // si el chofer no Timbro o excedio el tiempo predeterminado(10 minutos) 
+                else
+                {
+                    return "El Chofer no ha Timbrado en el Biometrico, Recuerde tener abierto el software del Biometrico y que el Tiempo de espera son 10 Minutos";
+                }
+            }
+            // FIN DEL FILTRO BIOMETRICO- CHOFER
+            else
+            {
+                return "El chofer debe estar Creado en el Biometrico";
+            }
+
+
 
         }
 
-      
+
         public override void ScaleAboveThreshold(ScaleAboveThresholdEventArgs myEventArgs)
         {
             lock (TransactionNeedsProcessed)
@@ -476,6 +463,7 @@ namespace PronacaApi
         }
         public override string SettingWeight(int nScaleId, ScaleWeightPacket myScaleWeightData, bool bIsSplitWeight)
         {
+            ventanaNueva("peso obteniendose");
             if (myScaleWeightData.MainWeightData.GrossWeightValue < (pesoMaximo[nScaleId]))
             {
                 if (myScaleWeightData.MainWeightData.GrossWeightValue >= (pesoMaximo[nScaleId] - 100))
@@ -484,13 +472,13 @@ namespace PronacaApi
                 }
                 else
                 {
-                    return "El peso ha bajado considerablemente, porfavor obtenga denuevo el peso  "+ "  - peso obtenido: " + myScaleWeightData.MainWeightData.GrossWeightValue +
-                        "peso máximo: " + pesoMaximo[nScaleId]+" -";
+                    return "El peso ha bajado considerablemente, porfavor obtenga denuevo el peso" + "  * peso obtenido: " + myScaleWeightData.MainWeightData.GrossWeightValue +
+                       " peso máximo: " + pesoMaximo[nScaleId] + " *";
                 }
             }
             else
-                return "El conductor no se ha bajado aún, porfavor obtenga denuevo el peso  " + "  - peso obtenido: " + myScaleWeightData.MainWeightData.GrossWeightValue +
-                        "peso máximo: " + pesoMaximo[nScaleId]+" -";
+                return "El conductor no se ha bajado aún, porfavor obtenga denuevo el peso" + "  * peso obtenido: " + myScaleWeightData.MainWeightData.GrossWeightValue +
+                       " peso máximo: " + pesoMaximo[nScaleId] + " *";
         }
 
 
