@@ -26,10 +26,10 @@ namespace PronacaApi
 {
    public class Transacciones : TransactionProcessing
     {
-        
+        //Variables globales
         double[] pesoMaximo;
         double peso;
-        // Default Constructor
+        //Constructor por defecto
         public Transacciones()
         {
             for (int nScale = 0; nScale < 6; nScale++)
@@ -72,151 +72,8 @@ namespace PronacaApi
         }
         #endregion
         
-        //Antes de completar la transacción(BOTON COMPLETAR)
-        public override string TransactionCompleting(int nScaleId, TransactionModel myTransaction)
-        {
-            GestionVehiculos VEH = new GestionVehiculos();
-            string Vehiculo = "";
-            string Chofer = "";
-                Vehiculo = myTransaction.Loads[0].Vehicle.DisplayDescription;
-                //string Material = myTransaction.Loads[0].Material.Description;
-                //string Empresa = myTransaction.Loads[0].Account.Description;
-                string N_Transaccion = myTransaction.Loads[0].TransactionNumber;
-               string Nota = myTransaction.Loads[0].Note;
-                string Peso_Salida = myTransaction.Loads[0].Pass2Weight.ToString();
-                ////gurdamos la informacion que envia el databridge 
-                Chofer = myTransaction.Loads[0].Driver.Name.ToString();
-            //1-*****************************Filtro del chofer y biometrico*********************************************************
-            //******Tomar encunta que debe estar abierto el progrma ZKAccess3.5 Security System del biometrico  
-            //***Consultamos si el chofer existe en el biometrico 
-            if (VEH.consulta_ExisteChofer(Chofer) != "")
-            {
-                // si existe procedemosa verificar si se tomo la lectura en el trascuroso de los 10 minutos
-                if (VEH.consulta_BiometricoChofer(Chofer) != "")
-                {
-                    //pasa el primer filtro del chofer 
-                    //2-********************** FILTRO DE LA PLACA AL salir el Vehiculo*******************************************************************   
-                    string Ping_Salida = VEH.consulta_PinSalida(N_Transaccion);
-
-                    if (Ping_Salida != "")
-                    {
-                        //si el vehiculo anteriormente se registro un pin el operador ya debio haber registrado 
-
-                        if (Ping_Salida.Equals(Nota))
-                        {
-                            // si cumple con el ping se cambia el estado  IC=Ingreso Completado mandamos el update 
-                            String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), Vehiculo, Chofer, "", Peso_Salida, N_Transaccion,"", "", "", "", "SC");
-                            return "";
-                        }
-                        else
-                        {
-                            return "El Ping Ingresado No Coincide";
-                        }
-
-
-
-                    }
-                    else
-                    {
-
-                        //hhacemos ping a la carpeta ftp 
-
-                        Ping HacerPing = new Ping();
-                        int iTiempoEspera = 500;
-                        PingReply RespuestaPingCamara;
-                        PingReply RespuestaPingFTP;
-                        string sDireccion;
-                        string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-                        UriBuilder uri = new UriBuilder(codeBase);
-                        string path = Uri.UnescapeDataString(uri.Path);
-                        Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-                        sDireccion = cfg.AppSettings.Settings["IP_Camara"].Value;
-                        RespuestaPingCamara = HacerPing.Send(sDireccion, iTiempoEspera);
-
-                        if (RespuestaPingCamara.Status == IPStatus.Success)
-                        {
-
-                            //HACEMOS PING A LA CARPETA FTP
-
-                            sDireccion = cfg.AppSettings.Settings["IP_Ftp"].Value;
-                            RespuestaPingFTP = HacerPing.Send(sDireccion, iTiempoEspera);
-
-                            if (RespuestaPingFTP.Status == IPStatus.Success)
-                            {
-
-                                //si la trasaccion va ser la primera vez que se verifica 
-                                //realizamos la conexion FTP Y Revisamos que exista un archivo en el trascurso de entre la hora actual menos 10 minutos con la comparacion de la placa 
-                                if (VEH.listarFTP(Vehiculo).Equals(""))
-                                {
-                                    ventanaNueva("se empezó con la lectura del sftp");
-                                    return "";
-                                }
-                                else
-                                {
-                                    
-                                                    //la informacion no coincide o no se tomo la foto se genera un pin y se lo envia 
-
-                                    var seed = Environment.TickCount;
-                                    var random = new Random(seed);
-                                    var Pin = random.Next(999, 9999);
-                                    String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, "", Peso_Salida, N_Transaccion, "", Pin.ToString(), "", "", "SP");
-                                    string Obtener_ruta = CreateTransaction(1, 1, Vehiculo);
-                                    if (Obtener_ruta.Equals(""))
-                                    {
-                                        //si la imagen no se creo
-                                        string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                                    }
-                                    else
-                                    {
-                                        //si la imagen se creo se adjunta en el correo electronico 
-                                        string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, @"C:\CAMARA\" + Obtener_ruta + ".jpg");
-
-                                    }
-
-                                    return "La Placa Seleccionada no se encuentra en los registros de la Camara se enviará un Pin para que siga con la Transaccion";
-
-                                }
-                            }
-                            else
-                            {
-                                var seed = Environment.TickCount;
-                                var random = new Random(seed);
-                                var Pin = random.Next(999, 9999);
-                                String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, "", Peso_Salida, N_Transaccion, "", Pin.ToString(), "", "", "SP");
-                                string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                                return "La carpeta ftp no esta en red";
-
-                            }
-                        }
-                        //caso que no haya respuesta de la camara 
-                        else
-                        {
-                            var seed = Environment.TickCount;
-                            var random = new Random(seed);
-                            var Pin = random.Next(999, 9999);
-                            String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, "", Peso_Salida, N_Transaccion, "", Pin.ToString(), "", "", "SP");
-                                string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                            return "La camara no se encuentra en la Red";
-
-                        }
-                    }
-
-                }
-                // si el chofer no Timbro o excedio el tiempo predeterminado(10 minutos) 
-                else
-                {
-                    return "El Chofer no a Timbrado en el Biometrico, Recuerde tener abierto el software del Biometrico y que el Tiempo de espera son 2 Minutos";
-                }
-            }
-            // FIN DEL FILTRO BIOMETRICO- CHOFER
-            else
-            {
-                return "El chofer debe estar Creado en el Biometrico";
-            }
-
-
-        }
-
+        
+    
         //Después de que continúe la transacción.
         public override void TransactionContinued(int nScaleId, TransactionModel myTransaction)
         {
@@ -228,15 +85,23 @@ namespace PronacaApi
         {
             return base.TransactionContinuing(nScaleId, myTransaction);
         }
-        //BOTON ACEPTAR
+        /*
+         * BOTON ACEPTAR
+         * valida que el chofer exista en la base de datos del biometrico
+         * valida que el chofer haya timbrado dentro de los proximos 10 mins
+         * valida que no haya el pin de salida, caso contrario que este sea igual al ingresado en el campo Nota
+         * valida que la camara se encuentre en red
+         * valida que el servidor SFTP se encuentre en red
+         * */
         public override string TransactionAccepting(int nScaleId, TransactionModel myTransaction)
         {
             GestionVehiculos VEH = new GestionVehiculos();
             string Vehiculo = "";
-
             string Nota;
             string Chofer = "";
             string Peso_Ing;
+            string cedula = "";
+            string bascula = "";
             try
             {
 
@@ -245,10 +110,13 @@ namespace PronacaApi
                 string N_Transaccion = myTransaction.Loads[0].TransactionNumber;
 
                 Peso_Ing = myTransaction.Loads[0].Pass1Weight.ToString();
-                ////gurdamos la informacion que envia el databridge 
-                Chofer = myTransaction.Loads[0].Driver.Name.ToString();
+                ////guardamos la informacion que envia el databridge 
+                //Chofer = myTransaction.Loads[0].Driver.Name.ToString();
+                Chofer = myTransaction.Loads[0].Driver.Description.ToString();
                 Vehiculo = myTransaction.Loads[0].Vehicle.DisplayDescription;
                 Nota = myTransaction.Loads[0].Note;
+                bascula = myTransaction.Loads[0].Pass1ScaleName.ToString();
+                ventanaOK("se guardaron los datos en la base", "DataBridge Plugin");
             }
             catch (Exception ex)
             {
@@ -259,17 +127,19 @@ namespace PronacaApi
             //***Consultamos si el chofer existe en el biometrico 
             if (VEH.consulta_ExisteChofer(Chofer) != "")
             {
+                ventanaOK("Se identifico al chofer, la bascula es la "+bascula, "DataBridge Plugin");
                 // si existe procedemosa verificar si se tomo la lectura en el trascuroso de los 10 minutos
                 if (VEH.consulta_BiometricoChofer(Chofer) != "")
                 {
                     //pasa el primer filtro del chofer 
                     //2-********************** FILTRO DE LA PLACA AL INGRESO*******************************************************************   
                     string Ping_Ingreso = VEH.consulta_PlacaIngreso(Vehiculo);
-
+                    ventanaOK("El chofer si timbro", "DataBridge Plugin");
                     if (Ping_Ingreso != "")
                     {
                         //si el vehiculo anteriormente se registro un pin el operador ya debio haber registrado 
-
+                        ventanaOK("Se envió un email con un ping para terminar la transacción." +
+                            " Porfavor digita el pin el campo NOTA ", "DataBridge Plugin");
                         if (Ping_Ingreso.Equals(Nota))
                         {
                             //  String RES = VEH.Gestion_Pesaje(nScaleId.ToString(),"",Vehiculo,Chofer, Peso_Ing,"","","","","","","IC");
@@ -310,11 +180,11 @@ namespace PronacaApi
 
                             if (RespuestaPingFTP.Status == IPStatus.Success)
                             {
+                                ventanaOK("si hay el SFTP", "Plugin SFTP");
                                 //si la trasaccion va ser la primera vez que se verifica 
                                 //realizamos la conexion FTP Y Revisamos que exista un archivo en el trascurso de entre la hora actual menos 10 minutos con la comparacion de la placa 
                                 if (VEH.listarFTP(Vehiculo).Equals(""))
                                 {
-                                    ventanaNueva("se empezó con la lectura del sftp");
                                     return "";
                                 }
                                 else
@@ -334,7 +204,7 @@ namespace PronacaApi
                                     else
                                     {
                                         //si la imagen se creo se adjunta en el correo electronico 
-                                        string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, @"C:\CAMARA\" + Obtener_ruta + ".jpg");
+                                        string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, @"C:\Camara_DataBridge\" + Obtener_ruta + ".jpg");
 
                                     }
 
@@ -352,7 +222,7 @@ namespace PronacaApi
                                 var Pin = random.Next(999, 9999);
                                 String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, Peso_Ing, "", "0", Pin.ToString(), "", "", "", "IP");
                                 string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                                return "La Carpeta FTP no esta en Red";
+                                return "No se tiene acceso al servidor SFTP";
 
                             }
 
@@ -397,6 +267,141 @@ namespace PronacaApi
 
         }
 
+        /*
+         * BOTON COMPLETAR
+         * valida que el chofer exista en la base de datos del biometrico
+         * valida que el chofer haya timbrado dentro de los proximos 10 mins
+         * valida que no haya el pin de salida, caso contrario que este sea igual al ingresado en el campo Nota
+         * valida que la camara se encuentre en red
+         * valida que el servidor SFTP se encuentre en red
+         * */
+        public override string TransactionCompleting(int nScaleId, TransactionModel myTransaction)
+        {
+            GestionVehiculos VEH = new GestionVehiculos();
+            string Vehiculo = "";
+            string Chofer = "";
+            Vehiculo = myTransaction.Loads[0].Vehicle.DisplayDescription;
+            string N_Transaccion = myTransaction.Loads[0].TransactionNumber;
+            string Nota = myTransaction.Loads[0].Note;
+            string Peso_Salida = myTransaction.Loads[0].Pass2Weight.ToString();
+            Chofer = myTransaction.Loads[0].Driver.Name.ToString();
+            ventanaOK("Se guardaron los datos en la base ", "DataBridge Plugin");
+            if (VEH.consulta_ExisteChofer(Chofer) != "")
+            {
+                if (VEH.consulta_BiometricoChofer(Chofer) != "")
+                {
+                    string Ping_Salida = VEH.consulta_PinSalida(N_Transaccion);
+                    if (Ping_Salida != "")
+                    {
+                        if (Ping_Salida.Equals(Nota))
+                        {
+                            String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), Vehiculo, Chofer, "", Peso_Salida, N_Transaccion, "", "", "", "", "SC");
+                            return "";
+                        }
+                        else
+                        {
+                            return "El Ping Ingresado No Coincide";
+                        }
+                    }
+                    else
+                    {
+
+                        //hhacemos ping a la carpeta ftp 
+
+                        Ping HacerPing = new Ping();
+                        int iTiempoEspera = 500;
+                        PingReply RespuestaPingCamara;
+                        PingReply RespuestaPingFTP;
+                        string sDireccion;
+                        string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+                        UriBuilder uri = new UriBuilder(codeBase);
+                        string path = Uri.UnescapeDataString(uri.Path);
+                        Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
+                        sDireccion = cfg.AppSettings.Settings["IP_Camara"].Value;
+                        RespuestaPingCamara = HacerPing.Send(sDireccion, iTiempoEspera);
+
+                        if (RespuestaPingCamara.Status == IPStatus.Success)
+                        {
+
+                            //HACEMOS PING A LA CARPETA FTP
+
+                            sDireccion = cfg.AppSettings.Settings["IP_Ftp"].Value;
+                            RespuestaPingFTP = HacerPing.Send(sDireccion, iTiempoEspera);
+
+                            if (RespuestaPingFTP.Status == IPStatus.Success)
+                            {
+
+                                //si la trasaccion va ser la primera vez que se verifica 
+                                //realizamos la conexion FTP Y Revisamos que exista un archivo en el trascurso de entre la hora actual menos 10 minutos con la comparacion de la placa 
+                                if (VEH.listarFTP(Vehiculo).Equals(""))
+                                {
+                                    return "";
+                                }
+                                else
+                                {
+
+                                    //la informacion no coincide o no se tomo la foto se genera un pin y se lo envia 
+
+                                    var seed = Environment.TickCount;
+                                    var random = new Random(seed);
+                                    var Pin = random.Next(999, 9999);
+                                    String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, "", Peso_Salida, N_Transaccion, "", Pin.ToString(), "", "", "SP");
+                                    string Obtener_ruta = CreateTransaction(1, 1, Vehiculo);
+                                    if (Obtener_ruta.Equals(""))
+                                    {
+                                        //si la imagen no se creo
+                                        string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
+                                    }
+                                    else
+                                    {
+                                        //si la imagen se creo se adjunta en el correo electronico 
+                                        string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, @"C:\Camara_DataBridge\" + Obtener_ruta + ".jpg");
+
+                                    }
+
+                                    return "La Placa Seleccionada no se encuentra en los registros de la Camara se enviará un Pin para que siga con la Transaccion";
+
+                                }
+                            }
+                            else
+                            {
+                                var seed = Environment.TickCount;
+                                var random = new Random(seed);
+                                var Pin = random.Next(999, 9999);
+                                String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, "", Peso_Salida, N_Transaccion, "", Pin.ToString(), "", "", "SP");
+                                string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
+                                return "La carpeta ftp no esta en red";
+
+                            }
+                        }
+                        //caso que no haya respuesta de la camara 
+                        else
+                        {
+                            var seed = Environment.TickCount;
+                            var random = new Random(seed);
+                            var Pin = random.Next(999, 9999);
+                            String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, "", Peso_Salida, N_Transaccion, "", Pin.ToString(), "", "", "SP");
+                            string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
+                            return "La camara no se encuentra en la Red";
+
+                        }
+                    }
+
+                }
+                // si el chofer no Timbro o excedio el tiempo predeterminado(10 minutos) 
+                else
+                {
+                    return "El Chofer no a Timbrado en el Biometrico, Recuerde tener abierto el software del Biometrico y que el Tiempo de espera son 2 Minutos";
+                }
+            }
+            // FIN DEL FILTRO BIOMETRICO- CHOFER
+            else
+            {
+                return "El chofer debe estar Creado en el Biometrico";
+            }
+
+
+        }
 
         public override void ScaleAboveThreshold(ScaleAboveThresholdEventArgs myEventArgs)
         {
@@ -461,25 +466,30 @@ namespace PronacaApi
 
             //   base.TransactionAccepted(nScaleId, myTransaction);
         }
+       
         public override string SettingWeight(int nScaleId, ScaleWeightPacket myScaleWeightData, bool bIsSplitWeight)
         {
-            ventanaNueva("peso obteniendose");
-            if (myScaleWeightData.MainWeightData.GrossWeightValue < (pesoMaximo[nScaleId]))
-            {
-                if (myScaleWeightData.MainWeightData.GrossWeightValue >= (pesoMaximo[nScaleId] - 100))
+            ventanaOK("nombre de la bascula: " + myScaleWeightData.ScaleName, "DataBridge Plugin");
+             if (myScaleWeightData.MainWeightData.GrossWeightValue < (pesoMaximo[nScaleId]))
                 {
-                    return "";
+                    if (myScaleWeightData.MainWeightData.GrossWeightValue >= (pesoMaximo[nScaleId] - 100))
+                    {
+                        return "";
+                    }
+                    else
+                    {
+                    return "El peso ha bajado considerablemente, porfavor obtenga denuevo el peso" + "  * peso obtenido: " + myScaleWeightData.MainWeightData.GrossWeightValue +
+                       " peso máximo: " + pesoMaximo[nScaleId] + " *";
+                    }
                 }
                 else
                 {
-                    return "El peso ha bajado considerablemente, porfavor obtenga denuevo el peso" + "  * peso obtenido: " + myScaleWeightData.MainWeightData.GrossWeightValue +
-                       " peso máximo: " + pesoMaximo[nScaleId] + " *";
-                }
-            }
-            else
                 return "El conductor no se ha bajado aún, porfavor obtenga denuevo el peso" + "  * peso obtenido: " + myScaleWeightData.MainWeightData.GrossWeightValue +
                        " peso máximo: " + pesoMaximo[nScaleId] + " *";
+
+                }               
         }
+        
 
 
 
@@ -525,7 +535,7 @@ namespace PronacaApi
                 string myCameraName = String.Empty;
                 if (nInboundLane == 1)
                 {
-                    myCameraName = "Cam1";
+                    myCameraName = "PBOCAM11";
                 }
                 else if (nInboundLane == 2)
                 {
@@ -553,7 +563,7 @@ namespace PronacaApi
 
                     using (System.Drawing.Image image = System.Drawing.Image.FromStream(new MemoryStream(myImageAsBytes)))
                     {
-                        image.Save(@"C:\CAMARA\"+ Nombre_Archivo + ".jpg", ImageFormat.Jpeg);  // Or Png
+                        image.Save(@"C:\Camara_DataBridge\"+ Nombre_Archivo + ".jpg", ImageFormat.Jpeg);  // Or Png
                     }
 
 
@@ -570,7 +580,7 @@ namespace PronacaApi
 
         }
 
-        private void ventanaNueva(String texto)
+        private string ventanaIngresoDato(String texto,String titulo,String cajaTexto)
         {
             try
             {
@@ -578,9 +588,9 @@ namespace PronacaApi
                 IWindowManager windowManager = ServiceLocator.GetKernel().Get<IWindowManager>();
 
                 CustomInputDialogViewModel viewModel = new CustomInputDialogViewModel();
-                viewModel.CustomWindowTitle = "Custom Data Entry Plugin";
+                viewModel.CustomWindowTitle = titulo;
                 viewModel.DisplayText = texto;
-                viewModel.WatermarkValue = "Enter PO Number";
+                viewModel.WatermarkValue = cajaTexto;
                 viewModel.YesButtonText = "OK";
                 viewModel.NoButtonText = "Cancel";
                 Application.Current?.Dispatcher.Invoke(() =>
@@ -593,14 +603,35 @@ namespace PronacaApi
                 {
                     // Do something with textbox result
                     string myTextboxResult = viewModel.InputValue;
+                    return myTextboxResult;
                 }
             }
             catch (Exception ex)
             {
                 ServiceManager.LogMgr.WriteError("Error", ex);
             }
+            return string.Empty;
+            
         }
+        private void ventanaOK(string texto,String titulo)
+        {
+            try
+            {
+                IWindowManager windowManager = ServiceLocator.GetKernel().Get<IWindowManager>();
+                CustomOkDialogViewModel viewModel = new CustomOkDialogViewModel(texto);
+                viewModel.CustomWindowTitle = titulo;
+                viewModel.OkButtonText = "OK";
+                Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    windowManager.ShowDialog(viewModel);
 
+                });
+            }
+            catch(Exception ex)
+            {
+                ServiceManager.LogMgr.WriteError("Error", ex);
+            }
+        }
 
 
 

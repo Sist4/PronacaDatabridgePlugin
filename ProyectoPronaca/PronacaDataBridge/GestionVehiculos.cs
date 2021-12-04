@@ -68,24 +68,26 @@ namespace PronacaApi
             UriBuilder uri = new UriBuilder(codeBase);
             string path = Uri.UnescapeDataString(uri.Path);
             Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-            string Usuario_Ftp = cfg.AppSettings.Settings["Usuario_Ftp"].Value;
-            string Password_Ftp = cfg.AppSettings.Settings["Password_Ftp"].Value;
+            string Usuario_Sftp = cfg.AppSettings.Settings["Usuario_Ftp"].Value;
+            string Password_Sftp = cfg.AppSettings.Settings["Password_Ftp"].Value;
             string Direccion_Ftp = cfg.AppSettings.Settings["Direccion_Ftp"].Value;
+            string Ip_Sftp = cfg.AppSettings.Settings["IP_Ftp"].Value;
 
             //***********************************************************FIN DEL APP CONFIG
             string respuesta = "La placa no coicide:" + placa_enviada;
-            FtpWebRequest ftpRequest = (FtpWebRequest)WebRequest.Create(Direccion_Ftp);
-            ftpRequest.Credentials = new NetworkCredential(Usuario_Ftp, Password_Ftp);
-            ftpRequest.Method = WebRequestMethods.Ftp.ListDirectory;
-            FtpWebResponse response = (FtpWebResponse)ftpRequest.GetResponse();
-            StreamReader streamReader = new StreamReader(response.GetResponseStream());
-
-            using(SftpClient cliente=new SftpClient(new PasswordConnectionInfo(Direccion_Ftp, Usuario_Ftp, Password_Ftp)))
+            try
             {
-                cliente.Connect();
-                buscarImagenesSFTP(cliente, "/Camara",placa_enviada, ref respuesta);
-                cliente.Disconnect();
+                using (SftpClient cliente = new SftpClient(new PasswordConnectionInfo(Ip_Sftp, Usuario_Sftp, Password_Sftp)))
+                {
+                    cliente.Connect();
+                    buscarImagenesSFTP(cliente, "/Camara", placa_enviada, ref respuesta);
+                    cliente.Disconnect();
+                }
+            }catch(Exception ex)
+            {
+                
             }
+            
             
             return respuesta;
 
@@ -93,18 +95,17 @@ namespace PronacaApi
 
         private void buscarImagenesSFTP(SftpClient cliente,string directorioServidor, string placa_enviada, ref string respuesta)
         {
-            var paths = cliente.ListDirectory(directorioServidor);
+            var paths = cliente.ListDirectory(directorioServidor).Select(s => s.Name);
             foreach (var path in paths)
             {
-                //obtenemeos el listado de los archivos ftp
-                //directories.Add(line);
-                if (path.ToString() != "." & path.ToString() != ".." & path.ToString() != "test")// | line == "..")
+                
+                if (path.ToString().Contains(".jpg"))
                 {
 
                     string[] array = path.ToString().Split('_');
                     //FECHA Y HORA EN EL array[0] ;la placa en el array[1]
                     string FEC = array[0];
-                    string PLACA = array[1].Replace(".jpg", "");
+                    string placa = array[1].Replace(".jpg", "");
                     //obtenemos la fecha y la hora 
                     string años = FEC.Substring(0, 4);
                     string mes = FEC.Substring(4, 2);
@@ -118,7 +119,7 @@ namespace PronacaApi
 
 
 
-                    if (placa_enviada.Equals(PLACA.Replace("-", "")) && (hora_foto.CompareTo(Fecha_restada) >= 0 && hora_foto.CompareTo(Fecha_Actual) <= 0))
+                    if (placa_enviada.Equals(placa.Replace("-", "")) && (hora_foto.CompareTo(Fecha_restada) >= 0 && hora_foto.CompareTo(Fecha_Actual) <= 0))
                     {
                         respuesta = "";
                     }
@@ -409,6 +410,8 @@ namespace PronacaApi
 
 
         #endregion
+
+
 
     }
 
