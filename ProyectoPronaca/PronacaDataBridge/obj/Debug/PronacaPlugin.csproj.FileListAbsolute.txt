@@ -7,3 +7,23 @@ C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\Prona
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CopyComplete
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.dll
 C:\Users\User\Documents\Ejemplos Visual\Pronaca Plugin-Git\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.pdb
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.AssemblyReference.cache
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CoreCompileInputs.cache
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.dll
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaApi.pdb
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.dll.config
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.dll
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaApi.pdb
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.dll
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.xml
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CopyComplete
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.dll
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.xml
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CoreCompileInputs.cache
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CopyComplete
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.dll.config
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.dll
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.pdb
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.AssemblyReference.cache
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.dll
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.pdb

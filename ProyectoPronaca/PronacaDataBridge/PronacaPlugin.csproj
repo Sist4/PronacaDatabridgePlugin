@@ -7,8 +7,8 @@
     <ProjectGuid>{0594F3FB-47F3-48D5-9729-391DA16161F9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PronacaApi</RootNamespace>
-    <AssemblyName>PronacaApi</AssemblyName>
+    <RootNamespace>PronacaPlugin</RootNamespace>
+    <AssemblyName>PronacaPlugin</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -84,7 +84,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Ninject">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\Ninject.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Mettler Toledo\DataBridge\Application\Ninject.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PresentationFramework" />

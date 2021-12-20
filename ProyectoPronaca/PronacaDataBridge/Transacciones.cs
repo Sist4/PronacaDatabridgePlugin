@@ -29,6 +29,16 @@ namespace PronacaApi
         //Variables globales
         double[] pesoMaximo;
         double peso;
+        bool banderaCamaras;
+        string estado;
+        string msj_recibido;
+        string Numeral_recibido;
+        GestionVehiculos VEH;
+        //**************Acceso al app config******************//
+        string codeBase;
+        UriBuilder uri;
+        string path;
+        Configuration cfg;
         //Constructor por defecto
         public Transacciones()
         {
@@ -37,10 +47,15 @@ namespace PronacaApi
                 TransactionNeedsProcessed.Add(nScale, false);
             }
             pesoMaximo = new double[6];
+            codeBase = Assembly.GetExecutingAssembly().CodeBase;
+            uri = new UriBuilder(codeBase);
+            path = Uri.UnescapeDataString(uri.Path);
+            cfg = ConfigurationManager.OpenExeConfiguration(path);
+            banderaCamaras = false;
+            VEH = new GestionVehiculos();
+            estado = "";
         }
 
-        
-        
         #region Propiedades para el peso maximo
 
         private Dictionary<int, bool> _myTransactionNeedsProcessed = null;
@@ -71,190 +86,112 @@ namespace PronacaApi
             }
         }
         #endregion
-        
-        
-    
-        //Después de que continúe la transacción.
-        public override void TransactionContinued(int nScaleId, TransactionModel myTransaction)
-        {
 
-            //base.TransactionContinued(nScaleId, myTransaction);
-        }
-        // Antes de continuar con la transacción
-        public override string TransactionContinuing(int nScaleId, TransactionModel myTransaction)
+        #region Propiedades de video para la camara
+
+        private ConcurrentDictionary<int, bool> _automaticallyComplete = null;
+        private ConcurrentDictionary<int, bool> CompleteTransactionAutomatically
         {
-            return base.TransactionContinuing(nScaleId, myTransaction);
+            get
+            {
+                if (_automaticallyComplete == null)
+                {
+                    _automaticallyComplete = new ConcurrentDictionary<int, bool>();
+                }
+
+                return _automaticallyComplete;
+            }
         }
-        /*
-         * BOTON ACEPTAR
-         * valida que el chofer exista en la base de datos del biometrico
-         * valida que el chofer haya timbrado dentro de los proximos 10 mins
-         * valida que no haya el pin de salida, caso contrario que este sea igual al ingresado en el campo Nota
-         * valida que la camara se encuentre en red
-         * valida que el servidor SFTP se encuentre en red
-         * */
+
+        private IVideoServerMgr _myVideoServerMgr = null;
+        public IVideoServerMgr VideoServerMgr
+        {
+            get
+            {
+                if (_myVideoServerMgr == null)
+                {
+                    _myVideoServerMgr = ServiceManager.GetService<IVideoServerMgr>();
+                }
+                return _myVideoServerMgr;
+            }
+        }
+        #endregion
+
+        #region Métodos públicos
+
         public override string TransactionAccepting(int nScaleId, TransactionModel myTransaction)
         {
-            GestionVehiculos VEH = new GestionVehiculos();
-            string Vehiculo = "";
-            string Nota;
-            string Chofer = "";
-            string Peso_Ing;
-            string cedula = "";
-            string bascula = "";
-            try
+            string T_Chofer = cfg.AppSettings.Settings["T_Chofer"].Value; //tiempo que tiene el chofer para timbrar en el biometrico
+            string chofer = myTransaction.Loads[0].Driver.Name; //cédula del chofer que conduce el vehículo 
+            string vehiculo = myTransaction.Loads[0].Vehicle.Name; //la placa del vehículo
+            estado = "entrada";
+            //ventanaOK("si se tomaron los datos databridge", "DataBridge Plugin");
+        
+            //*****************************FILTRO DEL CHOFER*********************************************************
+            //Tomar en cuenta que debe estar abierto el progrma ZKAccess3.5 Security System del biometrico  
+            //Consultamos si el chofer existe en el biometrico 
+            if (VEH.consulta_ExisteChofer(chofer) != "")
             {
-
-                string Material = myTransaction.Loads[0].Material.Description;
-                string Empresa = myTransaction.Loads[0].Account.Description;
-                string N_Transaccion = myTransaction.Loads[0].TransactionNumber;
-
-                Peso_Ing = myTransaction.Loads[0].Pass1Weight.ToString();
-                ////guardamos la informacion que envia el databridge 
-                //Chofer = myTransaction.Loads[0].Driver.Name.ToString();
-                Chofer = myTransaction.Loads[0].Driver.Description.ToString();
-                Vehiculo = myTransaction.Loads[0].Vehicle.DisplayDescription;
-                Nota = myTransaction.Loads[0].Note;
-                bascula = myTransaction.Loads[0].Pass1ScaleName.ToString();
-                ventanaOK("se guardaron los datos en la base", "DataBridge Plugin");
-            }
-            catch (Exception ex)
-            {
-                return "Debe Seleccionar un Chofer";
-            }
-            //1-*****************************Filtro del chofer y biometrico*********************************************************
-            //******Tomar enc euncta que debe estar abierto el progrma ZKAccess3.5 Security System del biometrico  
-            //***Consultamos si el chofer existe en el biometrico 
-            if (VEH.consulta_ExisteChofer(Chofer) != "")
-            {
-                ventanaOK("Se identifico al chofer, la bascula es la "+bascula, "DataBridge Plugin");
+                //ventanaOK("Si se identifico al chofer", "DataBridge Plugin");
+                //*****************************FILTRO DEL BIOMETRICO*********************************************************
                 // si existe procedemosa verificar si se tomo la lectura en el trascuroso de los 10 minutos
-                if (VEH.consulta_BiometricoChofer(Chofer) != "")
+                if (VEH.consulta_BiometricoChofer(chofer) != "")
                 {
                     //pasa el primer filtro del chofer 
-                    //2-********************** FILTRO DE LA PLACA AL INGRESO*******************************************************************   
-                    string Ping_Ingreso = VEH.consulta_PlacaIngreso(Vehiculo);
-                    ventanaOK("El chofer si timbro", "DataBridge Plugin");
+                    //********************** FILTRO DE LA PLACA AL INGRESO*******************************************************************   
+                    string Ping_Ingreso = VEH.consulta_PlacaIngreso(vehiculo);
+                    //ventanaOK("Si timbro el chofer", "DataBridge Plugin");
                     if (Ping_Ingreso != "")
                     {
                         //si el vehiculo anteriormente se registro un pin el operador ya debio haber registrado 
-                        ventanaOK("Se envió un email con un ping para terminar la transacción." +
-                            " Porfavor digita el pin el campo NOTA ", "DataBridge Plugin");
+                        ventanaOK("Se envió un email al coordinador con un PIN para terminar la transacción de entrada ", "DataBridge Plugin");
+                        string Nota = ventanaIngresoDato("Ingrese el PIN ","DataBridge Plugin","PIN");
                         if (Ping_Ingreso.Equals(Nota))
                         {
-                            //  String RES = VEH.Gestion_Pesaje(nScaleId.ToString(),"",Vehiculo,Chofer, Peso_Ing,"","","","","","","IC");
-                            // si cumple con el ping se cambia el estado  IC=Ingreso Completado mandamos el update 
-                            return "";
+                            //************************************************COMUNICACION CON EL ARIES *****************************************************
+                            //ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
+                            return ariesEntrada(myTransaction,nScaleId,ref msj_recibido,ref Numeral_recibido);
+                            //return "";          
                         }
                         else
                         {
-                            return "El Ping Ingresado No Coincide";
+                            return "El Pin Ingresado No Coincide";
                         }
                     }
                     else
                     {
-
-                        //hhacemos ping a la carpeta ftp 
-
-                        Ping HacerPing = new Ping();
-                        int iTiempoEspera = 500;
-                        PingReply RespuestaPingCamara;
-                        PingReply RespuestaPingFTP;
-                        string sDireccion;
-                        string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-                        UriBuilder uri = new UriBuilder(codeBase);
-                        string path = Uri.UnescapeDataString(uri.Path);
-                        Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-                        sDireccion = cfg.AppSettings.Settings["IP_Camara"].Value;
-                        RespuestaPingCamara = HacerPing.Send(sDireccion, iTiempoEspera);
-
-
-
-                        if (RespuestaPingCamara.Status == IPStatus.Success)
-                        {
-                            //HACEMOS PING A LA CARPETA FTP
-
-                            sDireccion = cfg.AppSettings.Settings["IP_Ftp"].Value;
-                            RespuestaPingFTP = HacerPing.Send(sDireccion, iTiempoEspera);
-
-
-                            if (RespuestaPingFTP.Status == IPStatus.Success)
+                            //************************************************COMUNICACION CAMARAS *****************************************************
+                        if (comunicacionCamaras(myTransaction,nScaleId)==true)
                             {
-                                ventanaOK("si hay el SFTP", "Plugin SFTP");
-                                //si la trasaccion va ser la primera vez que se verifica 
-                                //realizamos la conexion FTP Y Revisamos que exista un archivo en el trascurso de entre la hora actual menos 10 minutos con la comparacion de la placa 
-                                if (VEH.listarFTP(Vehiculo).Equals(""))
+                                banderaCamaras = true;
+                                //si la respuesta es positiva de cualquiera de las dos camaras
+                                ///BUSCAMOS EN LA RUTA DEL FTP SI LOS DEVUELVE EN BLANCO ES Q SI ENCONTRO LA FOTO
+                                if (VEH.listarFTP(vehiculo).Equals(""))
                                 {
-                                    return "";
+                                //************************************************COMUNICACION CON EL ARIES *****************************************************
+                                //    ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
+                                    return ariesEntrada(myTransaction,nScaleId,ref msj_recibido,ref Numeral_recibido);
+                                //return "";
                                 }
                                 else
                                 {
-                                    //                //la informacion no coincide o no se tomo la foto se genera un pin y se lo envia 
-                                    var seed = Environment.TickCount;
-                                    var random = new Random(seed);
-                                    var Pin = random.Next(999, 9999);
-                                    String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, Peso_Ing, "", "0", Pin.ToString(), "", "", "", "IP");
-
-                                    string Obtener_ruta = CreateTransaction(1, 1, Vehiculo);
-                                    if (Obtener_ruta.Equals(""))
-                                    {
-                                        //si la imagen no se creo
-                                        string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                                    }
-                                    else
-                                    {
-                                        //si la imagen se creo se adjunta en el correo electronico 
-                                        string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, @"C:\Camara_DataBridge\" + Obtener_ruta + ".jpg");
-
-                                    }
-
-                                    //string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                                    return "La Placa Seleccionada no se encuentra en los registros de la Camara, se enviará un Pin para que siga con la Transacción";
-
+                                //************************************************NOTIFICACION POR CORREO *****************************************************
+                                    return notificacionCorreo(myTransaction, nScaleId, banderaCamaras,estado);
                                 }
-
                             }
-                            else
-                            {
-                                //                //la informacion no coincide o no se tomo la foto se genera un pin y se lo envia 
-                                var seed = Environment.TickCount;
-                                var random = new Random(seed);
-                                var Pin = random.Next(999, 9999);
-                                String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, Peso_Ing, "", "0", Pin.ToString(), "", "", "", "IP");
-                                string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                                return "No se tiene acceso al servidor SFTP";
-
-                            }
-
-
-
-                        }
-                        //caso que no haya respuesta de la camra 
-                        else
-                        {
-                            //                //la informacion no coincide o no se tomo la foto se genera un pin y se lo envia 
-                            var seed = Environment.TickCount;
-                            var random = new Random(seed);
-                            var Pin = random.Next(999, 9999);
-                            String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, Peso_Ing, "", "0", Pin.ToString(), "", "", "", "IP");
-                            string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                            return "La camara no se encuentra en la Red";
-
-                        }
-
-
-
-
-
-
+                       else
+                       {
+                            //************************************************NOTIFICACION POR CORREO *****************************************************
+                            banderaCamaras = false;
+                           return notificacionCorreo(myTransaction, nScaleId, banderaCamaras,estado);
+                       }   
+                     
                     }
-                    //para crear el  filtro de la placa consultamos primero si no existe un vehiculo registrado
-                    //2-********************** FIN FILTRO DE LA PLACA AL INGRESO*******************************************************************   
                 }
                 // si el chofer no Timbro o excedio el tiempo predeterminado(10 minutos) 
                 else
                 {
-                    return "El Chofer no ha Timbrado en el Biometrico, Recuerde tener abierto el software del Biometrico y que el Tiempo de espera son 10 Minutos";
+                    return "El Chofer no ha Timbrado en el Biometrico. Recuerde tener abierto el software del Biometrico y que el Tiempo de espera son de " + T_Chofer +" Minutos";
                 }
             }
             // FIN DEL FILTRO BIOMETRICO- CHOFER
@@ -267,36 +204,30 @@ namespace PronacaApi
 
         }
 
-        /*
-         * BOTON COMPLETAR
-         * valida que el chofer exista en la base de datos del biometrico
-         * valida que el chofer haya timbrado dentro de los proximos 10 mins
-         * valida que no haya el pin de salida, caso contrario que este sea igual al ingresado en el campo Nota
-         * valida que la camara se encuentre en red
-         * valida que el servidor SFTP se encuentre en red
-         * */
         public override string TransactionCompleting(int nScaleId, TransactionModel myTransaction)
         {
-            GestionVehiculos VEH = new GestionVehiculos();
-            string Vehiculo = "";
-            string Chofer = "";
-            Vehiculo = myTransaction.Loads[0].Vehicle.DisplayDescription;
-            string N_Transaccion = myTransaction.Loads[0].TransactionNumber;
-            string Nota = myTransaction.Loads[0].Note;
-            string Peso_Salida = myTransaction.Loads[0].Pass2Weight.ToString();
-            Chofer = myTransaction.Loads[0].Driver.Name.ToString();
-            ventanaOK("Se guardaron los datos en la base ", "DataBridge Plugin");
-            if (VEH.consulta_ExisteChofer(Chofer) != "")
+           string  vehiculo = myTransaction.Loads[0].Vehicle.Name;
+           string Peso_Salida = myTransaction.Loads[0].Pass2Weight.ToString();
+           string chofer = myTransaction.Loads[0].Driver.Name.ToString();
+           string N_Transaccion = myTransaction.Loads[0].TransactionNumber; 
+           string T_pesaje = VEH.consulta_TipoIngreso(N_Transaccion);
+           string T_Chofer = cfg.AppSettings.Settings["T_Chofer"].Value;
+            estado = "salida";
+
+            if (VEH.consulta_ExisteChofer(chofer) != "")
             {
-                if (VEH.consulta_BiometricoChofer(Chofer) != "")
+                if (VEH.consulta_BiometricoChofer(chofer) != "")
                 {
                     string Ping_Salida = VEH.consulta_PinSalida(N_Transaccion);
                     if (Ping_Salida != "")
                     {
+                        string Nota = ventanaIngresoDato("Ingrese el PIN:", "DataBridge Plugin", "PIN");
                         if (Ping_Salida.Equals(Nota))
                         {
-                            String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), Vehiculo, Chofer, "", Peso_Salida, N_Transaccion, "", "", "", "", "SC");
-                            return "";
+                            String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), vehiculo, chofer, "", Peso_Salida, N_Transaccion, "", "", "", "", "SC", "", "");
+                            //ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
+                            return ariesSalida(myTransaction, nScaleId,ref msj_recibido,ref Numeral_recibido);
+                            //return "";
                         }
                         else
                         {
@@ -305,93 +236,34 @@ namespace PronacaApi
                     }
                     else
                     {
-
-                        //hhacemos ping a la carpeta ftp 
-
-                        Ping HacerPing = new Ping();
-                        int iTiempoEspera = 500;
-                        PingReply RespuestaPingCamara;
-                        PingReply RespuestaPingFTP;
-                        string sDireccion;
-                        string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-                        UriBuilder uri = new UriBuilder(codeBase);
-                        string path = Uri.UnescapeDataString(uri.Path);
-                        Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-                        sDireccion = cfg.AppSettings.Settings["IP_Camara"].Value;
-                        RespuestaPingCamara = HacerPing.Send(sDireccion, iTiempoEspera);
-
-                        if (RespuestaPingCamara.Status == IPStatus.Success)
+                        if (comunicacionCamaras(myTransaction, nScaleId) == true)
                         {
-
-                            //HACEMOS PING A LA CARPETA FTP
-
-                            sDireccion = cfg.AppSettings.Settings["IP_Ftp"].Value;
-                            RespuestaPingFTP = HacerPing.Send(sDireccion, iTiempoEspera);
-
-                            if (RespuestaPingFTP.Status == IPStatus.Success)
+                            banderaCamaras = true;
+                            if (VEH.listarFTP(vehiculo).Equals(""))
                             {
+                                String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), vehiculo, chofer, "", Peso_Salida, N_Transaccion, "", "", "", "", "SC", "", "");
 
-                                //si la trasaccion va ser la primera vez que se verifica 
-                                //realizamos la conexion FTP Y Revisamos que exista un archivo en el trascurso de entre la hora actual menos 10 minutos con la comparacion de la placa 
-                                if (VEH.listarFTP(Vehiculo).Equals(""))
-                                {
-                                    return "";
-                                }
-                                else
-                                {
-
-                                    //la informacion no coincide o no se tomo la foto se genera un pin y se lo envia 
-
-                                    var seed = Environment.TickCount;
-                                    var random = new Random(seed);
-                                    var Pin = random.Next(999, 9999);
-                                    String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, "", Peso_Salida, N_Transaccion, "", Pin.ToString(), "", "", "SP");
-                                    string Obtener_ruta = CreateTransaction(1, 1, Vehiculo);
-                                    if (Obtener_ruta.Equals(""))
-                                    {
-                                        //si la imagen no se creo
-                                        string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                                    }
-                                    else
-                                    {
-                                        //si la imagen se creo se adjunta en el correo electronico 
-                                        string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, @"C:\Camara_DataBridge\" + Obtener_ruta + ".jpg");
-
-                                    }
-
-                                    return "La Placa Seleccionada no se encuentra en los registros de la Camara se enviará un Pin para que siga con la Transaccion";
-
-                                }
+                                //ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
+                                return ariesSalida(myTransaction,nScaleId,ref msj_recibido,ref Numeral_recibido);
+                                //return "";
                             }
                             else
                             {
-                                var seed = Environment.TickCount;
-                                var random = new Random(seed);
-                                var Pin = random.Next(999, 9999);
-                                String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, "", Peso_Salida, N_Transaccion, "", Pin.ToString(), "", "", "SP");
-                                string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                                return "La carpeta ftp no esta en red";
-
+                                return notificacionCorreo(myTransaction, nScaleId, banderaCamaras,estado);
                             }
                         }
-                        //caso que no haya respuesta de la camara 
                         else
                         {
-                            var seed = Environment.TickCount;
-                            var random = new Random(seed);
-                            var Pin = random.Next(999, 9999);
-                            String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, "", Peso_Salida, N_Transaccion, "", Pin.ToString(), "", "", "SP");
-                            string envio_correo = VEH.EnvioCorreo("", Pin.ToString(), Vehiculo, "");
-                            return "La camara no se encuentra en la Red";
-
+                            banderaCamaras = false;
+                            return notificacionCorreo(myTransaction, nScaleId, banderaCamaras,estado);
                         }
-                    }
 
+                    }
                 }
                 // si el chofer no Timbro o excedio el tiempo predeterminado(10 minutos) 
                 else
                 {
-                    return "El Chofer no a Timbrado en el Biometrico, Recuerde tener abierto el software del Biometrico y que el Tiempo de espera son 2 Minutos";
+                    return "El Chofer no ha Timbrado en el Biometrico, Recuerde tener abierto el software del Biometrico y que el Tiempo de espera son de "+ T_Chofer + " Minutos";
                 }
             }
             // FIN DEL FILTRO BIOMETRICO- CHOFER
@@ -399,8 +271,6 @@ namespace PronacaApi
             {
                 return "El chofer debe estar Creado en el Biometrico";
             }
-
-
         }
 
         public override void ScaleAboveThreshold(ScaleAboveThresholdEventArgs myEventArgs)
@@ -442,7 +312,8 @@ namespace PronacaApi
                 //DATOS
 
 
-                string Vehiculo = myTransaction.Loads[0].Vehicle.DisplayDescription;
+               // string Vehiculo = myTransaction.Loads[0].Vehicle.DisplayDescription;
+                string Vehiculo = myTransaction.Loads[0].Vehicle.Name;
                 string Material = myTransaction.Loads[0].Material.Description;
                 string Empresa = myTransaction.Loads[0].Account.Description;
                 string N_Transaccion = myTransaction.Loads[0].TransactionNumber;
@@ -450,9 +321,8 @@ namespace PronacaApi
                 string Nota = myTransaction.Loads[0].Note;
                 string Peso_Ing = myTransaction.Loads[0].Pass1Weight.ToString();
                 //gurdamos la informacion que envia el databridge 
-                            String RES = VEH.Gestion_Pesaje(nScaleId.ToString(),"",Vehiculo,Chofer, Peso_Ing,"",N_Transaccion,"","","","","IC");
-                //string respuesta =  //VEH.Insertar_Dato(nScaleId.ToString(), Vehiculo, Chofer, Peso_Ing, N_Transaccion, "A");
-
+                String RES = VEH.Gestion_Pesaje(nScaleId.ToString(),"",Vehiculo,Chofer, Peso_Ing,"",N_Transaccion,"","","","","IC", msj_recibido, Numeral_recibido);
+      
 
                 if (RES.Equals("1"))
                 {
@@ -465,14 +335,26 @@ namespace PronacaApi
                 }
 
             //   base.TransactionAccepted(nScaleId, myTransaction);
+            //ventanaOK("Se guardaron los datos en la base", "DataBridge Plugin");
         }
        
         public override string SettingWeight(int nScaleId, ScaleWeightPacket myScaleWeightData, bool bIsSplitWeight)
         {
-            ventanaOK("nombre de la bascula: " + myScaleWeightData.ScaleName, "DataBridge Plugin");
-             if (myScaleWeightData.MainWeightData.GrossWeightValue < (pesoMaximo[nScaleId]))
+            //*************************************************************APP CONFIG
+            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+            UriBuilder uri = new UriBuilder(codeBase);
+            string path = Uri.UnescapeDataString(uri.Path);
+            Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
+            string V_Max = cfg.AppSettings.Settings["V_Max"].Value;
+            string V_Min = cfg.AppSettings.Settings["V_Min"].Value;
+
+            //***********************************************************FIN DEL APP CONFIG
+
+
+            //ventanaOK("nombre de la bascula: " + myScaleWeightData.ScaleName, "DataBridge Plugin");
+            if (myScaleWeightData.MainWeightData.GrossWeightValue <= (pesoMaximo[nScaleId]- Converter.ConvertToFloat(V_Min)))
                 {
-                    if (myScaleWeightData.MainWeightData.GrossWeightValue >= (pesoMaximo[nScaleId] - 100))
+                    if (myScaleWeightData.MainWeightData.GrossWeightValue >= (pesoMaximo[nScaleId] - Converter.ConvertToFloat(V_Max)))
                     {
                         return "";
                     }
@@ -489,97 +371,17 @@ namespace PronacaApi
 
                 }               
         }
-        
-
-
-
-
-        //*********************Proceso Para crear la imagen desde el data bridge********************************
-
-        private ConcurrentDictionary<int, bool> _automaticallyComplete = null;
-        private ConcurrentDictionary<int, bool> CompleteTransactionAutomatically
+        public override void ScaleBelowNextPassThreshold(ScaleBelowThresholdEventArgs myEventArgs)
         {
-            get
+            lock (TransactionNeedsProcessed)
             {
-                if (_automaticallyComplete == null)
-                {
-                    _automaticallyComplete = new ConcurrentDictionary<int, bool>();
-                }
-
-                return _automaticallyComplete;
+                pesoMaximo[myEventArgs.ScaleId] = 0.00;
             }
         }
 
-        private IVideoServerMgr _myVideoServerMgr = null;
-        public IVideoServerMgr VideoServerMgr
-        {
-            get
-            {
-                if (_myVideoServerMgr == null)
-                {
-                    _myVideoServerMgr = ServiceManager.GetService<IVideoServerMgr>();
-                }
-                return _myVideoServerMgr;
-            }
-        }
+        #endregion
 
-       // private string  CreateTransaction(int nVehicleId, int nInboundLane,string Placa)
-        private string  CreateTransaction(int nVehicleId, int nInboundLane,string Placa)
-        {
-
-            string Nombre_Archivo =  Placa  +   DateTime.Now.ToString("yyyyMMddhhmmss");
-            try
-            {
-                TransactionModel myTransaction = TransactionModel.Create();
-                myTransaction.SetOperationalData(OperationalDataType.Vehicle, nVehicleId);
-                string myCameraName = String.Empty;
-                if (nInboundLane == 1)
-                {
-                    myCameraName = "PBOCAM11";
-                }
-                else if (nInboundLane == 2)
-                {
-                    myCameraName = "Cam2";
-                }
-
-                CameraModel myCamera = CameraModel.GetByName(myCameraName);
-                int CameraId = myCamera.Id;
-                int ImageWidth = 600;
-                int ImageHeight = 800;
-                int Quality = myCamera.ImageQuality;
-                ImageFormat myImageFormat = ImageFormat.Jpeg;
-
-                CameraImageData cameraImageData = VideoServerMgr.CaptureCameraImage(CameraId, ImageWidth, ImageHeight, Quality, myImageFormat);
-
-                if (cameraImageData != null && cameraImageData.ImageBase64 != null)
-                {
-                    StringBuilder sb = new StringBuilder();
-                    foreach (string imageBase in cameraImageData.ImageBase64)
-                    {
-                        sb.Append(imageBase);
-                    }
-
-                    byte[] myImageAsBytes = Convert.FromBase64String(sb.ToString());
-
-                    using (System.Drawing.Image image = System.Drawing.Image.FromStream(new MemoryStream(myImageAsBytes)))
-                    {
-                        image.Save(@"C:\Camara_DataBridge\"+ Nombre_Archivo + ".jpg", ImageFormat.Jpeg);  // Or Png
-                    }
-
-
-                }
-            }
-            catch (Exception ex)
-            {
-                ServiceManager.LogMgr.WriteError("Failed to create transaction", ex);
-                Nombre_Archivo = ""; 
-            
-            }
-
-            return Nombre_Archivo;
-
-        }
-
+        #region Métodos privados
         private string ventanaIngresoDato(String texto,String titulo,String cajaTexto)
         {
             try
@@ -633,7 +435,280 @@ namespace PronacaApi
             }
         }
 
+        private string ObtenerImagen(string Placa,string Nom_Camara, PingReply estado)
+        {
+            if (estado.Status == IPStatus.Success)
+            {
+                string Nombre_Archivo = Placa + "_" + Nom_Camara + DateTime.Now.ToString("yyyyMMddhhmmss");
+                try
+                {
+                    CameraModel myCamera = CameraModel.GetByName(Nom_Camara);
+                    int CameraId = myCamera.Id;
+                    int ImageWidth = 600;
+                    int ImageHeight = 800;
+                    int Quality = myCamera.ImageQuality;
+                    ImageFormat myImageFormat = ImageFormat.Jpeg;
 
+                    CameraImageData cameraImageData = VideoServerMgr.CaptureCameraImage(CameraId, ImageWidth, ImageHeight, Quality, myImageFormat);
+
+                    if (cameraImageData != null && cameraImageData.ImageBase64 != null)
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        foreach (string imageBase in cameraImageData.ImageBase64)
+                        {
+                            sb.Append(imageBase);
+                        }
+
+                        byte[] myImageAsBytes = Convert.FromBase64String(sb.ToString());
+
+                        using (System.Drawing.Image image = System.Drawing.Image.FromStream(new MemoryStream(myImageAsBytes)))
+                        {
+                            image.Save(@"C:\Camara_DataBridge\" + Nombre_Archivo + ".jpg", ImageFormat.Jpeg);  // Or Png
+                        }
+
+
+                    }
+                    else
+                    {
+                        Nombre_Archivo = "";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ServiceManager.LogMgr.WriteError("Failed to create transaction", ex);
+                    Nombre_Archivo = "";
+
+                }
+
+                return Nombre_Archivo;
+            }
+            else
+            {
+                return "";
+            }
+
+        }
+
+        private string ariesEntrada(TransactionModel myTransaction, int nScaleId,ref string msj_recibido,ref string Numeral_recibido)
+        {
+            string N_Transaccion = VEH.consulta_TransaccionDB(); //myTransaction.Loads[0].TransactionNumber; //número de transacción
+            string FechaTicketProceso = DateTime.Now.ToString("dd/MM/yyyy");// Formato es: MM/dd/YYYY
+            string HoraTicketProceso = DateTime.Now.ToString("hh:mm"); //Hora de la transacción
+            string UsuarioDataBridge = myTransaction.Loads[0].Pass1Operator; //la persona que esté operando la báscula
+            string NumeroBascula = nScaleId.ToString(); //identificador de báscula | báscula 0 es la primera báscula | báscula 1 es la segunda báscula |
+            string TipoPeso = "E"; //E=Entrada S=Salida
+            string Peso_Ing = myTransaction.Loads[0].Pass1Weight.ToString(); //Peso de entrada
+            string Cedula = myTransaction.Loads[0].Driver.Name.ToString(); //Cédula del chofer
+            string Chofer = myTransaction.Loads[0].Driver.Description.ToString(); //cédula del chofer
+            string Vehiculo = myTransaction.Loads[0].Vehicle.Name; //placa del vehículo
+            string res_Aries = VEH.InvokeService(N_Transaccion, FechaTicketProceso, HoraTicketProceso, UsuarioDataBridge, NumeroBascula, TipoPeso, Peso_Ing, Vehiculo, Cedula, Chofer);
+            string[] rec_mensaje = res_Aries.Split('/');
+            switch (rec_mensaje[0])
+            {
+
+                case "2":
+                    // ERROR
+                    return rec_mensaje[1];
+
+                // break;
+                case "3":
+                    msj_recibido = "Transacción de Entrada exitosa";
+                    Numeral_recibido = "3";
+                    ventanaOK("¡Transacción de Entrada exitosa!", "DataBridge Plugin");
+                    return "";
+                //break;
+                case "4":
+                    ventanaOK("¡Pesaje Entrada Visitante exitoso!", "DataBridge Plugin");
+                    msj_recibido = rec_mensaje[1];
+                    Numeral_recibido = "4";
+                    return "";
+                case "5":
+                    // Error del factor de conversion(aborta el pesaje)
+                    return rec_mensaje[1];
+
+                default:
+                    return "";
+                    //  break;
+            }
+        }
+
+        private string ariesSalida(TransactionModel myTransaction, int nScaleId,ref string msj_recibido, ref string Numeral_recibido)
+        {
+            string N_Transaccion = myTransaction.Loads[0].TransactionNumber; //número de transacción
+            string FechaTicketProceso = DateTime.Now.ToString("dd/MM/yyyy");// Formato es: MM/dd/YYYY
+            string HoraTicketProceso = DateTime.Now.ToString("hh:mm"); //Hora de la transacción
+            string UsuarioDataBridge = myTransaction.Loads[0].Pass1Operator; //la persona que esté operando la báscula
+            string NumeroBascula = nScaleId.ToString(); //identificador de báscula | báscula 0 es la primera báscula | báscula 1 es la segunda báscula |
+            string TipoPeso = "S"; //E=Entrada S=Salida
+            string Peso_Ing = myTransaction.Loads[0].Pass2Weight.ToString(); //Peso de salida
+            string Cedula = myTransaction.Loads[0].Driver.Name.ToString(); //Cédula del chofer
+            string Chofer = myTransaction.Loads[0].Driver.Description.ToString(); //cédula del chofer
+            string Vehiculo = myTransaction.Loads[0].Vehicle.Name; //placa del vehículo
+            string T_pesaje = VEH.consulta_TipoIngreso(N_Transaccion);
+            if (T_pesaje != ("4")) 
+            { 
+                string res_Aries = VEH.InvokeService(N_Transaccion, FechaTicketProceso, HoraTicketProceso, UsuarioDataBridge, NumeroBascula, TipoPeso, Peso_Ing, Vehiculo, Cedula, Chofer);
+                string[] rec_mensaje = res_Aries.Split('/');
+                switch (rec_mensaje[0])
+                {
+
+                    case "2":
+                        // ERROR
+                        return rec_mensaje[1];
+
+                    // break;
+                    case "3":
+                        msj_recibido = "Transacción de Salida exitosa";
+                        Numeral_recibido = "3";
+                        ventanaOK("¡Transacción de Salida exitosa!", "DataBridge Plugin");
+                        return "";
+                    //break;
+                    case "4":
+                        ventanaOK("¡Pesaje Salida Visitante exitoso!", "DataBridge Plugin");
+                        msj_recibido = rec_mensaje[1];
+                        Numeral_recibido = "4";
+                        return "";
+                    case "5":
+                        // Error del factor de conversion(aborta el pesaje)
+                        return rec_mensaje[1];
+
+                    default:
+                        return "";
+                        //  break;
+                }
+            }
+            else
+            {
+                ventanaOK("¡Segundo Pesaje Aries no enviado", "DataBridge Plugin");
+                return "";
+            }
+        }
+
+        private bool comunicacionCamaras(TransactionModel myTransaction,int nScaleId)
+        {
+            Ping HacerPing = new Ping();
+            int iTiempoEspera = 500;
+            PingReply RespuestaPingCamara1;
+            PingReply RespuestaPingCamara2;
+            string IP_Camara1;
+            string IP_Camara2;
+            int balanza = nScaleId;
+            //****************************** BASCULA 1 ******************************************************
+            if (balanza==0)
+            {
+                IP_Camara1 = cfg.AppSettings.Settings["IP_Camara1"].Value;
+                IP_Camara2 = cfg.AppSettings.Settings["IP_Camara2"].Value;
+                RespuestaPingCamara1 = HacerPing.Send(IP_Camara1, iTiempoEspera);
+                RespuestaPingCamara2 = HacerPing.Send(IP_Camara2, iTiempoEspera);
+                if (RespuestaPingCamara1.Status == IPStatus.Success || RespuestaPingCamara2.Status == IPStatus.Success)
+                    return true;
+                else
+                    return false;
+            }
+            //****************************** BASCULA 2 ******************************************************
+            else
+            {
+                IP_Camara1 = cfg.AppSettings.Settings["IP_Camara3"].Value;
+                IP_Camara2 = cfg.AppSettings.Settings["IP_Camara4"].Value;
+                RespuestaPingCamara1 = HacerPing.Send(IP_Camara1, iTiempoEspera);
+                RespuestaPingCamara2 = HacerPing.Send(IP_Camara2, iTiempoEspera);
+                if (RespuestaPingCamara1.Status == IPStatus.Success || RespuestaPingCamara2.Status == IPStatus.Success)
+                    return true;
+                else
+                    return false;
+            }
+
+        }
+
+        private string notificacionCorreo(TransactionModel myTransaction, int nScaleId, bool banderaCamaras,string estado)
+        {
+            var seed = Environment.TickCount;
+            var random = new Random(seed);
+            var Pin = random.Next(999, 9999);
+            Ping HacerPing = new Ping();
+            int iTiempoEspera = 500;
+            PingReply RespuestaPingCamara1;
+            PingReply RespuestaPingCamara2;
+            string IP_Camara1;
+            string IP_Camara2;
+            string nom_Camara1;
+            string nom_Camara2;
+            string RES;
+            string vehiculo = myTransaction.Loads[0].Vehicle.Name; //placa del vehículo
+            string chofer = myTransaction.Loads[0].Driver.Name.ToString(); //cédula del chofer
+            string peso_Ing = myTransaction.Loads[0].Pass1Weight.ToString(); //Peso de entrada
+            string peso_Salida = myTransaction.Loads[0].Pass2Weight.ToString();//Peso salida
+            string N_Transaccion2 = myTransaction.Loads[0].TransactionNumber; //número de transacción
+            string N_Transaccion1 = VEH.consulta_TransaccionDB();
+            int balanza = nScaleId;
+            //****************************** BASCULA 1 ******************************************************
+            if (balanza == 0)
+            {
+                IP_Camara1 = cfg.AppSettings.Settings["IP_Camara1"].Value;
+                IP_Camara2 = cfg.AppSettings.Settings["IP_Camara2"].Value;
+                if (banderaCamaras == true)
+                {
+                    nom_Camara1= cfg.AppSettings.Settings["Nom_Camara1"].Value;
+                    nom_Camara2 = cfg.AppSettings.Settings["Nom_Camara2"].Value;
+                    RespuestaPingCamara1 = HacerPing.Send(IP_Camara1, iTiempoEspera);
+                    RespuestaPingCamara2 = HacerPing.Send(IP_Camara2, iTiempoEspera);
+                    if(estado.Equals("entrada"))
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, peso_Ing, "", "0", Pin.ToString(), "", "", "", "IP", msj_recibido, Numeral_recibido);
+                    else
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, "", peso_Salida, N_Transaccion2, "", Pin.ToString(), "", "", "SP", "", "");
+
+
+                    string Obtener_ruta1 = ObtenerImagen(vehiculo, nom_Camara1, RespuestaPingCamara1);
+                    string Obtener_ruta2 = ObtenerImagen(vehiculo, nom_Camara2, RespuestaPingCamara2);
+                    string envio_correo = VEH.EnvioCorreo(N_Transaccion1, Pin.ToString(), vehiculo, Obtener_ruta1, Obtener_ruta2);
+                    return "Las cámaras no identificaron la placa seleccionada, se envió un PIN al correo para continuar con la transacción";
+                }
+                else
+                {
+                    if (estado.Equals("entrada"))
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, peso_Ing, "", "0", Pin.ToString(), "", "", "", "IP", msj_recibido, Numeral_recibido);
+                    else
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, "", peso_Salida, N_Transaccion2, "", Pin.ToString(), "", "", "SP", "", "");
+                    string envio_correo = VEH.EnvioCorreo(N_Transaccion1, Pin.ToString(), vehiculo, "", "");
+                    return "Las camaras: " + IP_Camara1 + " y " + IP_Camara2 + " no se encuentran en la Red, se envió un pin al correo para continuar con la transacción";
+                }
+
+
+            }
+            //****************************** BASCULA 2 ******************************************************
+            else
+            {
+                IP_Camara1 = cfg.AppSettings.Settings["IP_Camara3"].Value;
+                IP_Camara2 = cfg.AppSettings.Settings["IP_Camara4"].Value;
+                if (banderaCamaras == true)
+                {
+                    nom_Camara1 = cfg.AppSettings.Settings["Nom_Camara3"].Value;
+                    nom_Camara2 = cfg.AppSettings.Settings["Nom_Camara4"].Value;
+                    RespuestaPingCamara1 = HacerPing.Send(IP_Camara1, iTiempoEspera);
+                    RespuestaPingCamara2 = HacerPing.Send(IP_Camara2, iTiempoEspera);
+                    if (estado.Equals("entrada"))
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, peso_Ing, "", "0", Pin.ToString(), "", "", "", "IP", msj_recibido, Numeral_recibido);
+                    else
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, "", peso_Salida, N_Transaccion2, "", Pin.ToString(), "", "", "SP", "", "");
+                    string Obtener_ruta1 = ObtenerImagen(vehiculo, nom_Camara1, RespuestaPingCamara1);
+                    string Obtener_ruta2 = ObtenerImagen(vehiculo, nom_Camara2, RespuestaPingCamara2);
+                    string envio_correo = VEH.EnvioCorreo(N_Transaccion1, Pin.ToString(), vehiculo, Obtener_ruta1, Obtener_ruta2);
+                    return "Las cámaras no identificaron la placa seleccionada, se envió un pin al correo para continuar con la transacción";
+                }
+                else
+                {
+                    if (estado.Equals("entrada"))
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, peso_Ing, "", "0", Pin.ToString(), "", "", "", "IP", msj_recibido, Numeral_recibido);
+                    else
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, "", peso_Salida, N_Transaccion2, "", Pin.ToString(), "", "", "SP", "", "");
+                    string envio_correo = VEH.EnvioCorreo(N_Transaccion1, Pin.ToString(), vehiculo, "", "");
+                    return "Las camaras: " + IP_Camara1 + " y " + IP_Camara2 + " no se encuentran en la Red, se envió un pin al correo para continuar con la transacción";
+                }
+
+            }
+        }
+
+        #endregion
 
 
 

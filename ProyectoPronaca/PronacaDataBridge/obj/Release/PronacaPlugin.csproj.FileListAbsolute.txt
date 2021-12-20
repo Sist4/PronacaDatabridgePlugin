@@ -1,0 +1,10 @@
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Release\PronacaApi.dll.config
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Release\PronacaApi.dll
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Release\PronacaApi.pdb
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Release\Renci.SshNet.dll
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\bin\Release\Renci.SshNet.xml
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Release\PronacaPlugin.csproj.AssemblyReference.cache
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Release\PronacaPlugin.csproj.CoreCompileInputs.cache
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Release\PronacaPlugin.csproj.CopyComplete
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Release\PronacaApi.dll
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaDataBridge\obj\Release\PronacaApi.pdb

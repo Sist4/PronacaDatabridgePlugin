@@ -1,0 +1,6 @@
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\Camaras\bin\Release\Camaras.dll
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\Camaras\bin\Release\Camaras.pdb
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\Camaras\obj\Release\Camaras.csproj.AssemblyReference.cache
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\Camaras\obj\Release\Camaras.csproj.CoreCompileInputs.cache
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\Camaras\obj\Release\Camaras.dll
+C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\Camaras\obj\Release\Camaras.pdb

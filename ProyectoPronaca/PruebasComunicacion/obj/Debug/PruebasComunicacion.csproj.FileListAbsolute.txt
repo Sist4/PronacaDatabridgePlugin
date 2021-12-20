@@ -1,0 +1,17 @@
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\bin\Debug\PruebasComunicacion.exe.config
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\bin\Debug\PruebasComunicacion.exe
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\bin\Debug\PruebasComunicacion.pdb
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\bin\Debug\PronacaApi.dll
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\bin\Debug\Renci.SshNet.dll
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\bin\Debug\Newtonsoft.Json.dll
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\bin\Debug\PronacaApi.pdb
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\bin\Debug\PronacaApi.dll.config
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\bin\Debug\Renci.SshNet.xml
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.csproj.AssemblyReference.cache
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.Form1.resources
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.Properties.Resources.resources
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.csproj.GenerateResource.cache
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.csproj.CoreCompileInputs.cache
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.csproj.CopyComplete
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.exe
+D:\Users\SISTEMAS PRECITROL\Desktop\Pronaca_Final\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.pdb
