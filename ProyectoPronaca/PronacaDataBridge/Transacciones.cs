@@ -322,20 +322,7 @@ namespace PronacaApi
                 string Peso_Ing = myTransaction.Loads[0].Pass1Weight.ToString();
                 //gurdamos la informacion que envia el databridge 
                 String RES = VEH.Gestion_Pesaje(nScaleId.ToString(),"",Vehiculo,Chofer, Peso_Ing,"",N_Transaccion,"","","","","IC", msj_recibido, Numeral_recibido);
-      
 
-                if (RES.Equals("1"))
-                {
-                    // return "";
-
-                }
-                else
-                {
-                    //   return "No se pudo Guardar la transaccion";
-                }
-
-            //   base.TransactionAccepted(nScaleId, myTransaction);
-            //ventanaOK("Se guardaron los datos en la base", "DataBridge Plugin");
         }
        
         public override string SettingWeight(int nScaleId, ScaleWeightPacket myScaleWeightData, bool bIsSplitWeight)
