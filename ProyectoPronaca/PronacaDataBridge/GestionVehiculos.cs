@@ -14,27 +14,34 @@ using System.Data;
 using Renci.SshNet;
 using System.Xml;
 using System.Diagnostics;
+using System.Collections;
 
-namespace PronacaApi
+namespace PronacaPlugin
 {
-    public  class GestionVehiculos
+    public class GestionVehiculos
     {
-
+        string codeBase;
+        UriBuilder uri;
+        string path;
+        Configuration cfg;
+        public GestionVehiculos()
+        {
+            codeBase = Assembly.GetExecutingAssembly().CodeBase;
+            uri = new UriBuilder(codeBase);
+            path = Uri.UnescapeDataString(uri.Path);
+            cfg = ConfigurationManager.OpenExeConfiguration(path);
+        }
         #region Correo
-        public string EnvioCorreo(string N_Transaccion,string codigo_transaccion,string placa_seleccionada,string ruta_Imagen1, string ruta_Imagen2)
+        public string EnvioCorreo(string N_Transaccion, string codigo_transaccion, string placa_seleccionada, string ruta_Imagen1, string ruta_Imagen2)
         {
             //*************************************************************APP CONFIG
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
             string Correo_Destino = cfg.AppSettings.Settings["Correo_Destino"].Value;
             string Correo_Destino2 = cfg.AppSettings.Settings["Correo_Destino2"].Value;
             string Correo_Envio = cfg.AppSettings.Settings["Correo_Envio"].Value;
-            string Correo_Pasword = cfg.AppSettings.Settings["Correo_Pasword"].Value;         
+            string Correo_Pasword = cfg.AppSettings.Settings["Correo_Pasword"].Value;
             string Host_Salida = cfg.AppSettings.Settings["Host_Salida"].Value;
             string Host_Puerto = cfg.AppSettings.Settings["Host_Puerto"].Value;
-            
+
             //***********************************************************FIN DEL APP CONFIG
 
             using (MailMessage mail = new MailMessage())
@@ -43,13 +50,13 @@ namespace PronacaApi
                 mail.To.Add(Correo_Destino);
                 mail.To.Add(Correo_Destino2);
                 mail.Subject = "DataBridge - Sistema de Pesaje - ";
-                mail.Body = "<h1>Notificacion</h1></br><p>La transaccion nº:"+ N_Transaccion + " con placa seleccionada del operador: "  + placa_seleccionada  + "   no cumple con las condiciones para seguir el proceso de Pesaje.</p></br> <p>Si desea seguir con la transaccion digite el siguiente PIN:"  +  codigo_transaccion + "   </p>";
+                mail.Body = "<h1>Notificacion</h1></br><p>La transaccion nº:" + N_Transaccion + " con placa seleccionada del operador: " + placa_seleccionada + "   no cumple con las condiciones para seguir el proceso de Pesaje.</p></br> <p>Si desea seguir con la transaccion digite el siguiente PIN:" + codigo_transaccion + "   </p>";
 
 
                 mail.IsBodyHtml = true;
                 if (ruta_Imagen1 != (""))
                 {
-                    mail.Attachments.Add(new Attachment(@"C:\Camara_DataBridge\"+ ruta_Imagen1 +".jpg"));
+                    mail.Attachments.Add(new Attachment(@"C:\Camara_DataBridge\" + ruta_Imagen1 + ".jpg"));
                 }
                 if (ruta_Imagen2 != (""))
                 {
@@ -59,8 +66,8 @@ namespace PronacaApi
                 {
                     smtp.UseDefaultCredentials = false;
                     smtp.Credentials = new NetworkCredential(Correo_Envio, Correo_Pasword);
-                    smtp.EnableSsl = false;
-                   // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
+                    smtp.EnableSsl = false; //pronaca en false
+                                            // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
                     smtp.Send(mail);
                 }
                 //// fin del proyecto
@@ -77,37 +84,37 @@ namespace PronacaApi
 
         public String listarFTP(string placa_enviada)
         {
-        
+
             string respuesta = "La placa no coicide:" + placa_enviada;
             try
             {    //*************************************************************APP CONFIG
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-            string Usuario_Sftp = cfg.AppSettings.Settings["Usuario_Ftp"].Value;
-            string Password_Sftp = cfg.AppSettings.Settings["Password_Ftp"].Value;
+                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+                UriBuilder uri = new UriBuilder(codeBase);
+                string path = Uri.UnescapeDataString(uri.Path);
+                Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
+                string Usuario_Sftp = cfg.AppSettings.Settings["Usuario_Ftp"].Value;
+                string Password_Sftp = cfg.AppSettings.Settings["Password_Ftp"].Value;
 
-            string Ip_Sftp = cfg.AppSettings.Settings["IP_Ftp"].Value;
+                string Ip_Sftp = cfg.AppSettings.Settings["IP_Ftp"].Value;
 
-            //***********************************************************FIN DEL APP CONFIG
+                //***********************************************************FIN DEL APP CONFIG
                 using (SftpClient cliente = new SftpClient(new PasswordConnectionInfo(Ip_Sftp, Usuario_Sftp, Password_Sftp)))
                 {
                     cliente.Connect();
                     buscarImagenesSFTP(cliente, "/Camara", placa_enviada, ref respuesta);
                     cliente.Disconnect();
                 }
-            }catch(Exception ex)
+            } catch (Exception ex)
             {
-                
+
             }
-            
-            
+
+
             return respuesta;
 
         }
 
-        private void buscarImagenesSFTP(SftpClient cliente,string directorioServidor, string placa_enviada, ref string respuesta)
+        private void buscarImagenesSFTP(SftpClient cliente, string directorioServidor, string placa_enviada, ref string respuesta)
         {
 
 
@@ -126,7 +133,7 @@ namespace PronacaApi
             var paths = cliente.ListDirectory(directorioServidor).Select(s => s.Name);
             foreach (var path in paths)
             {
-                
+
                 if (path.ToString().Contains(".jpg"))
                 {
 
@@ -144,7 +151,7 @@ namespace PronacaApi
                     string segundos = FEC.Substring(12, 2);
                     DateTime hora_foto = Convert.ToDateTime(años + "-" + mes + "-" + dia + " " + horas + ":" + minutos + ":" + segundos);
                     DateTime Fecha_Actual = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                    DateTime Fecha_restada = (Fecha_Actual.AddMinutes(- Convert .ToUInt32(T_Camion) ));
+                    DateTime Fecha_restada = (Fecha_Actual.AddMinutes(-Convert.ToUInt32(T_Camion)));
 
 
 
@@ -163,8 +170,8 @@ namespace PronacaApi
         #endregion
 
         #region ConexionBdDataBridge
-        
-     
+
+
 
         SqlConnection ConexionSql = null;
         SqlCommand ComandoSql = null;
@@ -187,7 +194,7 @@ namespace PronacaApi
             string consulta;
             try
             {
-                consulta = "select Veh_PinSalida from tb_vehiculos where veh_ticket='"+ N_Transaccion + "' AND  Veh_Estado='SP' ";
+                consulta = "select Veh_PinSalida from tb_vehiculos where veh_ticket='" + N_Transaccion + "' AND  Veh_Estado='SP' ";
 
                 SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
                 ConexionSql.Open();
@@ -209,7 +216,7 @@ namespace PronacaApi
 
         //INSERTAR EL DATO CON EL PIN GENERADO
 
-        public string Insertar_Dato( string Veh_Bascula,  string Veh_Placa,  string Veh_Chofer,  string Veh_Peso_Ingreso,  
+        public string Insertar_Dato(string Veh_Bascula, string Veh_Placa, string Veh_Chofer, string Veh_Peso_Ingreso,
                                        string Veh_Ticket, string Veh_Estado)
         {
             //*************************************************************APP CONFIG
@@ -223,7 +230,7 @@ namespace PronacaApi
             string consulta;
             try
             {
-                consulta = "INSERT INTO [dbo].[Tb_Vehiculos] ([Veh_Bascula],[Veh_Placa],[Veh_Chofer],[Veh_Peso_Ingreso],[Veh_Ticket],[Veh_Estado],[Veh_Fecha_Ingreso]) VALUES('" +  Veh_Bascula + "','" +  Veh_Placa + "','" +  Veh_Chofer + "','" +  Veh_Peso_Ingreso + "','" +  Veh_Ticket + "','" +  Veh_Estado + "',getdate())";
+                consulta = "INSERT INTO [dbo].[Tb_Vehiculos] ([Veh_Bascula],[Veh_Placa],[Veh_Chofer],[Veh_Peso_Ingreso],[Veh_Ticket],[Veh_Estado],[Veh_Fecha_Ingreso]) VALUES('" + Veh_Bascula + "','" + Veh_Placa + "','" + Veh_Chofer + "','" + Veh_Peso_Ingreso + "','" + Veh_Ticket + "','" + Veh_Estado + "',getdate())";
 
                 SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
                 ConexionSql.Open();
@@ -241,10 +248,10 @@ namespace PronacaApi
             }
 
             return consulta;
-            
+
         }
 
-        public string Peso_Salida(string Veh_BasculaSalida,string Veh_Peso_Salida, string Veh_Ticket,string Veh_PinSalida, string  Ven_RutaImg)
+        public string Peso_Salida(string Veh_BasculaSalida, string Veh_Peso_Salida, string Veh_Ticket, string Veh_PinSalida, string Veh_RutaImg)
         {
             //*************************************************************APP CONFIG
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;
@@ -257,7 +264,7 @@ namespace PronacaApi
             string consulta;
             try
             {
-                consulta = "update Tb_Vehiculos set Veh_BasculaSalida='"+ Veh_BasculaSalida + "',Veh_Peso_Salida='"+ Veh_Peso_Salida + "',Veh_Fecha_Salida=GETDATE(),Veh_PinSalida='"+ Veh_PinSalida + "',Veh_RutaImg='"+ Ven_RutaImg + "'  where  Veh_Ticket='" + Veh_Ticket + "'";
+                consulta = "update Tb_Vehiculos set Veh_BasculaSalida='" + Veh_BasculaSalida + "',Veh_Peso_Salida='" + Veh_Peso_Salida + "',Veh_Fecha_Salida=GETDATE(),Veh_PinSalida='" + Veh_PinSalida + "',Veh_RutaImg='" + Veh_RutaImg + "'  where  Veh_Ticket='" + Veh_Ticket + "'";
 
                 SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
                 ConexionSql.Open();
@@ -302,7 +309,7 @@ namespace PronacaApi
             try
             {
                 //consulta = "select USERINFO.USERID ,USERINFO.Name,CHECKTIME  from USERINFO inner join CHECKINOUT on USERINFO.USERID= CHECKINOUT.USERID where USERINFO.Name='"+ Cedula_Chofer + "' and   CHECKTIME BETWEEN DATEADD(minute, -11, GETDATE() )  and getdate()";
-                consulta = "select USERINFO.USERID ,USERINFO.Badgenumber,CHECKTIME  from USERINFO inner join CHECKINOUT on USERINFO.USERID= CHECKINOUT.USERID where USERINFO.Badgenumber='" + Cedula_Chofer + "' and   CHECKTIME BETWEEN DATEADD(minute, -"+( Convert.ToInt32 (T_Chofer) + 1) + ", GETDATE() )  and getdate()";
+                consulta = "select USERINFO.USERID ,USERINFO.CardNo,CHECKTIME  from USERINFO inner join CHECKINOUT on USERINFO.USERID= CHECKINOUT.USERID where USERINFO.CardNo='" + Cedula_Chofer + "' and   CHECKTIME BETWEEN DATEADD(minute, -" + (Convert.ToInt32(T_Chofer) + 1) + ", GETDATE() )  and getdate()";
                 SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
                 ConexionSql.Open();
                 SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
@@ -325,35 +332,35 @@ namespace PronacaApi
 
         public string consulta_ExisteChofer(string Cedula_Chofer)
         {
-                //*************************************************************APP CONFIG
-                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-                UriBuilder uri = new UriBuilder(codeBase);
-                string path = Uri.UnescapeDataString(uri.Path);
-                Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-                string Conexion_Bd = cfg.AppSettings.Settings["Conexion_BDBiometrico"].Value;
+            //*************************************************************APP CONFIG
+            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+            UriBuilder uri = new UriBuilder(codeBase);
+            string path = Uri.UnescapeDataString(uri.Path);
+            Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_BDBiometrico"].Value;
 
-                //***********************************************************FIN DEL APP CONFIG
-                string consulta;
-                try
+            //***********************************************************FIN DEL APP CONFIG
+            string consulta;
+            try
+            {
+                consulta = "select top 1 * from USERINFO where USERINFO.CardNo='" + Cedula_Chofer + "'";
+                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
+                ConexionSql.Open();
+                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
+                consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
+                ConexionSql.Close();
+            }
+            finally
+            {
+
+                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
                 {
-                consulta = "select top 1 * from USERINFO where USERINFO.Badgenumber='" +  Cedula_Chofer +"'";
-                    SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                    ConexionSql.Open();
-                    SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                    consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
                     ConexionSql.Close();
                 }
-                finally
-                {
-
-                    if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
-                    {
-                        ConexionSql.Close();
-                    }
-                }
-
-                return consulta;
             }
+
+            return consulta;
+        }
 
 
         #endregion
@@ -374,8 +381,8 @@ namespace PronacaApi
 
             //*************VEN_ESTADO**********
 
-//            iP=IngresoParcial
-//            IC=IngresoCompleto  
+            //            iP=IngresoParcial
+            //            IC=IngresoCompleto  
 
             string consulta;
             try
@@ -404,7 +411,7 @@ namespace PronacaApi
         public string Gestion_Pesaje(String Veh_Bascula, String Veh_BasculaSalida, String Veh_Placa
         , String Veh_Chofer, String Veh_Peso_Ingreso, String Veh_Peso_Salida
         , String Veh_Ticket, String Veh_PinEntrada, String Veh_PinSalida
-        , String Ven_RutaImgIng, String Ven_RutaImgSal, String Veh_Estado, string msj_recibido, string Numeral_recibido)
+        , String Veh_RutaImgIng, String Veh_RutaImgSal, string pesosObtenidos,String Veh_Estado, string msj_recibido, string Numeral_recibido)
         {
             //*************************************************************APP CONFIG
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;
@@ -417,7 +424,7 @@ namespace PronacaApi
             string consulta;
             try
             {
-                consulta = "EXECUTE P_TBVehiculos N'" + Veh_Bascula + "',N'" + Veh_BasculaSalida + "',N'" + Veh_Placa + "',N'" + Veh_Chofer + "',N'" + Veh_Peso_Ingreso + "',N'" + Veh_Peso_Salida + "',N'" + Veh_Ticket + "',N'" + Veh_PinEntrada + "',N'" + Veh_PinSalida + "',N'" + Ven_RutaImgIng + "',N'" + Ven_RutaImgSal + "',N'" + Veh_Estado + "',N'" + msj_recibido + "',N'" + Numeral_recibido + "',N''";
+                consulta = "EXECUTE P_TBVehiculos N'" + Veh_Bascula + "',N'" + Veh_BasculaSalida + "',N'" + Veh_Placa + "',N'" + Veh_Chofer + "',N'" + Veh_Peso_Ingreso + "',N'" + Veh_Peso_Salida + "',N'" + Veh_Ticket + "',N'" + Veh_PinEntrada + "',N'" + Veh_PinSalida + "',N'" + Veh_RutaImgIng + "',N'" + Veh_RutaImgSal + "',N'" +pesosObtenidos+"',N'"+ Veh_Estado + "',N'" + msj_recibido + "',N'" + Numeral_recibido + "',N''";
 
                 SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
                 ConexionSql.Open();
@@ -490,7 +497,7 @@ namespace PronacaApi
             UriBuilder uri = new UriBuilder(codeBase);
             string path = Uri.UnescapeDataString(uri.Path);
             Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value; ;
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value; 
 
             //***********************************************************FIN DEL APP CONFIG
             string consulta;
@@ -797,6 +804,33 @@ namespace PronacaApi
             }
 
             return consulta;
+        }
+        public void InsertarPesosObtenidos(ArrayList pesosObtenidos,string transaccion)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            string consulta = "";
+            foreach(String peso in pesosObtenidos)
+            {
+                try
+                {
+                    consulta = "update Tb_Vehiculos set Veh_PesosObtenidos= Veh_PesosObtenidos+'"+ peso+ "'+';' where  Veh_Ticket='" + transaccion + "'";
+                    SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
+                    ConexionSql.Open();
+                    SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
+                    consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
+                    ConexionSql.Close();
+                }
+                finally
+                {
+
+                    if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
+                    {
+                        ConexionSql.Close();
+                    }
+                }
+            }
+            
+           
         }
 
         #endregion

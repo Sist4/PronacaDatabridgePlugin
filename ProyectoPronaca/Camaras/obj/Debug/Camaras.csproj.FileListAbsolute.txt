@@ -31,3 +31,8 @@ C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\Camaras\bin
 C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.CoreCompileInputs.cache
 C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\Camaras\obj\Debug\Camaras.dll
 C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\Camaras\obj\Debug\Camaras.pdb
+C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\bin\Debug\Camaras.dll
+C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\bin\Debug\Camaras.pdb
+C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.CoreCompileInputs.cache
+C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.dll
+C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.pdb
