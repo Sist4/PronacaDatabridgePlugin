@@ -70,6 +70,9 @@
       <HintPath>C:\Program Files (x86)\Mettler Toledo\DataBridge\Application\DataBridge.DeviceManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="DataBridge.IOManager">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\DataBridge.IOManager.dll</HintPath>
+    </Reference>
     <Reference Include="DataBridge.ScaleLibrary">
       <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\DataBridge.ScaleLibrary.dll</HintPath>
       <Private>False</Private>

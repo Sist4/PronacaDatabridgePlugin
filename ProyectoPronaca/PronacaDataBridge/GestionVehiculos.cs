@@ -152,10 +152,11 @@ namespace PronacaPlugin
                     DateTime hora_foto = Convert.ToDateTime(años + "-" + mes + "-" + dia + " " + horas + ":" + minutos + ":" + segundos);
                     DateTime Fecha_Actual = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                     DateTime Fecha_restada = (Fecha_Actual.AddMinutes(-Convert.ToUInt32(T_Camion)));
+                    string placa_con_cero = placa.Substring(0, 3) + "0" + placa.Substring(3, (placa.Length - 3));
+                    placa_enviada = placa_enviada.Replace("-", "");
+                    placa = placa.Replace("-", "");
 
-
-
-                    if (placa_enviada.Replace("-", "").Equals(placa.Replace("-", "")) && (hora_foto.CompareTo(Fecha_restada) >= 0 && hora_foto.CompareTo(Fecha_Actual) <= 0))
+                    if ((placa.Equals(placa_enviada)||placa_con_cero.Equals(placa_enviada)) && (hora_foto.CompareTo(Fecha_restada) >= 0 && hora_foto.CompareTo(Fecha_Actual) <= 0))
                     {
 
                         respuesta = "";
@@ -620,6 +621,7 @@ namespace PronacaPlugin
                 int Codigo = 0;
                 int Transaccion;
                 string mensaje_R = "";
+                string Estado = "";
 
                 using (SqlConnection connection = new SqlConnection(Conexion_Bd))
                 {
@@ -636,6 +638,7 @@ namespace PronacaPlugin
                             {
                                 Codigo = Convert.ToInt32(reader.GetInt32(0));
                                 mensaje_R = reader.GetString(3);
+                                Estado = reader.GetString(4);
                             }
                         }
                         connection.Close();
@@ -643,17 +646,40 @@ namespace PronacaPlugin
                 }
 
 
-                string consulta = "UPDATE TEMPORAL SET  [Tem_Estado] ='Fin' where Tem_Codigo='" + Codigo + "' ";
+                if (Estado != "")
+                {
 
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
-                ConexionSql.Close();
+                    string consulta = "UPDATE TEMPORAL SET  [Tem_Estado] ='Fin' where Tem_Codigo='" + Codigo + "' ";
+
+                    SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
+                    ConexionSql.Open();
+                    SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
+                    consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
+                    ConexionSql.Close();
+                    return leer_Xml(DecodeBase64ToString(mensaje_R));
+
+                }
+                else
+                {
+
+                    string consulta = "DELETE FROM TEMPORAL  where Tem_Codigo='" + Codigo + "'  AND [Tem_Estado] ='A'";
+
+                    SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
+                    ConexionSql.Open();
+                    SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
+                    consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
+                    ConexionSql.Close();
+                
+                    return "El mensaje No fue procesado por Aries";
+
+
+
+
+
+                }
 
 
                 //FIN
-                return leer_Xml(DecodeBase64ToString(mensaje_R));
 
 
                 //////////////////Calling CreateSOAPWebRequest method    
@@ -831,6 +857,51 @@ namespace PronacaPlugin
             }
             
            
+        }
+
+        public void anularTransacción(string transaccion)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+
+            //***********************************************************FIN DEL APP CONFIG
+            string consulta;
+            string consulta2;
+            try
+            {
+                consulta = "update Tb_Vehiculos set Veh_Estado='TA' where  Veh_Ticket='" + transaccion + "'";
+
+                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
+                ConexionSql.Open();
+                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
+                consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
+                ConexionSql.Close();
+            }
+            finally
+            {
+
+                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
+                {
+                    ConexionSql.Close();
+                }
+            }
+            try
+            {
+                consulta2 = "DELETE FROM [dbo].[Tb_Vehiculos] WHERE Veh_Estado='IP';'";
+
+                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
+                ConexionSql.Open();
+                SqlCommand Comando_Sql = new SqlCommand(consulta2, ConexionSql);
+                consulta2 = Convert.ToString(Comando_Sql.ExecuteNonQuery());
+                ConexionSql.Close();
+            }
+            finally
+            {
+
+                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
+                {
+                    ConexionSql.Close();
+                }
+            }
         }
 
         #endregion
