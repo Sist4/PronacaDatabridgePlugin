@@ -67,8 +67,15 @@ namespace PronacaPlugin
                     smtp.UseDefaultCredentials = false;
                     smtp.Credentials = new NetworkCredential(Correo_Envio, Correo_Pasword);
                     smtp.EnableSsl = false; //pronaca en false
-                                            // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
-                    smtp.Send(mail);
+                                           // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
+                    try {
+                        smtp.Send(mail);
+                    }
+                    catch(Exception ex)
+                    {
+                        throw;
+                    }
+                    
                 }
                 //// fin del proyecto
                 return "";
@@ -615,7 +622,7 @@ namespace PronacaPlugin
                 string codificiacionMsj = EncodeStrToBase64(XmlEnvio);
                 string res = G_Msg(codificiacionMsj, "A", N_Transaccion);
 
-                Process.Start(@"C:\Camion\PruebasComunicacion.exe");
+                Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
                 System.Threading.Thread.Sleep(3000);
                 //CONSULTA DE DATOS
                 int Codigo = 0;
@@ -865,7 +872,6 @@ namespace PronacaPlugin
 
             //***********************************************************FIN DEL APP CONFIG
             string consulta;
-            string consulta2;
             try
             {
                 consulta = "update Tb_Vehiculos set Veh_Estado='TA' where  Veh_Ticket='" + transaccion + "'";
@@ -884,9 +890,17 @@ namespace PronacaPlugin
                     ConexionSql.Close();
                 }
             }
+            
+        }
+        public void eliminarTransaccionPendiente()
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+
+            //***********************************************************FIN DEL APP CONFIG
+            string consulta2;
             try
             {
-                consulta2 = "DELETE FROM [dbo].[Tb_Vehiculos] WHERE Veh_Estado='IP';'";
+                consulta2 = "DELETE FROM [dbo].[Tb_Vehiculos] WHERE Veh_Estado='IP';";
 
                 SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
                 ConexionSql.Open();

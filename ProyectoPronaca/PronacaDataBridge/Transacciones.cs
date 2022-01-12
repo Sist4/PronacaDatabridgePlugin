@@ -26,44 +26,32 @@ using System.Diagnostics;
 using System.Threading;
 using PronacaPlugin;
 using System.Collections;
+using DataBridge.IOManager;
+using DataBridge.Core.Services;
+using DataBridge.Core.TransactionManager;
+using DataBridge.ScaleManager;
 
 namespace PronacaPlugin
 {
    public class Transacciones : TransactionProcessing
     {
         //Variables globales
-        double[] pesoMaximo;
         ArrayList pesosObtenidos;
         double[] pesoActualBascula;
-        double pesoActualBascula1;
-        double pesoActualBascula2;
         bool banderaCamaras;
         string estado;
         string msj_recibido;
         string Numeral_recibido;
         GestionVehiculos VEH;
-        Double tiempoEstable;
-        double pesoTemporal;
-        Double tiempoTranscurrido;
-        string choferEnviado;
         //**************Acceso al app config******************//
         string codeBase;
         UriBuilder uri;
         string path;
         Configuration cfg;
-        Stopwatch timeMeasure;
-        //ScaleWeightPacket peso;
         //Constructor por defecto
         public Transacciones()
         {
-            for (int nScale = 0; nScale < 6; nScale++)
-            {
-                TransactionNeedsProcessed.Add(nScale, false);
-            }
-            pesoMaximo = new double[6];
             pesoActualBascula = new double[2];
-            pesoActualBascula1 = 0.00;
-            pesoActualBascula2 = 0.00;
             codeBase = Assembly.GetExecutingAssembly().CodeBase;
             uri = new UriBuilder(codeBase);
             path = Uri.UnescapeDataString(uri.Path);
@@ -71,27 +59,22 @@ namespace PronacaPlugin
             banderaCamaras = false;
             VEH = new GestionVehiculos();
             estado = "";
-            timeMeasure = new Stopwatch();
-            tiempoEstable = 0.00;
-            tiempoTranscurrido = 0.00;
-            choferEnviado = "";
             pesosObtenidos = new ArrayList();
-            //peso = new ScaleWeightPacket();
         }
 
-        #region Propiedades para el peso maximo
+        #region Propiedades
 
-        private Dictionary<int, bool> _myTransactionNeedsProcessed = null;
-        private Dictionary<int, bool> TransactionNeedsProcessed
+       
+        private IScaleMgr _myScaleMgr = null;
+        private IScaleMgr ScaleMgr
         {
             get
             {
-                if (_myTransactionNeedsProcessed == null)
+                if (_myScaleMgr == null)
                 {
-                    _myTransactionNeedsProcessed = new Dictionary<int, bool>();
+                    _myScaleMgr = ServiceManager.GetService<IScaleMgr>();
                 }
-
-                return _myTransactionNeedsProcessed;
+                return _myScaleMgr;
             }
         }
 
@@ -128,13 +111,11 @@ namespace PronacaPlugin
         #endregion
 
         #region Métodos públicos
-
-
         public override void TransactionVoided(int nScaleId, TransactionModel myTransaction)
         {
             VEH.anularTransacción(myTransaction.TransactionNumber);
+            VEH.eliminarTransaccionPendiente();
         }
-
         public override string TransactionAccepting(int nScaleId, TransactionModel myTransaction) 
         {
             string T_Chofer = cfg.AppSettings.Settings["T_Chofer"].Value; //tiempo que tiene el chofer para timbrar en el biometrico
@@ -170,7 +151,14 @@ namespace PronacaPlugin
                             {
                                 //************************************************COMUNICACION CON EL ARIES *****************************************************
                                 //ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
-                                return AriesEntrada(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
+                                try
+                                {
+                                    return AriesEntrada(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
+                                }
+                                catch (Exception ex)
+                                {
+                                    return "Error en la comunicación con Aries: " + ex.Message;
+                                }
                                 //return "";          
                             }
                             else
@@ -190,20 +178,46 @@ namespace PronacaPlugin
                                 {
                                     //************************************************COMUNICACION CON EL ARIES *****************************************************
                                     //    ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
-                                    return AriesEntrada(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
+                                    try
+                                    {
+                                        return AriesEntrada(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
+                                    }
+                                    catch(Exception ex)
+                                    {
+                                        return "Error en la comunicación con Aries: " + ex.Message;
+                                    }
+                                    
                                     //return "";
                                 }
                                 else
                                 {
                                     //************************************************NOTIFICACION POR CORREO *****************************************************
-                                    return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                    try
+                                    {
+                                        return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                     }
+                                    catch(Exception ex)
+                                    {
+                                        VEH.eliminarTransaccionPendiente();
+                                        return "Error en el envío del correo: "+ex.Message;
+                                    }
+                                    
+
                                 }
                             }
                             else
                             {
                                 //************************************************NOTIFICACION POR CORREO *****************************************************
                                 banderaCamaras = false;
-                                return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                try
+                                {
+                                    return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                }
+                                catch (Exception ex)
+                                {
+                                    VEH.eliminarTransaccionPendiente();
+                                    return "Error en el envío del correo: " + ex.Message;
+                                }
                             }
 
                         }
@@ -226,30 +240,15 @@ namespace PronacaPlugin
             {
                 return "El chofer debe estar Creado en el Biometrico";
             }
-
-
-
         }
         public override void TransactionAccepted(int nScaleId, TransactionModel myTransaction)
         {
 
-            lock (TransactionNeedsProcessed)
-            {
-                TransactionNeedsProcessed[nScaleId] = false;
-                pesoMaximo[nScaleId] = 0.00;
-
-            }
             GestionVehiculos VEH = new GestionVehiculos();
             //DATOS
-
-
-            // string Vehiculo = myTransaction.Loads[0].Vehicle.DisplayDescription;
             string Vehiculo = myTransaction.Loads[0].Vehicle.Name;
-            string Material = myTransaction.Loads[0].Material.Description;
-            string Empresa = myTransaction.Loads[0].Account.Description;
             string N_Transaccion = myTransaction.Loads[0].TransactionNumber;
             string Chofer = myTransaction.Loads[0].Driver.Name.ToString();
-            string Nota = myTransaction.Loads[0].Note;
             string Peso_Ing = myTransaction.Loads[0].Pass1Weight.ToString();
             //gurdamos la informacion que envia el databridge 
             String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, Peso_Ing, "", N_Transaccion, "", "", "", "", "", "IC", msj_recibido, Numeral_recibido);
@@ -332,7 +331,6 @@ namespace PronacaPlugin
                 return "El chofer debe estar Creado en el Biometrico";
             }
         }
-
         public override void TransactionCompleted(int nScaleId, TransactionModel myTransaction)
         {
             string N_Transaccion = myTransaction.Loads[0].TransactionNumber;
@@ -341,29 +339,18 @@ namespace PronacaPlugin
         }
         public override void ScaleAboveThreshold(ScaleAboveThresholdEventArgs myEventArgs)
         {
-            lock (TransactionNeedsProcessed)
-            {
-                TransactionNeedsProcessed[myEventArgs.ScaleId] = true;
-            }
             pesosObtenidos.Clear();
         }
-
-        
-
         public override void ScaleDataReceived(ScaleWeightPacket myScaleWeightData)
         {
             double peso = myScaleWeightData.MainWeightData.GrossWeightValue;
-            SetPesoActual(ref peso,myScaleWeightData.ScaleId);
-            
-            
+            SetPesoActual(ref peso,myScaleWeightData.ScaleId);  
         }
-
         public override void WeightSet(int nScaleId, ScaleWeightPacket myScaleWeightData, bool bIsSplitWeight)
         {
             //ventanaOK("se tomo el peso: " + myScaleWeightData.MainWeightData.GrossWeightValue,"ventana peso tomado");
             pesosObtenidos.Add(myScaleWeightData.MainWeightData.GrossWeightValue.ToString());
         }
-
         #endregion
 
         #region Métodos privados
@@ -400,6 +387,7 @@ namespace PronacaPlugin
             return string.Empty;
             
         }
+
         private void ventanaOK(string texto,String titulo)
         {
             try
@@ -486,16 +474,27 @@ namespace PronacaPlugin
             string Cedula = myTransaction.Loads[0].Driver.Name.ToString(); //Cédula del chofer
             string Chofer = myTransaction.Loads[0].Driver.Description.ToString(); //cédula del chofer
             string Vehiculo = myTransaction.Loads[0].Vehicle.Name; //placa del vehículo
-            string res_Aries = VEH.InvokeService(N_Transaccion, FechaTicketProceso, HoraTicketProceso, UsuarioDataBridge, NumeroBascula, TipoPeso, Peso_Ing, Vehiculo, Cedula, Chofer);
+            string res_Aries = "";
+            try
+            {
+                res_Aries = VEH.InvokeService(N_Transaccion, FechaTicketProceso, HoraTicketProceso, UsuarioDataBridge, NumeroBascula, TipoPeso, Peso_Ing, Vehiculo, Cedula, Chofer);
+            }
+            catch(Exception ex)
+            {
+                throw;
+            }
+            
             string[] rec_mensaje = res_Aries.Split('/');
             switch (rec_mensaje[0])
             {
+
+                case "":
+                    return "Error en la comunicación con Aries";
 
                 case "2":
                     // ERROR
                     return rec_mensaje[1];
 
-                // break;
                 case "3":
                     msj_recibido = "Transacción de Entrada exitosa";
                     Numeral_recibido = "3";

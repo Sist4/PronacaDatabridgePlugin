@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PronacaPlugin
 {
-   public class Vehiculos
+   public class Vehiculo
     {
         public int Veh_Bascula { get; set; }
         public string Veh_Placa { get; set; }
