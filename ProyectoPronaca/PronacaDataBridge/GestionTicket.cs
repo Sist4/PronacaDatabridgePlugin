@@ -15,24 +15,68 @@ using Renci.SshNet;
 using System.Xml;
 using System.Diagnostics;
 using System.Collections;
+using DataBridge.Core.Business;
+using System.Net.NetworkInformation;
 
 namespace PronacaPlugin
 {
-    public class GestionVehiculos
+    public class GestionTicket
     {
         string codeBase;
         UriBuilder uri;
         string path;
         Configuration cfg;
-        public GestionVehiculos()
+        string Conexion_Bd;
+        Ticket ticket;
+        public string PinEntrada { get; set; }
+        public string PinSalida { get; set; }
+        public string RutaImagenEntrada { get; set; }
+        public string RutaImagenSalida { get; set; }
+        public string MensajeRecibido { get; set; }
+        public string NumeralRecibido { get; set; }
+        public ArrayList PesosObtenidos { get ; set ; }
+
+        SqlConnection ConexionSql = null;
+        SqlCommand ComandoSql = null;
+        string query = null;
+        SqlDataReader LectorDatos = null;
+        SqlDataAdapter AdaptadorSql = null;
+
+        public GestionTicket()
         {
             codeBase = Assembly.GetExecutingAssembly().CodeBase;
             uri = new UriBuilder(codeBase);
             path = Uri.UnescapeDataString(uri.Path);
             cfg = ConfigurationManager.OpenExeConfiguration(path);
+            ticket = new Ticket();
+            PesosObtenidos = new ArrayList();
+            PinEntrada = "";
+            PinSalida="";
+            RutaImagenEntrada = "";
+            RutaImagenSalida = "";
+            NumeralRecibido = "";
+            MensajeRecibido = "";
+            Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
         }
+
         #region Correo
-        public string EnvioCorreo(string N_Transaccion, string codigo_transaccion, string placa_seleccionada, string ruta_Imagen1, string ruta_Imagen2)
+        public void ValidarCorreo(TransactionModel myTransaction, int nScaleId, bool banderaCamaras, string estado)
+        {
+            var seed = Environment.TickCount;
+            var random = new Random(seed);
+            var Pin = random.Next(999, 9999);
+            Ping HacerPing = new Ping();
+            int iTiempoEspera = 500;
+            PingReply RespuestaPingCamara1;
+            PingReply RespuestaPingCamara2;
+            string IP_Camara1;
+            string IP_Camara2;
+            string nom_Camara1;
+            string nom_Camara2;
+            string RES;
+  
+        }
+        public string EnviarCorreo(string N_Transaccion, string codigo_transaccion, string placa_seleccionada, string ruta_Imagen1, string ruta_Imagen2)
         {
             //*************************************************************APP CONFIG
             string Correo_Destino = cfg.AppSettings.Settings["Correo_Destino"].Value;
@@ -56,17 +100,17 @@ namespace PronacaPlugin
                 mail.IsBodyHtml = true;
                 if (ruta_Imagen1 != (""))
                 {
-                    mail.Attachments.Add(new Attachment(@"C:\Camara_DataBridge\" + ruta_Imagen1 + ".jpg"));
+                    mail.Attachments.Add(new Attachment(@"C:\Program Files (x86)\METTLER TOLEDO\Fotos captura de peso\" + ruta_Imagen1 + ".jpg"));
                 }
                 if (ruta_Imagen2 != (""))
                 {
-                    mail.Attachments.Add(new Attachment(@"C:\Camara_DataBridge\" + ruta_Imagen2 + ".jpg"));
+                    mail.Attachments.Add(new Attachment(@"CC:\Program Files (x86)\METTLER TOLEDO\Fotos captura de peso\" + ruta_Imagen2 + ".jpg"));
                 }
                 using (SmtpClient smtp = new SmtpClient(Host_Salida, Convert.ToInt32(Host_Puerto)))
                 {
                     smtp.UseDefaultCredentials = false;
                     smtp.Credentials = new NetworkCredential(Correo_Envio, Correo_Pasword);
-                    smtp.EnableSsl = false; //pronaca en false
+                    smtp.EnableSsl = true; //pronaca en false
                                            // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
                     try {
                         smtp.Send(mail);
@@ -123,16 +167,12 @@ namespace PronacaPlugin
 
         private void buscarImagenesSFTP(SftpClient cliente, string directorioServidor, string placa_enviada, ref string respuesta)
         {
-
-
             //*************************************************************APP CONFIG
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;
             UriBuilder uri = new UriBuilder(codeBase);
             string Ubicacion = Uri.UnescapeDataString(uri.Path);
             Configuration cfg = ConfigurationManager.OpenExeConfiguration(Ubicacion);
             string T_Camion = cfg.AppSettings.Settings["T_Camion"].Value;
-
-
 
             //***********************************************************FIN DEL APP CONFIG
 
@@ -180,16 +220,8 @@ namespace PronacaPlugin
         #region ConexionBdDataBridge
 
 
-
-        SqlConnection ConexionSql = null;
-        SqlCommand ComandoSql = null;
-        string query = null;
-        SqlDataReader LectorDatos = null;
-        SqlDataAdapter AdaptadorSql = null;
-
-
         //Consulta 
-        public string consulta_PinSalida(string N_Transaccion)
+        public string consultarPinSalida(string N_Transaccion)
         {
             //*************************************************************APP CONFIG
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;
@@ -302,7 +334,7 @@ namespace PronacaPlugin
 
 
 
-        public string consulta_BiometricoChofer(string Cedula_Chofer)
+        public string consulta_BiometricoConductor(string Cedula_Chofer)
         {
             //*************************************************************APP CONFIG
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;
@@ -338,7 +370,7 @@ namespace PronacaPlugin
 
 
 
-        public string consulta_ExisteChofer(string Cedula_Chofer)
+        public string consulta_ExisteConductor(string Cedula_Chofer)
         {
             //*************************************************************APP CONFIG
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;
@@ -376,7 +408,7 @@ namespace PronacaPlugin
 
         #region Pesaje_Ingreso
         //verificamos si el pesaje de ing. existe un ping generado se guarda en el campo 
-        public string consulta_PlacaIngreso(string Placa_Seleccionada)
+        public string consultarPinEntrada(string Placa_Seleccionada)
         {
             //*************************************************************APP CONFIG
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;
@@ -415,7 +447,47 @@ namespace PronacaPlugin
             return consulta;
         }
 
+        public void llenarDatosEntrada(TransactionModel myTransaction,int nScaleId,string estado)
+        {
+            ticket.BasculaEntrada = nScaleId + 1;
+            ticket.Conductor = myTransaction.Loads[0].Driver.Name;
+            ticket.PlacaVehiculo = myTransaction.Loads[0].Vehicle.Name;
+            ticket.Numero = myTransaction.Loads[0].TransactionNumber;
+            ticket.PesoEntrada = myTransaction.Loads[0].Pass1Weight.ToString();
+            ticket.Estado = estado;
+            InsertarPesosObtenidos(PesosObtenidos,myTransaction.Loads[0].TransactionNumber);
+            PesosObtenidos.Clear();
+        }
+        public void llenarDatosSalida(TransactionModel myTransaction, int nScaleId, string estado)
+        {
+            ticket.Numero = consulta_TransaccionDB();
+            ticket.PesoSalida = myTransaction.Loads[0].Pass2Weight.ToString();
+            ticket.BasculaSalida = nScaleId + 1;
 
+        }
+        public string CrearPesaje()
+        {
+            string consulta;
+            try
+            {
+                consulta = "EXECUTE P_TBVehiculos N'" + ticket.BasculaEntrada + "',N'" + ticket.BasculaSalida + "',N'" + ticket.PlacaVehiculo + "',N'" + ticket.Conductor + "',N'" + ticket.PesoEntrada + "',N'" + ticket.PesoSalida + "',N'" + ticket.Numero + "',N'" + PinEntrada + "',N'" + PinSalida + "',N'" + RutaImagenEntrada + "',N'" + RutaImagenSalida + "',N'" + PesosObtenidos + "',N'" + ticket.Estado + "',N'" + MensajeRecibido + "',N'" + NumeralRecibido + "',N''";
+                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
+                ConexionSql.Open();
+                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
+                consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
+                ConexionSql.Close();
+            }
+            finally
+            {
+
+                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
+                {
+                    ConexionSql.Close();
+                }
+            }
+
+            return consulta;
+        }
         public string Gestion_Pesaje(String Veh_Bascula, String Veh_BasculaSalida, String Veh_Placa
         , String Veh_Chofer, String Veh_Peso_Ingreso, String Veh_Peso_Salida
         , String Veh_Ticket, String Veh_PinEntrada, String Veh_PinSalida
@@ -621,8 +693,14 @@ namespace PronacaPlugin
                 ///*****************************************************esto no va************************************
                 string codificiacionMsj = EncodeStrToBase64(XmlEnvio);
                 string res = G_Msg(codificiacionMsj, "A", N_Transaccion);
-
-                Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
+                try
+                {
+                    Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
+                }catch(Exception ex)
+                {
+                    throw;
+                }
+                
                 System.Threading.Thread.Sleep(3000);
                 //CONSULTA DE DATOS
                 int Codigo = 0;
