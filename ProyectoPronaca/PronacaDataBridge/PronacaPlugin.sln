@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PronacaPlugin", "PronacaPlu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Camaras", "..\Camaras\Camaras.csproj", "{82624E7C-3EF0-4BC7-A957-DC2DFC8F8566}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PruebasComunicacion", "..\..\..\..\Pronaca Puembo\Pronaca con ejecutable de comunicación\ProyectoPronaca\PruebasComunicacion\PruebasComunicacion.csproj", "{3F47118A-5DF4-4291-BA23-7D408189F62C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{82624E7C-3EF0-4BC7-A957-DC2DFC8F8566}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82624E7C-3EF0-4BC7-A957-DC2DFC8F8566}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82624E7C-3EF0-4BC7-A957-DC2DFC8F8566}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F47118A-5DF4-4291-BA23-7D408189F62C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F47118A-5DF4-4291-BA23-7D408189F62C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F47118A-5DF4-4291-BA23-7D408189F62C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F47118A-5DF4-4291-BA23-7D408189F62C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
