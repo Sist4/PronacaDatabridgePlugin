@@ -173,7 +173,7 @@ namespace PronacaPlugin
                                     banderaCamaras = true;
                                     //si la respuesta es positiva de cualquiera de las dos camaras
                                     ///BUSCAMOS EN LA RUTA DEL FTP SI LOS DEVUELVE EN BLANCO ES Q SI ENCONTRO LA FOTO
-                                    if (VEH.listarFTP(vehiculo).Equals(""))
+                                    if (VEH.listarFTP(vehiculo, nScaleId).Equals(""))
                                     {
                                         //************************************************COMUNICACION CON EL ARIES *****************************************************
                                         //    ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");

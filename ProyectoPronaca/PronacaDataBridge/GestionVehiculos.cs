@@ -89,7 +89,7 @@ namespace PronacaPlugin
 
 
 
-        public String listarFTP(string placa_enviada)
+        public String listarFTP(string placa_enviada, int nScaleId)
         {
 
             string respuesta = "La placa no coicide:" + placa_enviada;
@@ -108,7 +108,7 @@ namespace PronacaPlugin
                 using (SftpClient cliente = new SftpClient(new PasswordConnectionInfo(Ip_Sftp, Usuario_Sftp, Password_Sftp)))
                 {
                     cliente.Connect();
-                    buscarImagenesSFTP(cliente, "/Camara", placa_enviada, ref respuesta);
+                    buscarImagenesSFTP(cliente, "/Camara", placa_enviada, ref respuesta, nScaleId);
                     cliente.Disconnect();
                 }
             } catch (Exception ex)
@@ -121,7 +121,7 @@ namespace PronacaPlugin
 
         }
 
-        private void buscarImagenesSFTP(SftpClient cliente, string directorioServidor, string placa_enviada, ref string respuesta)
+        private void buscarImagenesSFTP(SftpClient cliente, string directorioServidor, string placa_enviada, ref string respuesta, int nScaleId)
         {
 
 
@@ -131,22 +131,18 @@ namespace PronacaPlugin
             string Ubicacion = Uri.UnescapeDataString(uri.Path);
             Configuration cfg = ConfigurationManager.OpenExeConfiguration(Ubicacion);
             string T_Camion = cfg.AppSettings.Settings["T_Camion"].Value;
-
-
-
             //***********************************************************FIN DEL APP CONFIG
 
 
             var paths = cliente.ListDirectory(directorioServidor).Select(s => s.Name);
             foreach (var path in paths)
             {
-
                 if (path.ToString().Contains(".jpg"))
                 {
 
                     string[] array = path.ToString().Split('_');
                     //FECHA Y HORA EN EL array[0] ;la placa en el array[1]
-                    string sucursal = array[0];
+                    string sucursalBasculaCamaras = array[0];
                     string FEC = array[1];
                     string placa = array[2].Replace(".jpg", "");
                     //obtenemos la fecha y la hora 
@@ -162,12 +158,23 @@ namespace PronacaPlugin
                     string placa_con_cero = placa.Substring(0, 3) + "0" + placa.Substring(3, (placa.Length - 3));
                     placa_enviada = placa_enviada.Replace("-", "");
                     placa = placa.Replace("-", "");
-
-                    if ((placa.Equals(placa_enviada)||placa_con_cero.Equals(placa_enviada)) && (hora_foto.CompareTo(Fecha_restada) >= 0 && hora_foto.CompareTo(Fecha_Actual) <= 0))
+                    if (nScaleId == 0 && (sucursalBasculaCamaras.Equals("PBOCAM11") || sucursalBasculaCamaras.Equals("PBOCAM12")))
                     {
+                        if ((placa.Equals(placa_enviada) || placa_con_cero.Equals(placa_enviada)) && (hora_foto.CompareTo(Fecha_restada) >= 0 && hora_foto.CompareTo(Fecha_Actual) <= 0))
+                        {
 
-                        respuesta = "";
+                            respuesta = "";
+                        }
                     }
+                    else if (nScaleId == 1 && (sucursalBasculaCamaras.Equals("PBOCAM21") || sucursalBasculaCamaras.Equals("PBOCAM22")))
+                    {
+                        if ((placa.Equals(placa_enviada) || placa_con_cero.Equals(placa_enviada)) && (hora_foto.CompareTo(Fecha_restada) >= 0 && hora_foto.CompareTo(Fecha_Actual) <= 0))
+                        {
+
+                            respuesta = "";
+                        }
+                    }
+                     
 
                 }
 
