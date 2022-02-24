@@ -324,7 +324,8 @@ namespace PronacaPlugin
             try
             {
                 //consulta = "select USERINFO.USERID ,USERINFO.Name,CHECKTIME  from USERINFO inner join CHECKINOUT on USERINFO.USERID= CHECKINOUT.USERID where USERINFO.Name='"+ Cedula_Chofer + "' and   CHECKTIME BETWEEN DATEADD(minute, -11, GETDATE() )  and getdate()";
-                consulta = "select USERINFO.USERID ,USERINFO.CardNo,CHECKTIME  from USERINFO inner join CHECKINOUT on USERINFO.USERID= CHECKINOUT.USERID where USERINFO.CardNo='" + Cedula_Chofer + "' and   CHECKTIME BETWEEN DATEADD(minute, -" + (Convert.ToInt32(T_Chofer) + 1) + ", GETDATE() )  and getdate()";
+                //consulta = "select USERINFO.USERID ,USERINFO.CardNo,CHECKTIME  from USERINFO inner join CHECKINOUT on USERINFO.USERID= CHECKINOUT.USERID where USERINFO.CardNo='" + Cedula_Chofer + "' and   CHECKTIME BETWEEN DATEADD(minute, -" + (Convert.ToInt32(T_Chofer) + 1) + ", GETDATE() )  and getdate()";
+                consulta = "SELECT personnel_employee.emp_code,iclock_transaction.punch_time FROM personnel_employee INNER JOIN iclock_transaction ON personnel_employee.emp_code=iclock_transaction.emp_code WHERE personnel_employee.first_name='" + Cedula_Chofer + "' AND punch_time BETWEEN DATEADD(minute, -" + (Convert.ToInt32(T_Chofer) + 1) + ", GETDATE() )  and getdate()";
                 SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
                 ConexionSql.Open();
                 SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
@@ -358,7 +359,8 @@ namespace PronacaPlugin
             string consulta;
             try
             {
-                consulta = "select top 1 * from USERINFO where USERINFO.CardNo='" + Cedula_Chofer + "'";
+                //consulta = "select top 1 * from USERINFO where USERINFO.CardNo='" + Cedula_Chofer + "'";
+                consulta = "SELECT top 1 * FROM personnel_employee where personnel_employee.first_name = '" + Cedula_Chofer + "'";
                 SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
                 ConexionSql.Open();
                 SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
@@ -900,6 +902,32 @@ namespace PronacaPlugin
             
         }
         public void eliminarTransaccionPendiente()
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+
+            //***********************************************************FIN DEL APP CONFIG
+            string consulta2;
+            try
+            {
+                consulta2 = "DELETE FROM [dbo].[Tb_Vehiculos] WHERE Veh_Estado='IP';";
+
+                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
+                ConexionSql.Open();
+                SqlCommand Comando_Sql = new SqlCommand(consulta2, ConexionSql);
+                consulta2 = Convert.ToString(Comando_Sql.ExecuteNonQuery());
+                ConexionSql.Close();
+            }
+            finally
+            {
+
+                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
+                {
+                    ConexionSql.Close();
+                }
+            }
+        }
+
+        public void detenerSecuencia()
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
 

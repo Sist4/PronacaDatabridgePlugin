@@ -284,7 +284,7 @@ namespace PronacaPlugin
                                 if (ComunicacionCamaras(myTransaction, nScaleId) == true)
                                 {
                                     banderaCamaras = true;
-                                    if (VEH.listarFTP(vehiculo).Equals(""))
+                                    if (VEH.listarFTP(vehiculo,nScaleId).Equals(""))
                                     {
                                         String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), vehiculo, chofer, "", Peso_Salida, N_Transaccion, "", "", "", "", "", "SC", "", "");
 
@@ -359,6 +359,7 @@ namespace PronacaPlugin
                 viewModel.CustomWindowTitle = titulo;
                 viewModel.DisplayText = texto;
                 viewModel.WatermarkValue = cajaTexto;
+                //viewModel.DialogResult = false;
                 viewModel.YesButtonText = "OK";
                 viewModel.NoButtonText = "Cancel";
                 Application.Current?.Dispatcher.Invoke(() =>
@@ -500,8 +501,8 @@ namespace PronacaPlugin
                     msj_recibido = rec_mensaje[1];
                     Numeral_recibido = "4";
                     banderaTransaccionEnviada = true;
-                    ventanaOK("¡Pesaje Entrada Visitante exitoso!", "DataBridge Plugin");
-                    return "";
+                    //ventanaOK("¡Pesaje Entrada Visitante exitoso!", "DataBridge Plugin");
+                    return rec_mensaje[1];
                 case "5":
                     // Error del factor de conversion(aborta el pesaje)
                     return rec_mensaje[1];
@@ -549,8 +550,7 @@ namespace PronacaPlugin
                         msj_recibido = rec_mensaje[1];
                         Numeral_recibido = "4";
                         banderaTransaccionEnviada = true;
-                        ventanaOK("¡Pesaje Salida Visitante exitoso!", "DataBridge Plugin");
-                        return "";
+                        return rec_mensaje[1];
                     case "5":
                         // Error del factor de conversion(aborta el pesaje)
                         return rec_mensaje[1];
