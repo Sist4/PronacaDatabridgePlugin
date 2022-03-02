@@ -44,6 +44,7 @@ namespace PronacaPlugin
         string Numeral_recibido;
         GestionVehiculos VEH;
         bool banderaTransaccionEnviada;
+        int contadorCamarasBascula;
         //**************Acceso al app config******************//
         string codeBase;
         UriBuilder uri;
@@ -62,6 +63,7 @@ namespace PronacaPlugin
             estado = "";
             pesosObtenidos = new ArrayList();
             banderaTransaccionEnviada = false;
+            contadorCamarasBascula = 0;
         }
 
         #region Propiedades
@@ -182,17 +184,17 @@ namespace PronacaPlugin
                                     }
                                     else
                                     {
-                                        //************************************************NOTIFICACION POR CORREO *****************************************************
-                                        try
+                                        //************************************************NOTIFICACION POR CORREO ****************************************************
+                                        if(contadorCamarasBascula == 0)
+                                        {
+                                            contadorCamarasBascula += 1;
+                                            return "Porfavor revisar que la báscula escogida para la transacción sea la correcta";  
+                                        }
+                                        else
                                         {
                                             return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
                                         }
-                                        catch (Exception ex)
-                                        {
-                                            VEH.eliminarTransaccionPendiente();
-                                            return "Error en el envío del correo: " + ex.Message;
-                                        }
-
+                                        
 
                                     }
                                 }
@@ -200,7 +202,15 @@ namespace PronacaPlugin
                                 {
                                     //************************************************NOTIFICACION POR CORREO *****************************************************
                                     banderaCamaras = false;
-                                    return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                    if (contadorCamarasBascula == 0)
+                                    {
+                                        contadorCamarasBascula += 1;
+                                        return "Porfavor revisar que la báscula escogida para la transacción sea la correcta";   
+                                    }
+                                    else
+                                    {
+                                        return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                    }
                                 }
 
                             }
@@ -208,14 +218,14 @@ namespace PronacaPlugin
                         }
                         else
                         {
-                            return "El peso obtenido no es igual al peso actual, vuelva a obtener el peso porfavor";
+                            return "El peso obtenido no es igual al peso actual en la báscula, vuelva a obtener el peso porfavor";
                         }
 
                     }
                     // si el chofer no Timbro o excedio el tiempo predeterminado(10 minutos) 
                     else
                     {
-                        return "El Chofer no ha Timbrado en el Biometrico. Recuerde tener abierto el software del Biometrico y que el Tiempo de espera son de " + T_Chofer + " Minutos";
+                        return "El Chofer no ha Timbrado en el Biometrico. El Tiempo de espera son de " + T_Chofer + " Minutos";
                     }
                 }
                 // FIN DEL FILTRO BIOMETRICO- CHOFER
@@ -240,6 +250,7 @@ namespace PronacaPlugin
             VEH.InsertarPesosObtenidos(pesosObtenidos, N_Transaccion);
             pesosObtenidos.Clear();
             banderaTransaccionEnviada = false;
+            contadorCamarasBascula = 0;
 
         }
         public override string TransactionCompleting(int nScaleId, TransactionModel myTransaction)
@@ -294,13 +305,29 @@ namespace PronacaPlugin
                                     }
                                     else
                                     {
-                                        return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                        if (contadorCamarasBascula == 0)
+                                        {
+                                            contadorCamarasBascula += 1;
+                                            return "Porfavor revisar que la báscula escogida para la transacción sea la correcta";    
+                                        }
+                                        else
+                                        {
+                                            return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                        }
                                     }
                                 }
                                 else
                                 {
                                     banderaCamaras = false;
-                                    return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                    if (contadorCamarasBascula == 0)
+                                    {
+                                        contadorCamarasBascula += 1;
+                                        return "Porfavor revisar que la báscula escogida para la transacción sea la correcta";   
+                                    }
+                                    else
+                                    {
+                                        return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                    }
                                 }
 
                             }
@@ -330,6 +357,7 @@ namespace PronacaPlugin
             VEH.InsertarPesosObtenidos(pesosObtenidos, N_Transaccion);
             pesosObtenidos.Clear();
             banderaTransaccionEnviada = false;
+            contadorCamarasBascula = 0;
         }
         public override void ScaleAboveThreshold(ScaleAboveThresholdEventArgs myEventArgs)
         {
@@ -359,7 +387,6 @@ namespace PronacaPlugin
                 viewModel.CustomWindowTitle = titulo;
                 viewModel.DisplayText = texto;
                 viewModel.WatermarkValue = cajaTexto;
-                //viewModel.DialogResult = false;
                 viewModel.YesButtonText = "OK";
                 viewModel.NoButtonText = "Cancel";
                 Application.Current?.Dispatcher.Invoke(() =>
@@ -500,9 +527,8 @@ namespace PronacaPlugin
                 case "4":
                     msj_recibido = rec_mensaje[1];
                     Numeral_recibido = "4";
-                    banderaTransaccionEnviada = true;
                     //ventanaOK("¡Pesaje Entrada Visitante exitoso!", "DataBridge Plugin");
-                    return rec_mensaje[1];
+                    return "¡Transacción sin turno en Aries!";
                 case "5":
                     // Error del factor de conversion(aborta el pesaje)
                     return rec_mensaje[1];
@@ -549,8 +575,7 @@ namespace PronacaPlugin
                         
                         msj_recibido = rec_mensaje[1];
                         Numeral_recibido = "4";
-                        banderaTransaccionEnviada = true;
-                        return rec_mensaje[1];
+                        return "¡Transacción sin turno en Aries!";
                     case "5":
                         // Error del factor de conversion(aborta el pesaje)
                         return rec_mensaje[1];

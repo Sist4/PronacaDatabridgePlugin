@@ -927,28 +927,20 @@ namespace PronacaPlugin
             }
         }
 
-        public void detenerSecuencia()
+        public void detenerSecuencia(string operador,string razon,int bascula,string pesoObtenido,string pesoBascula)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-
-            //***********************************************************FIN DEL APP CONFIG
-            string consulta2;
-            try
+            using (var Conn = new SqlConnection(Conexion_Bd))
             {
-                consulta2 = "DELETE FROM [dbo].[Tb_Vehiculos] WHERE Veh_Estado='IP';";
-
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta2, ConexionSql);
-                consulta2 = Convert.ToString(Comando_Sql.ExecuteNonQuery());
-                ConexionSql.Close();
-            }
-            finally
-            {
-
-                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
+                Conn.Open();
+                using (var command = new SqlCommand("INSERT INTO[dbo].[Secuencia] VALUES(GETDATE(),@operador,@razon,@bascula,@pesoObtenido,@pesoBascula)", Conn))
                 {
-                    ConexionSql.Close();
+                    command.Parameters.Add(new SqlParameter("@operador", operador));
+                    command.Parameters.Add(new SqlParameter("@razon", razon));
+                    command.Parameters.Add(new SqlParameter("@bascula", bascula));
+                    command.Parameters.Add(new SqlParameter("@pesoObtenido", pesoObtenido));
+                    command.Parameters.Add(new SqlParameter("@pesoBascula", pesoBascula));
+                    int rowsAdded = command.ExecuteNonQuery();
                 }
             }
         }
