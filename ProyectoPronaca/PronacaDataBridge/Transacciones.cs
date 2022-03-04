@@ -160,7 +160,7 @@ namespace PronacaPlugin
                             {
                                 //si el vehiculo anteriormente se registro un pin el operador ya debio haber registrado 
                                 ventanaOK("Se envió un email al coordinador con un PIN para terminar la transacción de entrada ", "DataBridge Plugin");
-                                string Nota = ventanaIngresoDato("Ingrese el PIN ", "DataBridge Plugin", "PIN");
+                                string Nota = ventanaImput("Ingrese el PIN ", "DataBridge Plugin", "PIN");
                                 if (Ping_Ingreso.Equals(Nota))
                                 {
                                     //************************************************COMUNICACION CON EL ARIES *****************************************************
@@ -181,41 +181,39 @@ namespace PronacaPlugin
                                     banderaCamaras = true;
                                     //si la respuesta es positiva de cualquiera de las dos camaras
                                     ///BUSCAMOS EN LA RUTA DEL FTP SI LOS DEVUELVE EN BLANCO ES Q SI ENCONTRO LA FOTO
-                                    if (VEH.listarFTP(vehiculo, nScaleId).Equals(""))
-                                    {
-                                        //************************************************COMUNICACION CON EL ARIES *****************************************************
-                                        //    ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
-                                        return AriesEntrada(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
-                                        //return "";
-                                    }
-                                    else
-                                    {
-                                        //************************************************NOTIFICACION POR CORREO ****************************************************
-                                        if(contadorCamarasBascula == 0)
+                                        if (VEH.listarFTP(vehiculo, nScaleId).Equals(""))
                                         {
-                                            contadorCamarasBascula += 1;
-                                            return "Porfavor revisar que la báscula escogida para la transacción sea la correcta";  
+                                            //************************************************COMUNICACION CON EL ARIES *****************************************************
+                                            //    ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
+                                            return AriesEntrada(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
+                                            //return "";
                                         }
                                         else
                                         {
-                                            return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
-                                        }
-                                        
-
+                                        //************************************************NOTIFICACION POR CORREO **************************************************
+                                            if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
+                                            {
+                                                 return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                            }
+                                             else
+                                            {
+                                                 return "Porfavor seleccione la báscula correcta y continue la transacción";
+                                            }
                                     }
+                                    
+
+                                    
                                 }
                                 else
                                 {
-                                    //************************************************NOTIFICACION POR CORREO *****************************************************
-                                    banderaCamaras = false;
-                                    if (contadorCamarasBascula == 0)
+                                    //************************************************NOTIFICACION POR CORREO *****************************************************   
+                                    if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
                                     {
-                                        contadorCamarasBascula += 1;
-                                        return "Porfavor revisar que la báscula escogida para la transacción sea la correcta";   
+                                        return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
                                     }
                                     else
                                     {
-                                        return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                        return "Porfavor seleccione la báscula correcta y continue la transacción";
                                     }
                                 }
 
@@ -284,7 +282,7 @@ namespace PronacaPlugin
                             string Ping_Salida = VEH.consulta_PinSalida(N_Transaccion);
                             if (Ping_Salida != "")
                             {
-                                string Nota = ventanaIngresoDato("Ingrese el PIN:", "DataBridge Plugin", "PIN");
+                                string Nota = ventanaImput("Ingrese el PIN:", "DataBridge Plugin", "PIN");
                                 if (Ping_Salida.Equals(Nota))
                                 {
                                     String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), vehiculo, chofer, "", Peso_Salida, N_Transaccion, "", "", "", "", "", "SC", "", "");
@@ -302,7 +300,8 @@ namespace PronacaPlugin
                                 if (ComunicacionCamaras(myTransaction, nScaleId) == true)
                                 {
                                     banderaCamaras = true;
-                                    if (VEH.listarFTP(vehiculo,nScaleId).Equals(""))
+                                    
+                                    if (VEH.listarFTP(vehiculo, nScaleId).Equals(""))
                                     {
                                         String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), vehiculo, chofer, "", Peso_Salida, N_Transaccion, "", "", "", "", "", "SC", "", "");
 
@@ -312,28 +311,26 @@ namespace PronacaPlugin
                                     }
                                     else
                                     {
-                                        if (contadorCamarasBascula == 0)
-                                        {
-                                            contadorCamarasBascula += 1;
-                                            return "Porfavor revisar que la báscula escogida para la transacción sea la correcta";    
-                                        }
-                                        else
+                                        if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
                                         {
                                             return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
                                         }
-                                    }
+                                        else
+                                        {
+                                            return "Porfavor seleccione la báscula correcta y continue la transacción";
+                                        }
+                                            
+                                    }    
                                 }
                                 else
                                 {
-                                    banderaCamaras = false;
-                                    if (contadorCamarasBascula == 0)
+                                    if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
                                     {
-                                        contadorCamarasBascula += 1;
-                                        return "Porfavor revisar que la báscula escogida para la transacción sea la correcta";   
+                                        return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
                                     }
                                     else
                                     {
-                                        return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                        return "Porfavor seleccione la báscula correcta y continue la transacción";
                                     }
                                 }
 
@@ -383,7 +380,11 @@ namespace PronacaPlugin
         public override void IOStopped(int nScaleId, IOStoppedEventArgs args)
         {
 
-            string razon=ventanaIngresoDato("¡Se detuvo la secuencia!", "DataBridge Plugin", "ingrese la Razón");
+            string razon = "";
+            do
+            {
+                razon = ventanaImput("¡Se detuvo la secuencia!", "DataBridge Plugin", "ingrese la Razón");
+            } while (razon == "");
             VEH.detenerSecuencia(operador, razon, nScaleId, pesosObtenidos[0].ToString(),pesoActualBascula[nScaleId].ToString()) ;
             NotificacionCorreoSecuencia(operador, razon, nScaleId);
         }
@@ -394,7 +395,7 @@ namespace PronacaPlugin
         #endregion
 
         #region Métodos privados
-        private string ventanaIngresoDato(String texto,String titulo,String cajaTexto)
+        private string ventanaImput(String texto,String titulo,String cajaTexto)
         {
             try
             {
@@ -446,6 +447,29 @@ namespace PronacaPlugin
             {
                 ServiceManager.LogMgr.WriteError("Error", ex);
             }
+        }
+        private bool ventanaOKCancel(string texto, String titulo)
+        {
+            bool? bResult = null;
+            bool actualBool = false;
+            try
+            {
+                IWindowManager windowManager = ServiceLocator.GetKernel().Get<IWindowManager>();
+                CustomOkCancelDialogViewModel viewModel = new CustomOkCancelDialogViewModel(texto);
+                viewModel.CustomWindowTitle = titulo;
+                viewModel.OkButtonText = "SI";
+                viewModel.CancelButtonText = "NO";
+                Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    bResult = windowManager.ShowDialog(viewModel);
+                });
+            }
+            catch (Exception ex)
+            {
+                ServiceManager.LogMgr.WriteError("Error", ex);
+            }
+            actualBool = bResult.GetValueOrDefault();
+            return actualBool;
         }
 
         private string ObtenerImagen(string Placa,string Nom_Camara, PingReply estado)

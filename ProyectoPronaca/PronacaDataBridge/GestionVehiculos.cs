@@ -41,6 +41,7 @@ namespace PronacaPlugin
             string Correo_Pasword = cfg.AppSettings.Settings["Correo_Pasword"].Value;
             string Host_Salida = cfg.AppSettings.Settings["Host_Salida"].Value;
             string Host_Puerto = cfg.AppSettings.Settings["Host_Puerto"].Value;
+            bool ssl = Boolean.Parse(cfg.AppSettings.Settings["SSL"].Value);
 
             //***********************************************************FIN DEL APP CONFIG
 
@@ -66,7 +67,7 @@ namespace PronacaPlugin
                 {
                     smtp.UseDefaultCredentials = false;
                     smtp.Credentials = new NetworkCredential(Correo_Envio, Correo_Pasword);
-                    smtp.EnableSsl = false; //pronaca en false
+                    smtp.EnableSsl = ssl; //pronaca en false
                                            // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
                     try {
                         smtp.Send(mail);
