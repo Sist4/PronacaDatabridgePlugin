@@ -945,6 +945,60 @@ namespace PronacaPlugin
             }
         }
 
+        public string EnvioCorreoSecuenciaDetenida(string razon, string operador, string ruta_Imagen1, string ruta_Imagen2)
+        {
+            //*************************************************************APP CONFIG
+            string Correo_Destino = cfg.AppSettings.Settings["Correo_Destino"].Value;
+            string Correo_Destino2 = cfg.AppSettings.Settings["Correo_Destino2"].Value;
+            string Correo_Envio = cfg.AppSettings.Settings["Correo_Envio"].Value;
+            string Correo_Pasword = cfg.AppSettings.Settings["Correo_Pasword"].Value;
+            string Host_Salida = cfg.AppSettings.Settings["Host_Salida"].Value;
+            string Host_Puerto = cfg.AppSettings.Settings["Host_Puerto"].Value;
+
+            //***********************************************************FIN DEL APP CONFIG
+
+            using (MailMessage mail = new MailMessage())
+            {
+                mail.From = new MailAddress(Correo_Envio);
+                mail.To.Add(Correo_Destino);
+                mail.To.Add(Correo_Destino2);
+                mail.Subject = "DataBridge - Sistema de Pesaje - ";
+                mail.Body = "<h1>Notificacion</h1></br><p>El día" + DateTime.Now.ToString() + " fue detenida la secuencia, por la razón: " + razon + " por el operador: " +operador+".</p>";
+
+
+                mail.IsBodyHtml = true;
+                if (ruta_Imagen1 != (""))
+                {
+                    mail.Attachments.Add(new Attachment(@"C:\Camara_DataBridge\" + ruta_Imagen1 + ".jpg"));
+                }
+                if (ruta_Imagen2 != (""))
+                {
+                    mail.Attachments.Add(new Attachment(@"C:\Camara_DataBridge\" + ruta_Imagen2 + ".jpg"));
+                }
+                using (SmtpClient smtp = new SmtpClient(Host_Salida, Convert.ToInt32(Host_Puerto)))
+                {
+                    smtp.UseDefaultCredentials = false;
+                    smtp.Credentials = new NetworkCredential(Correo_Envio, Correo_Pasword);
+                    smtp.EnableSsl = false; //pronaca en false
+                                            // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
+                    try
+                    {
+                        smtp.Send(mail);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw;
+                    }
+
+                }
+                //// fin del proyecto
+                return "";
+
+            }
+        }
+
+
+
         #endregion
 
 

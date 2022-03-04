@@ -42,6 +42,8 @@ namespace PronacaPlugin
         string estado;
         string msj_recibido;
         string Numeral_recibido;
+        string operador;
+        string vehiculo;
         GestionVehiculos VEH;
         bool banderaTransaccionEnviada;
         int contadorCamarasBascula;
@@ -50,6 +52,7 @@ namespace PronacaPlugin
         UriBuilder uri;
         string path;
         Configuration cfg;
+        TransactionProcessor myTransactionProcessor;
         //Constructor por defecto
         public Transacciones()
         {
@@ -64,6 +67,8 @@ namespace PronacaPlugin
             pesosObtenidos = new ArrayList();
             banderaTransaccionEnviada = false;
             contadorCamarasBascula = 0;
+            operador = "";
+            vehiculo = "";
         }
 
         #region Propiedades
@@ -125,6 +130,7 @@ namespace PronacaPlugin
             string T_Chofer = cfg.AppSettings.Settings["T_Chofer"].Value; //tiempo que tiene el chofer para timbrar en el biometrico
             string chofer = myTransaction.Loads[0].Driver.Name; //cédula del chofer que conduce el vehículo 
             string vehiculo = myTransaction.Loads[0].Vehicle.Name; //la placa del vehículo
+            operador = myTransaction.Loads[0].Pass1Operator;
             estado = "entrada";
             if(banderaTransaccionEnviada==true)
             {
@@ -255,12 +261,13 @@ namespace PronacaPlugin
         }
         public override string TransactionCompleting(int nScaleId, TransactionModel myTransaction)
         {
-           string  vehiculo = myTransaction.Loads[0].Vehicle.Name;
+           vehiculo = myTransaction.Loads[0].Vehicle.Name;
            string Peso_Salida = myTransaction.Loads[0].Pass2Weight.ToString();
            string chofer = myTransaction.Loads[0].Driver.Name.ToString();
            string N_Transaccion = myTransaction.Loads[0].TransactionNumber; 
            string T_pesaje = VEH.consulta_TipoIngreso(N_Transaccion);
            string T_Chofer = cfg.AppSettings.Settings["T_Chofer"].Value;
+            operador = myTransaction.Loads[0].Pass2Operator;
             estado = "salida";
             if(banderaTransaccionEnviada==true)
             {
@@ -372,6 +379,17 @@ namespace PronacaPlugin
         {
             //ventanaOK("se tomo el peso: " + myScaleWeightData.MainWeightData.GrossWeightValue,"ventana peso tomado");
             pesosObtenidos.Add(myScaleWeightData.MainWeightData.GrossWeightValue.ToString());
+        }
+        public override void IOStopped(int nScaleId, IOStoppedEventArgs args)
+        {
+
+            string razon=ventanaIngresoDato("¡Se detuvo la secuencia!", "DataBridge Plugin", "ingrese la Razón");
+            VEH.detenerSecuencia(operador, razon, nScaleId, pesosObtenidos[0].ToString(),pesoActualBascula[nScaleId].ToString()) ;
+            NotificacionCorreoSecuencia(operador, razon, nScaleId);
+        }
+        public override void InputsSignaled(int nScaleId, InputsSignaledEventArgs args)
+        {
+
         }
         #endregion
 
@@ -714,6 +732,40 @@ namespace PronacaPlugin
                 }
 
             }
+        }
+
+        private void NotificacionCorreoSecuencia(string razon, string operador,int bascula)
+        {
+            string nom_Camara1;
+            string nom_Camara2;
+            string IP_Camara1;
+            string IP_Camara2;
+            PingReply RespuestaPingCamara1;
+            PingReply RespuestaPingCamara2;
+            int iTiempoEspera = 500;
+            Ping HacerPing = new Ping();
+            if (bascula==0)
+            {
+                nom_Camara1 = cfg.AppSettings.Settings["Nom_Camara1"].Value;
+                nom_Camara2 = cfg.AppSettings.Settings["Nom_Camara2"].Value;
+                IP_Camara1 = cfg.AppSettings.Settings["IP_Camara1"].Value;
+                IP_Camara2 = cfg.AppSettings.Settings["IP_Camara2"].Value;
+                RespuestaPingCamara1 = HacerPing.Send(IP_Camara1, iTiempoEspera);
+                RespuestaPingCamara2 = HacerPing.Send(IP_Camara2, iTiempoEspera);
+            }
+            else
+            {
+                nom_Camara1 = cfg.AppSettings.Settings["Nom_Camara3"].Value;
+                nom_Camara2 = cfg.AppSettings.Settings["Nom_Camara4"].Value;
+                IP_Camara1 = cfg.AppSettings.Settings["IP_Camara3"].Value;
+                IP_Camara2 = cfg.AppSettings.Settings["IP_Camara4"].Value;
+                RespuestaPingCamara1 = HacerPing.Send(IP_Camara1, iTiempoEspera);
+                RespuestaPingCamara2 = HacerPing.Send(IP_Camara2, iTiempoEspera);
+            }
+            
+            string Obtener_ruta1 = ObtenerImagen(vehiculo, nom_Camara1, RespuestaPingCamara1);
+            string Obtener_ruta2 = ObtenerImagen(vehiculo, nom_Camara2, RespuestaPingCamara2);
+            VEH.EnvioCorreoSecuenciaDetenida(razon, operador, Obtener_ruta1, Obtener_ruta2);
         }
 
         private void SetPesoActual(ref double peso, int nScaleId)
