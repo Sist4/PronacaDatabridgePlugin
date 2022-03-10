@@ -44,6 +44,7 @@ namespace PronacaPlugin
         string Numeral_recibido;
         string operador;
         string vehiculo;
+        string pesoObtenido;
         GestionVehiculos VEH;
         bool banderaTransaccionEnviada;
         int contadorCamarasBascula;
@@ -53,6 +54,7 @@ namespace PronacaPlugin
         string path;
         Configuration cfg;
         TransactionProcessor myTransactionProcessor;
+        Aplicacion aplicacion;
         //Constructor por defecto
         public Transacciones()
         {
@@ -67,8 +69,10 @@ namespace PronacaPlugin
             pesosObtenidos = new ArrayList();
             banderaTransaccionEnviada = false;
             contadorCamarasBascula = 0;
-            operador = "";
+            operador = "PUE1";
             vehiculo = "";
+            pesoObtenido = "N/A";
+            aplicacion = new Aplicacion();
         }
 
         #region Propiedades
@@ -131,6 +135,7 @@ namespace PronacaPlugin
             string chofer = myTransaction.Loads[0].Driver.Name; //cédula del chofer que conduce el vehículo 
             string vehiculo = myTransaction.Loads[0].Vehicle.Name; //la placa del vehículo
             operador = myTransaction.Loads[0].Pass1Operator;
+            pesoObtenido = myTransaction.Loads[0].GrossWeight.ToString();
             estado = "entrada";
             if(banderaTransaccionEnviada==true)
             {
@@ -255,6 +260,7 @@ namespace PronacaPlugin
             pesosObtenidos.Clear();
             banderaTransaccionEnviada = false;
             contadorCamarasBascula = 0;
+            pesoObtenido = "N/A";
 
         }
         public override string TransactionCompleting(int nScaleId, TransactionModel myTransaction)
@@ -266,6 +272,7 @@ namespace PronacaPlugin
            string T_pesaje = VEH.consulta_TipoIngreso(N_Transaccion);
            string T_Chofer = cfg.AppSettings.Settings["T_Chofer"].Value;
             operador = myTransaction.Loads[0].Pass2Operator;
+            pesoObtenido = myTransaction.Loads[0].GrossWeight.ToString();
             estado = "salida";
             if(banderaTransaccionEnviada==true)
             {
@@ -362,6 +369,7 @@ namespace PronacaPlugin
             pesosObtenidos.Clear();
             banderaTransaccionEnviada = false;
             contadorCamarasBascula = 0;
+            pesoObtenido = "N/A";
         }
         public override void ScaleAboveThreshold(ScaleAboveThresholdEventArgs myEventArgs)
         {
@@ -379,14 +387,14 @@ namespace PronacaPlugin
         }
         public override void IOStopped(int nScaleId, IOStoppedEventArgs args)
         {
-
+            double peso = pesoActualBascula[nScaleId];
             string razon = "";
             do
             {
                 razon = ventanaImput("¡Se detuvo la secuencia!", "DataBridge Plugin", "ingrese la Razón");
             } while (razon == "");
-            VEH.detenerSecuencia(operador, razon, nScaleId, pesosObtenidos[0].ToString(),pesoActualBascula[nScaleId].ToString()) ;
-            NotificacionCorreoSecuencia(operador, razon, nScaleId);
+            VEH.detenerSecuencia(operador, razon, nScaleId,pesoObtenido,peso.ToString()) ;
+            NotificacionCorreoSecuencia(razon,operador, nScaleId,pesoObtenido,peso.ToString());
         }
         public override void InputsSignaled(int nScaleId, InputsSignaledEventArgs args)
         {
@@ -576,7 +584,7 @@ namespace PronacaPlugin
                     return rec_mensaje[1];
 
                 default:
-                    return "Sin respuesta de Aries en la transacción de entrada. Presione el botón Aceptar e intente denuevo";
+                    return "Sin respuesta de Aries en la transacción de entrada. Presione el botón Aceptar e intente denuevo.";
                     //  break;
             }
         }
@@ -623,7 +631,7 @@ namespace PronacaPlugin
                         return rec_mensaje[1];
 
                     default:
-                        return "Sin respuesta de Aries en la transacción de salida. Presione el botón Aceptar e intente denuevo"; 
+                        return "Sin respuesta de Aries en la transacción de salida. Presione el botón Completar e intente denuevo"; 
                         //  break;
                 }
             }
@@ -758,7 +766,7 @@ namespace PronacaPlugin
             }
         }
 
-        private void NotificacionCorreoSecuencia(string razon, string operador,int bascula)
+        private void NotificacionCorreoSecuencia(string razon, string operador,int bascula,string pesoObtenido,string pesoBascula)
         {
             string nom_Camara1;
             string nom_Camara2;
@@ -789,7 +797,9 @@ namespace PronacaPlugin
             
             string Obtener_ruta1 = ObtenerImagen(vehiculo, nom_Camara1, RespuestaPingCamara1);
             string Obtener_ruta2 = ObtenerImagen(vehiculo, nom_Camara2, RespuestaPingCamara2);
-            VEH.EnvioCorreoSecuenciaDetenida(razon, operador, Obtener_ruta1, Obtener_ruta2);
+            VEH.escribirImagen(Obtener_ruta1,pesoBascula);
+            VEH.escribirImagen(Obtener_ruta2, pesoBascula);
+            VEH.EnvioCorreoSecuenciaDetenida(razon, operador, Obtener_ruta1, Obtener_ruta2,pesoObtenido,pesoBascula);
         }
 
         private void SetPesoActual(ref double peso, int nScaleId)

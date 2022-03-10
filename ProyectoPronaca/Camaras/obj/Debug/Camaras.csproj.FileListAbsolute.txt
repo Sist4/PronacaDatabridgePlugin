@@ -36,4 +36,3 @@ C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\b
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.CoreCompileInputs.cache
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.dll
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.pdb
-C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.AssemblyReference.cache

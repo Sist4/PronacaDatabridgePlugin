@@ -15,6 +15,7 @@ using Renci.SshNet;
 using System.Xml;
 using System.Diagnostics;
 using System.Collections;
+using System.Drawing;
 
 namespace PronacaPlugin
 {
@@ -633,7 +634,9 @@ namespace PronacaPlugin
                 string res = G_Msg(codificiacionMsj, "A", N_Transaccion);
 
                 Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
+               // Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
                 System.Threading.Thread.Sleep(3000);
+               // G_Msg2();
                 //CONSULTA DE DATOS
                 int Codigo = 0;
                 int Transaccion;
@@ -848,6 +851,80 @@ namespace PronacaPlugin
 
             return consulta;
         }
+
+        //private void G_Msg2()
+        //{
+        //    //*************************************************************APP CONFIG
+
+        //    //string Conexion_Bd = @"Data Source=7s1-databridge;Initial Catalog=DBVehiculos;user id=DataBridgeUser;password=Pronaca2021";
+        //    //string Conexion_Bd = @"Data Source=.\SQL;Initial Catalog=DBVehiculos;Integrated Security=True";
+        //    string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+        //    //***********************************************************FIN DEL APP CONFIG
+        //    string consulta;
+
+        //    int Codigo = 0;
+        //    int Transaccion;
+        //    string mensaje_V = "";
+        //    string mensaje_R;
+
+        //    using (SqlConnection connection = new SqlConnection(Conexion_Bd))
+        //    {
+
+
+        //        String sql = "SELECT top 10 * FROM Temporal where Tem_Estado = 'A'";
+
+        //        using (SqlCommand command = new SqlCommand(sql, connection))
+        //        {
+        //            connection.Open();
+        //            using (SqlDataReader reader = command.ExecuteReader())
+        //            {
+        //                while (reader.Read())
+        //                {
+        //                    Codigo = Convert.ToInt32(reader.GetInt32(0));
+        //                    Transaccion = Convert.ToInt32(reader.GetInt32(1));
+        //                    mensaje_V = reader.GetString(2);
+        //                }
+        //            }
+        //            connection.Close();
+        //        }
+        //    }
+        //    if (Codigo.Equals(0))
+        //    {
+
+        //    }
+        //    else
+        //    {
+        //        ///PROCESAMOS EL MESNAJE
+        //        WsRp3.ImportacionPesosAriesPortClient servicioPortClient = new WsRp3.ImportacionPesosAriesPortClient();
+        //        WsRp3.validarPeso sendBalanceData = new WsRp3.validarPeso();
+        //        servicioPortClient.ClientCredentials.UserName.UserName = @"data_bridge_test";
+        //        servicioPortClient.ClientCredentials.UserName.Password = @"UGVzMHNENHQ0QnIxZGczUHIwbmFjYSQ";
+        //        sendBalanceData.xmlFileBase64 = mensaje_V; //"PG5zMTpHZXNJbXBQZXNBciB4bWxuczpuczE9Imh0dHA6Ly9sbi5nZXNhbG0uaW50ZWdyYWNpb24ucHJvbmFjYS5jb20uZWMiPjxDb250cm9sUHJvY2Vzbz48Q29kaWdvQ29tcGFuaWE+MDAyPC9Db2RpZ29Db21wYW5pYT48Q29kaWdvU2lzdGVtYT5EQjwvQ29kaWdvU2lzdGVtYT48Q29kaWdvU2VydmljaW8+VmFsaWRhUGVzb3NEQjwvQ29kaWdvU2VydmljaW8+PFByb2Nlc28+SW5zZXJ0YXIvVmFsaWRhcjwvUHJvY2Vzbz48UmVzdWx0YWRvPjwvUmVzdWx0YWRvPjwvQ29udHJvbFByb2Nlc28+PENhYmVjZXJhPjxUaWNrZXREYXRhQnJpZGdlPjk5OTwvVGlja2V0RGF0YUJyaWRnZT48RmVjaGFUaWNrZXRQcm9jZXNvPjEwLzEwLzIwMjE8L0ZlY2hhVGlja2V0UHJvY2Vzbz48SG9yYVRpY2tldFByb2Nlc28+MTA6MDA6MDA8L0hvcmFUaWNrZXRQcm9jZXNvPjxVc3VhcmlvRGF0YUJyaWRnZT5Db25maWd1cmFkb3I8L1VzdWFyaW9EYXRhQnJpZGdlPjxOdW1lcm9CYXNjdWxhPjE8L051bWVyb0Jhc2N1bGE+PFRpcG9QZXNvPkU8L1RpcG9QZXNvPjxQZXNvVGlja2V0RGF0YUJyaWRnZT41NjAwMDwvUGVzb1RpY2tldERhdGFCcmlkZ2U+PFBsYWNhVmVoaWN1bG8+QUFBOTk5PC9QbGFjYVZlaGljdWxvPjxDZWR1bGFUcmFuc3BvcnRpc3RhPjE3NTE1OTU1NDU8L0NlZHVsYVRyYW5zcG9ydGlzdGE+PE5vbWJyZVRyYW5zcG9ydGlzdGE+QW5nZWwgQXVjYW5jZWxhPC9Ob21icmVUcmFuc3BvcnRpc3RhPjxDb2RDZW50cm9Bcmllcz48L0NvZENlbnRyb0FyaWVzPjxUaWNrZXRBcmllcz4gPC9UaWNrZXRBcmllcz48Q2VkVXN1YXJpb0FyaWVzPiA8L0NlZFVzdWFyaW9Bcmllcz48Tm9tVXN1YXJpb0FyaWVzPiA8L05vbVVzdWFyaW9Bcmllcz48RXN0YXR1c0FyaWVzPjE8L0VzdGF0dXNBcmllcz48TWVuc2FqZUFyaWVzPkVudmlhZG88L01lbnNhamVBcmllcz48L0NhYmVjZXJhPjwvbnMxOkdlc0ltcFBlc0FyPg==";
+
+        //        WsRp3.validarPesoResponse response = servicioPortClient.ImportacionPesosAries(sendBalanceData);
+        //        string XmlRespuesta = response.validarPesoResult;
+        //        ///gUARDAMOS EL MESNAJE PROCESADO
+        //        ///
+
+
+        //        consulta = "UPDATE TEMPORAL SET [Temp_MensajeRecibido]='" + XmlRespuesta + "', [Tem_Estado] ='Procesado' where Tem_Codigo='" + Codigo + "' ";
+
+        //        SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
+        //        ConexionSql.Open();
+        //        SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
+        //        consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
+        //        ConexionSql.Close();
+
+
+        //        //   MessageBox.Show(XmlRespuesta);
+
+        //    }
+
+
+
+
+
+        //}
         public void InsertarPesosObtenidos(ArrayList pesosObtenidos,string transaccion)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
@@ -946,7 +1023,7 @@ namespace PronacaPlugin
             }
         }
 
-        public string EnvioCorreoSecuenciaDetenida(string razon, string operador, string ruta_Imagen1, string ruta_Imagen2)
+        public string EnvioCorreoSecuenciaDetenida(string razon, string operador, string ruta_Imagen1, string ruta_Imagen2,string pesoObtenido,string pesoBascula)
         {
             //*************************************************************APP CONFIG
             string Correo_Destino = cfg.AppSettings.Settings["Correo_Destino"].Value;
@@ -955,6 +1032,7 @@ namespace PronacaPlugin
             string Correo_Pasword = cfg.AppSettings.Settings["Correo_Pasword"].Value;
             string Host_Salida = cfg.AppSettings.Settings["Host_Salida"].Value;
             string Host_Puerto = cfg.AppSettings.Settings["Host_Puerto"].Value;
+            bool ssl = Boolean.Parse(cfg.AppSettings.Settings["SSL"].Value);
 
             //***********************************************************FIN DEL APP CONFIG
 
@@ -964,10 +1042,9 @@ namespace PronacaPlugin
                 mail.To.Add(Correo_Destino);
                 mail.To.Add(Correo_Destino2);
                 mail.Subject = "DataBridge - Sistema de Pesaje - ";
-                mail.Body = "<h1>Notificacion</h1></br><p>El día" + DateTime.Now.ToString() + " fue detenida la secuencia, por la razón: " + razon + " por el operador: " +operador+".</p>";
-
-
-                mail.IsBodyHtml = true;
+               // mail.Body = "<h1>Notificacion</h1></br><p>El día " + DateTime.Now.ToString() + " fue detenida la secuencia, por la razón: " + razon + " por el operador: " +operador+".</p>";
+                mail.Body = "<h1>Notificacion</h1><p> Se ha detenido la secuencia de pesaje en DataBridge.</p><table><tr><td>Fecha:</td><td>"+ DateTime.Now.ToString() + "</td></tr><tr><td>Razón:</td><td>"+razon +"</td></tr><tr><td>Operador:</td><td>"+operador+"</td></tr><tr><td>Peso obtenido:</td><td>"+pesoObtenido+"</td></tr><tr><td>Peso en báscula:</td><td>"+pesoBascula+"</td></tr></table>";
+                 mail.IsBodyHtml = true;
                 if (ruta_Imagen1 != (""))
                 {
                     mail.Attachments.Add(new Attachment(@"C:\Camara_DataBridge\" + ruta_Imagen1 + ".jpg"));
@@ -980,7 +1057,7 @@ namespace PronacaPlugin
                 {
                     smtp.UseDefaultCredentials = false;
                     smtp.Credentials = new NetworkCredential(Correo_Envio, Correo_Pasword);
-                    smtp.EnableSsl = false; //pronaca en false
+                    smtp.EnableSsl = ssl; //pronaca en false
                                             // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
                     try
                     {
@@ -997,7 +1074,30 @@ namespace PronacaPlugin
 
             }
         }
+        public void escribirImagen(string ruta, string pesoBascula)
+        {
+            var filePath = @"C:\Camara_DataBridge\" + ruta + ".jpg";
+            Bitmap bitmap = null;
 
+            // Create from a stream so we don't keep a lock on the file.
+            using (var stream = File.OpenRead(filePath))
+            {
+                bitmap = (Bitmap)Bitmap.FromStream(stream);
+            }
+
+            using (bitmap)
+            using (var graphics = Graphics.FromImage(bitmap))
+            using (var font = new Font("Arial", 18, FontStyle.Regular))
+            {
+                // Do what you want using the Graphics object here.
+                //graphics.DrawString("Fecha: 08-03-2022", font, Brushes.Red, 0, 650);
+                //graphics.DrawString("Placa: ABCD1234", font, Brushes.Red, 0, 670);
+                graphics.DrawString("Peso en báscula: "+pesoBascula, font, Brushes.Red, 0, 520);
+
+                // Important part!
+                bitmap.Save(filePath);
+            }
+        }
 
 
         #endregion
