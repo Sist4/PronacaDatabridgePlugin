@@ -25,12 +25,22 @@ namespace PronacaPlugin
         UriBuilder uri;
         string path;
         Configuration cfg;
+        string cam1;
+        string cam2;
+        string cam3;
+        string cam4;
         public GestionVehiculos()
         {
             codeBase = Assembly.GetExecutingAssembly().CodeBase;
             uri = new UriBuilder(codeBase);
             path = Uri.UnescapeDataString(uri.Path);
             cfg = ConfigurationManager.OpenExeConfiguration(path);
+            cam1 = cfg.AppSettings.Settings["Nom_Camara1"].Value.Substring(0, 8);
+            cam1 = cfg.AppSettings.Settings["Nom_Camara1"].Value.Substring(0, 8);
+            cam2 = cfg.AppSettings.Settings["Nom_Camara2"].Value.Substring(0, 8);
+            cam3 = cfg.AppSettings.Settings["Nom_Camara3"].Value.Substring(0, 8);
+            cam4 = cfg.AppSettings.Settings["Nom_Camara4"].Value.Substring(0, 8);
+
         }
         #region Correo
         public string EnvioCorreo(string N_Transaccion, string codigo_transaccion, string placa_seleccionada, string ruta_Imagen1, string ruta_Imagen2)
@@ -44,7 +54,7 @@ namespace PronacaPlugin
             string Host_Puerto = cfg.AppSettings.Settings["Host_Puerto"].Value;
             bool ssl = Boolean.Parse(cfg.AppSettings.Settings["SSL"].Value);
 
-            //***********************************************************FIN DEL APP CONFIG
+            //***********************************************************FIN DEL APP CONFIG*****
 
             using (MailMessage mail = new MailMessage())
             {
@@ -69,15 +79,16 @@ namespace PronacaPlugin
                     smtp.UseDefaultCredentials = false;
                     smtp.Credentials = new NetworkCredential(Correo_Envio, Correo_Pasword);
                     smtp.EnableSsl = ssl; //pronaca en false
-                                           // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
-                    try {
+                                          // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
+                    try
+                    {
                         smtp.Send(mail);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
-                        throw;
+                        throw new ExcepcionNegocio("Error en el envío del correo");
                     }
-                    
+
                 }
                 //// fin del proyecto
                 return "";
@@ -160,7 +171,7 @@ namespace PronacaPlugin
                     string placa_con_cero = placa.Substring(0, 3) + "0" + placa.Substring(3, (placa.Length - 3));
                     placa_enviada = placa_enviada.Replace("-", "");
                     placa = placa.Replace("-", "");
-                    if (nScaleId == 0 && (sucursalBasculaCamaras.Equals("PBOCAM11") || sucursalBasculaCamaras.Equals("PBOCAM12")))
+                    if (nScaleId == 0 && (sucursalBasculaCamaras.Equals(cam1) || sucursalBasculaCamaras.Equals(cam2)))
                     {
                         if ((placa.Equals(placa_enviada) || placa_con_cero.Equals(placa_enviada)) && (hora_foto.CompareTo(Fecha_restada) >= 0 && hora_foto.CompareTo(Fecha_Actual) <= 0))
                         {
@@ -168,7 +179,7 @@ namespace PronacaPlugin
                             respuesta = "";
                         }
                     }
-                    else if (nScaleId == 1 && (sucursalBasculaCamaras.Equals("PBOCAM21") || sucursalBasculaCamaras.Equals("PBOCAM22")))
+                    else if (nScaleId == 1 && (sucursalBasculaCamaras.Equals(cam3) || sucursalBasculaCamaras.Equals(cam4)))
                     {
                         if ((placa.Equals(placa_enviada) || placa_con_cero.Equals(placa_enviada)) && (hora_foto.CompareTo(Fecha_restada) >= 0 && hora_foto.CompareTo(Fecha_Actual) <= 0))
                         {
@@ -429,7 +440,7 @@ namespace PronacaPlugin
 
         public string Gestion_Pesaje(String Veh_Bascula, String Veh_BasculaSalida, String Veh_Placa
         , String Veh_Chofer, String Veh_Peso_Ingreso, String Veh_Peso_Salida
-        , String Veh_Ticket, String Veh_PinEntrada, String Veh_PinSalida
+        , String Veh_Ticket,String Veh_PinEntrada, String Veh_PinSalida,String Veh_OperadorEntrada, String Veh_OperadorSalida
         , String Veh_RutaImgIng, String Veh_RutaImgSal, string pesosObtenidos,String Veh_Estado, string msj_recibido, string Numeral_recibido)
         {
             //*************************************************************APP CONFIG
@@ -443,7 +454,7 @@ namespace PronacaPlugin
             string consulta;
             try
             {
-                consulta = "EXECUTE P_TBVehiculos N'" + Veh_Bascula + "',N'" + Veh_BasculaSalida + "',N'" + Veh_Placa + "',N'" + Veh_Chofer + "',N'" + Veh_Peso_Ingreso + "',N'" + Veh_Peso_Salida + "',N'" + Veh_Ticket + "',N'" + Veh_PinEntrada + "',N'" + Veh_PinSalida + "',N'" + Veh_RutaImgIng + "',N'" + Veh_RutaImgSal + "',N'" +pesosObtenidos+"',N'"+ Veh_Estado + "',N'" + msj_recibido + "',N'" + Numeral_recibido + "',N''";
+                consulta = "EXECUTE P_TBVehiculos N'" + Veh_Bascula + "',N'" + Veh_BasculaSalida + "',N'" + Veh_Placa + "',N'" + Veh_Chofer + "',N'" + Veh_Peso_Ingreso + "',N'" + Veh_Peso_Salida + "',N'" + Veh_Ticket + "',N'" + Veh_PinEntrada + "',N'" + Veh_PinSalida + "',N'" +Veh_OperadorEntrada + "',N'" +Veh_OperadorSalida + "',N'" + Veh_RutaImgIng + "',N'" + Veh_RutaImgSal + "',N'" +pesosObtenidos+"',N'"+ Veh_Estado + "',N'" + msj_recibido + "',N'" + Numeral_recibido + "',N''";
 
                 SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
                 ConexionSql.Open();
@@ -583,7 +594,7 @@ namespace PronacaPlugin
             return Req;
         }
         public string InvokeService(string N_Transaccion, string FechaTicketProceso, string HoraTicketProceso, string UsuarioDataBridge, string NumeroBascula, string TipoPeso, string Peso_Ing,
-                                  string Vehiculo, string Cedula, string Chofer)
+                                  string Vehiculo, string Cedula, string Chofer,string centroTransaccion)
         {
 
             try
@@ -600,6 +611,10 @@ namespace PronacaPlugin
 
                 const string Comillas = "\"";
 
+                if(centroTransaccion.Equals(""))
+                {
+                    centroTransaccion = Centro;
+                }
 
                 string XmlEnvio = "<ns1:GesImpPesAr xmlns:ns1=" + Comillas + "http://ln.gesalm.integracion.pronaca.com.ec" + Comillas + ">" +
                                 "<ControlProceso>" +
@@ -620,7 +635,7 @@ namespace PronacaPlugin
                                 "<PlacaVehiculo>" + Vehiculo + "</PlacaVehiculo>" +
                                 "<CedulaTransportista>" + Cedula + "</CedulaTransportista>" +
                                 "<NombreTransportista>" + Chofer + "</NombreTransportista>" +
-                                "<CodCentroAries>" + Centro + "</CodCentroAries>" +
+                                "<CodCentroAries>" + centroTransaccion + "</CodCentroAries>" +
                                 "<TicketAries> </TicketAries>" +
                                 "<CedUsuarioAries> </CedUsuarioAries>" +
                                 "<NomUsuarioAries> </NomUsuarioAries>" +
@@ -956,9 +971,10 @@ namespace PronacaPlugin
         public void anularTransacción(string transaccion)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-
-            //***********************************************************FIN DEL APP CONFIG
             string consulta;
+            string pesoSalida;
+            //Cambio de estado a TA(Transaccion anulada)
+
             try
             {
                 consulta = "update Tb_Vehiculos set Veh_Estado='TA' where  Veh_Ticket='" + transaccion + "'";
@@ -977,7 +993,31 @@ namespace PronacaPlugin
                     ConexionSql.Close();
                 }
             }
-            
+            //consulto si tiene peso de salida
+            using (var Conn = new SqlConnection(Conexion_Bd))
+            {
+                Conn.Open();
+                using (var command = new SqlCommand("SELECT veh_peso_salida FROM Tb_Vehiculos where  Veh_Ticket=@transaccion AND Veh_Estado='TA'", Conn))
+                {
+                    command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                    pesoSalida = Convert.ToString(command.ExecuteScalar());
+                }
+            }
+
+            //si solo fue transaccion de entrada, actualizo a peso de salida 0
+            if(pesoSalida.Equals(""))
+            {
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open();
+                    using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_Peso_Salida='0' WHERE Veh_Ticket=@transaccion AND Veh_Estado='TA'", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                        int rowsAdded = command.ExecuteNonQuery();
+                    }
+                }
+            }
+
         }
         public void eliminarTransaccionPendiente()
         {
@@ -1003,6 +1043,21 @@ namespace PronacaPlugin
                     ConexionSql.Close();
                 }
             }
+        }
+
+        public string obtenerOperador()
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            string consultaOperador = "";
+            using (var Conn = new SqlConnection(Conexion_Bd))
+            {
+                Conn.Open();
+                using (var command = new SqlCommand("SELECT TOP 1 operador FROM login order by Operador desc", Conn))
+                {
+                    consultaOperador = Convert.ToString(command.ExecuteScalar());
+                }
+            }
+            return consultaOperador;
         }
 
         public void detenerSecuencia(string operador,string razon,int bascula,string pesoObtenido,string pesoBascula)
@@ -1092,7 +1147,7 @@ namespace PronacaPlugin
                 // Do what you want using the Graphics object here.
                 //graphics.DrawString("Fecha: 08-03-2022", font, Brushes.Red, 0, 650);
                 //graphics.DrawString("Placa: ABCD1234", font, Brushes.Red, 0, 670);
-                graphics.DrawString("Peso en báscula: "+pesoBascula, font, Brushes.Red, 0, 520);
+                  graphics.DrawString("Peso en báscula: "+pesoBascula, font, Brushes.Red, 0, 520);
 
                 // Important part!
                 bitmap.Save(filePath);

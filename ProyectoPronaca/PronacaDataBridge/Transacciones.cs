@@ -45,6 +45,7 @@ namespace PronacaPlugin
         string operador;
         string vehiculo;
         string pesoObtenido;
+        string centro;
         GestionVehiculos VEH;
         bool banderaTransaccionEnviada;
         int contadorCamarasBascula;
@@ -69,8 +70,9 @@ namespace PronacaPlugin
             pesosObtenidos = new ArrayList();
             banderaTransaccionEnviada = false;
             contadorCamarasBascula = 0;
-            operador = "PUE1";
+            operador = "";
             vehiculo = "";
+            centro = "";
             pesoObtenido = "N/A";
             aplicacion = new Aplicacion();
         }
@@ -137,7 +139,15 @@ namespace PronacaPlugin
             operador = myTransaction.Loads[0].Pass1Operator;
             pesoObtenido = myTransaction.Loads[0].GrossWeight.ToString();
             estado = "entrada";
-            if(banderaTransaccionEnviada==true)
+            LoadModel myLoad = myTransaction.FirstLoad;
+            foreach (LoadCDEModel myLoadCDE in myLoad.LoadCDEs)
+            {
+                if (String.Compare(myLoadCDE.CustomDataEntry.CustomDataCollection.Name, "Centro", true) == 0)
+                {
+                    centro = myLoadCDE.CustomDataEntry.Name;
+                }
+            }
+            if (banderaTransaccionEnviada==true)
             {
                 return "";
             }
@@ -198,7 +208,15 @@ namespace PronacaPlugin
                                         //************************************************NOTIFICACION POR CORREO **************************************************
                                             if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
                                             {
-                                                 return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                                try
+                                                {
+                                                    return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    return ex.Message;
+                                                }
+                                                 
                                             }
                                              else
                                             {
@@ -214,7 +232,14 @@ namespace PronacaPlugin
                                     //************************************************NOTIFICACION POR CORREO *****************************************************   
                                     if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
                                     {
-                                        return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                        try
+                                        {
+                                            return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            return ex.Message;
+                                        }
                                     }
                                     else
                                     {
@@ -254,8 +279,9 @@ namespace PronacaPlugin
             string N_Transaccion = myTransaction.Loads[0].TransactionNumber;
             string Chofer = myTransaction.Loads[0].Driver.Name.ToString();
             string Peso_Ing = myTransaction.Loads[0].Pass1Weight.ToString();
+            string operadorEntrada = myTransaction.Loads[0].Pass1Operator;
             //gurdamos la informacion que envia el databridge 
-            String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, Peso_Ing, "", N_Transaccion, "", "", "", "", "", "IC", msj_recibido, Numeral_recibido);
+            String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", Vehiculo, Chofer, Peso_Ing, "", N_Transaccion, "", "",operadorEntrada,"","", "", "", "IC", msj_recibido, Numeral_recibido);
             VEH.InsertarPesosObtenidos(pesosObtenidos, N_Transaccion);
             pesosObtenidos.Clear();
             banderaTransaccionEnviada = false;
@@ -274,7 +300,15 @@ namespace PronacaPlugin
             operador = myTransaction.Loads[0].Pass2Operator;
             pesoObtenido = myTransaction.Loads[0].GrossWeight.ToString();
             estado = "salida";
-            if(banderaTransaccionEnviada==true)
+            LoadModel myLoad = myTransaction.FirstLoad;
+            foreach (LoadCDEModel myLoadCDE in myLoad.LoadCDEs)
+            {
+                if (String.Compare(myLoadCDE.CustomDataEntry.CustomDataCollection.Name, "Centro", true) == 0)
+                {
+                    centro = myLoadCDE.CustomDataEntry.Name;
+                }
+            }
+            if (banderaTransaccionEnviada==true)
             {
                 return "";
             }
@@ -292,7 +326,7 @@ namespace PronacaPlugin
                                 string Nota = ventanaImput("Ingrese el PIN:", "DataBridge Plugin", "PIN");
                                 if (Ping_Salida.Equals(Nota))
                                 {
-                                    String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), vehiculo, chofer, "", Peso_Salida, N_Transaccion, "", "", "", "", "", "SC", "", "");
+                                    String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), vehiculo, chofer, "", Peso_Salida, N_Transaccion, "", "","",operador, "", "", "", "SC", "", "");
                                     //ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
                                     return AriesSalida(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
                                     //return "";
@@ -310,7 +344,7 @@ namespace PronacaPlugin
                                     
                                     if (VEH.listarFTP(vehiculo, nScaleId).Equals(""))
                                     {
-                                        String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), vehiculo, chofer, "", Peso_Salida, N_Transaccion, "", "", "", "", "", "SC", "", "");
+                                        String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), vehiculo, chofer, "", Peso_Salida, N_Transaccion, "", "","",operador, "", "", "", "SC", "", "");
 
                                         //ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
                                         return AriesSalida(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
@@ -320,7 +354,14 @@ namespace PronacaPlugin
                                     {
                                         if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
                                         {
-                                            return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                            try
+                                            {
+                                                return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                return ex.Message;
+                                            }
                                         }
                                         else
                                         {
@@ -333,7 +374,14 @@ namespace PronacaPlugin
                                 {
                                     if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
                                     {
-                                        return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                        try
+                                        {
+                                            return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            return ex.Message;
+                                        }
                                     }
                                     else
                                     {
@@ -376,6 +424,7 @@ namespace PronacaPlugin
             pesosObtenidos.Clear();
         }
         public override void ScaleDataReceived(ScaleWeightPacket myScaleWeightData)
+
         {
             double peso = myScaleWeightData.MainWeightData.GrossWeightValue;
             SetPesoActual(ref peso,myScaleWeightData.ScaleId);  
@@ -393,12 +442,16 @@ namespace PronacaPlugin
             {
                 razon = ventanaImput("¡Se detuvo la secuencia!", "DataBridge Plugin", "ingrese la Razón");
             } while (razon == "");
-            VEH.detenerSecuencia(operador, razon, nScaleId,pesoObtenido,peso.ToString()) ;
-            NotificacionCorreoSecuencia(razon,operador, nScaleId,pesoObtenido,peso.ToString());
+            VEH.detenerSecuencia(VEH.obtenerOperador(), razon, nScaleId,pesoObtenido,peso.ToString()) ;
+            NotificacionCorreoSecuencia(razon,VEH.obtenerOperador(), nScaleId,pesoObtenido,peso.ToString());
         }
         public override void InputsSignaled(int nScaleId, InputsSignaledEventArgs args)
         {
 
+        }
+        public override void TransactionCleared(int nScaleId, TransactionModel myTransaction)
+        {
+            VEH.eliminarTransaccionPendiente();
         }
         #endregion
 
@@ -549,7 +602,7 @@ namespace PronacaPlugin
             string res_Aries = "";
             try
             {
-                res_Aries = VEH.InvokeService(N_Transaccion, FechaTicketProceso, HoraTicketProceso, UsuarioDataBridge, NumeroBascula, TipoPeso, Peso_Ing, Vehiculo, Cedula, Chofer);
+                res_Aries = VEH.InvokeService(N_Transaccion, FechaTicketProceso, HoraTicketProceso, UsuarioDataBridge, NumeroBascula, TipoPeso, Peso_Ing, Vehiculo, Cedula, Chofer,centro);
             }
             catch(Exception ex)
             {
@@ -604,7 +657,7 @@ namespace PronacaPlugin
             string T_pesaje = VEH.consulta_TipoIngreso(N_Transaccion);
             if (T_pesaje != ("4")) 
             { 
-                string res_Aries = VEH.InvokeService(N_Transaccion, FechaTicketProceso, HoraTicketProceso, UsuarioDataBridge, NumeroBascula, TipoPeso, Peso_Ing, Vehiculo, Cedula, Chofer);
+                string res_Aries = VEH.InvokeService(N_Transaccion, FechaTicketProceso, HoraTicketProceso, UsuarioDataBridge, NumeroBascula, TipoPeso, Peso_Ing, Vehiculo, Cedula, Chofer,centro);
                 string[] rec_mensaje = res_Aries.Split('/');
                 switch (rec_mensaje[0])
                 {
@@ -698,7 +751,10 @@ namespace PronacaPlugin
             string peso_Salida = myTransaction.Loads[0].Pass2Weight.ToString();//Peso salida
             string N_Transaccion2 = myTransaction.Loads[0].TransactionNumber; //número de transacción
             string N_Transaccion1 = VEH.consulta_TransaccionDB();
+            string operadorEntrada = myTransaction.Loads[0].Pass1Operator;
+            string operadorSalida = myTransaction.Loads[0].Pass2Operator;
             int balanza = nScaleId;
+            string pesoBascula = pesoActualBascula[nScaleId].ToString();
             //****************************** BASCULA 1 ******************************************************
             if (balanza == 0)
             {
@@ -711,22 +767,24 @@ namespace PronacaPlugin
                     RespuestaPingCamara1 = HacerPing.Send(IP_Camara1, iTiempoEspera);
                     RespuestaPingCamara2 = HacerPing.Send(IP_Camara2, iTiempoEspera);
                     if(estado.Equals("entrada"))
-                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, peso_Ing, "", "0", Pin.ToString(), "", "", "", "","IP", msj_recibido, Numeral_recibido);
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), operador, vehiculo, chofer, peso_Ing, operador, "0", Pin.ToString(), "",operadorEntrada,operadorSalida,"", "", "","IP", msj_recibido, Numeral_recibido);
                     else
-                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, "", peso_Salida, N_Transaccion2, "", Pin.ToString(), "", "", "","SP", "", "");
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, "", peso_Salida, N_Transaccion2, "", Pin.ToString(), operadorEntrada,operadorSalida,"", "", "","SP", "", "");
 
 
                     string Obtener_ruta1 = ObtenerImagen(vehiculo, nom_Camara1, RespuestaPingCamara1);
                     string Obtener_ruta2 = ObtenerImagen(vehiculo, nom_Camara2, RespuestaPingCamara2);
+                    VEH.escribirImagen(Obtener_ruta1, pesoBascula);
+                    VEH.escribirImagen(Obtener_ruta2, pesoBascula);
                     string envio_correo = VEH.EnvioCorreo(N_Transaccion1, Pin.ToString(), vehiculo, Obtener_ruta1, Obtener_ruta2);
                     return "Las cámaras no identificaron la placa seleccionada, se envió un PIN al correo para continuar con la transacción";
                 }
                 else
                 {
                     if (estado.Equals("entrada"))
-                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, peso_Ing, "", "0", Pin.ToString(), "", "", "", "","IP", msj_recibido, Numeral_recibido);
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, peso_Ing, "", "0", Pin.ToString(),"",operadorEntrada,operadorSalida,"", "", "","IP", msj_recibido, Numeral_recibido);
                     else
-                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, "", peso_Salida, N_Transaccion2, "", Pin.ToString(), "", "", "","SP", "", "");
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, "", peso_Salida, N_Transaccion2, "", Pin.ToString(), operadorEntrada,operadorSalida, "", "", "","SP", "", "");
                     string envio_correo = VEH.EnvioCorreo(N_Transaccion1, Pin.ToString(), vehiculo, "", "");
                     return "Las camaras: " + IP_Camara1 + " y " + IP_Camara2 + " no se encuentran en la Red, se envió un PIN al correo para continuar con la transacción";
                 }
@@ -745,20 +803,22 @@ namespace PronacaPlugin
                     RespuestaPingCamara1 = HacerPing.Send(IP_Camara1, iTiempoEspera);
                     RespuestaPingCamara2 = HacerPing.Send(IP_Camara2, iTiempoEspera);
                     if (estado.Equals("entrada"))
-                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, peso_Ing, "", "0", Pin.ToString(), "", "", "", "","IP", msj_recibido, Numeral_recibido);
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, peso_Ing, "", "0", Pin.ToString(), "",operadorEntrada,operadorSalida, "", "", "","IP", msj_recibido, Numeral_recibido);
                     else
-                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, "", peso_Salida, N_Transaccion2, "", Pin.ToString(), "", "", "","SP", "", "");
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, "", peso_Salida, N_Transaccion2, "", Pin.ToString(),operadorEntrada,operadorSalida, "", "", "","SP", "", "");
                     string Obtener_ruta1 = ObtenerImagen(vehiculo, nom_Camara1, RespuestaPingCamara1);
                     string Obtener_ruta2 = ObtenerImagen(vehiculo, nom_Camara2, RespuestaPingCamara2);
+                    VEH.escribirImagen(Obtener_ruta1, pesoBascula);
+                    VEH.escribirImagen(Obtener_ruta2, pesoBascula);
                     string envio_correo = VEH.EnvioCorreo(N_Transaccion1, Pin.ToString(), vehiculo, Obtener_ruta1, Obtener_ruta2);
                     return "Las cámaras no identificaron la placa seleccionada, se envió un PIN al correo para continuar con la transacción";
                 }
                 else
                 {
                     if (estado.Equals("entrada"))
-                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, peso_Ing, "", "0", Pin.ToString(), "", "", "", "","IP", msj_recibido, Numeral_recibido);
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, peso_Ing, "", "0", Pin.ToString(), "",operadorEntrada,operadorSalida, "", "", "","IP", msj_recibido, Numeral_recibido);
                     else
-                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, "", peso_Salida, N_Transaccion2, "", Pin.ToString(), "", "", "","SP", "", "");
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, "", peso_Salida, N_Transaccion2, "", Pin.ToString(),operadorEntrada,operadorSalida, "", "", "","SP", "", "");
                     string envio_correo = VEH.EnvioCorreo(N_Transaccion1, Pin.ToString(), vehiculo, "", "");
                     return "Las camaras: " + IP_Camara1 + " y " + IP_Camara2 + " no se encuentran en la Red, se envió un PIN al correo para continuar con la transacción";
                 }
