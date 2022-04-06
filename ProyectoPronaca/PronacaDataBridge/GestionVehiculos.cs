@@ -46,8 +46,16 @@ namespace PronacaPlugin
         public string EnvioCorreo(string N_Transaccion, string codigo_transaccion, string placa_seleccionada, string ruta_Imagen1, string ruta_Imagen2)
         {
             //*************************************************************APP CONFIG
-            string Correo_Destino = cfg.AppSettings.Settings["Correo_Destino"].Value;
+            string Correo_Destino1 = cfg.AppSettings.Settings["Correo_Destino1"].Value;
             string Correo_Destino2 = cfg.AppSettings.Settings["Correo_Destino2"].Value;
+            string Correo_Destino3 = cfg.AppSettings.Settings["Correo_Destino3"].Value;
+            string Correo_Destino4 = cfg.AppSettings.Settings["Correo_Destino4"].Value;
+            string Correo_Destino5 = cfg.AppSettings.Settings["Correo_Destino5"].Value;
+            string Correo_Destino6 = cfg.AppSettings.Settings["Correo_Destino6"].Value;
+            string Correo_Destino7 = cfg.AppSettings.Settings["Correo_Destino7"].Value;
+            string Correo_Destino8 = cfg.AppSettings.Settings["Correo_Destino8"].Value;
+            string Correo_Destino9 = cfg.AppSettings.Settings["Correo_Destino9"].Value;
+            string Correo_Destino10 = cfg.AppSettings.Settings["Correo_Destino10"].Value;
             string Correo_Envio = cfg.AppSettings.Settings["Correo_Envio"].Value;
             string Correo_Pasword = cfg.AppSettings.Settings["Correo_Pasword"].Value;
             string Host_Salida = cfg.AppSettings.Settings["Host_Salida"].Value;
@@ -59,11 +67,19 @@ namespace PronacaPlugin
             using (MailMessage mail = new MailMessage())
             {
                 mail.From = new MailAddress(Correo_Envio);
-                mail.To.Add(Correo_Destino);
+                mail.To.Add(Correo_Destino1);
                 mail.To.Add(Correo_Destino2);
+                mail.To.Add(Correo_Destino3);
+                mail.To.Add(Correo_Destino4);
+                mail.To.Add(Correo_Destino5);
+                mail.To.Add(Correo_Destino6);
+                mail.To.Add(Correo_Destino7);
+                mail.To.Add(Correo_Destino8);
+                mail.To.Add(Correo_Destino9);
+                mail.To.Add(Correo_Destino10);
                 mail.Subject = "DataBridge - Sistema de Pesaje - ";
-                mail.Body = "<h1>Notificacion</h1></br><p>La transaccion nº:" + N_Transaccion + " con placa seleccionada del operador: " + placa_seleccionada + "   no cumple con las condiciones para seguir el proceso de Pesaje.</p></br> <p>Si desea seguir con la transaccion digite el siguiente PIN:" + codigo_transaccion + "   </p>";
-
+                //mail.Body = "<h1>Notificacion</h1></br><p>La transaccion nº:" + N_Transaccion + " con placa seleccionada del operador: " + placa_seleccionada + "   no cumple con las condiciones para seguir el proceso de Pesaje.</p></br> <p>Si desea seguir con la transaccion digite el siguiente PIN:" + codigo_transaccion + "   </p>";
+                mail.Body = "<h1>Notificación</h1><p>Las cámaras no identificaron la placa seleccionada, para proceguir con la transacción digite el PIN en el sistema de pesaje DataBridge.</p><table><tr><td>Fecha y hora:</td><td>" + DateTime.Now.ToString() + "</td></tr><tr><td>N# Transacción:</td><td>" + N_Transaccion + "</td></tr><tr><td>Placa seleccionada:</td><td>" + placa_seleccionada + "</td></tr><tr><td>PIN:</td><td>" + codigo_transaccion + "</td></tr><tr></table>";
 
                 mail.IsBodyHtml = true;
                 if (ruta_Imagen1 != (""))
@@ -194,6 +210,26 @@ namespace PronacaPlugin
 
             }
 
+        }
+
+        public string validarPlaca(string placa)
+        {
+            int digitosPlaca = placa.Length;
+            string letrasPlaca = "";
+            string numerosPlaca = "";
+            if(digitosPlaca==7)
+            {
+                letrasPlaca.Substring(0, 3);
+                //numerosPlaca.Substring()
+            }
+            else
+            {
+                if(digitosPlaca==6)
+                {
+
+                }
+            }
+            return "";
         }
         #endregion
 
@@ -504,6 +540,10 @@ namespace PronacaPlugin
                 ConexionSql.Open();
                 SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
                 consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
+                if (consulta.Equals(""))
+                {
+                    consulta = "1";
+                }
                 ConexionSql.Close();
             }
             finally
@@ -1052,7 +1092,7 @@ namespace PronacaPlugin
             using (var Conn = new SqlConnection(Conexion_Bd))
             {
                 Conn.Open();
-                using (var command = new SqlCommand("SELECT TOP 1 operador FROM login order by Operador desc", Conn))
+                using (var command = new SqlCommand("SELECT TOP 1 operador FROM login order by Fecha desc", Conn))
                 {
                     consultaOperador = Convert.ToString(command.ExecuteScalar());
                 }
@@ -1081,8 +1121,16 @@ namespace PronacaPlugin
         public string EnvioCorreoSecuenciaDetenida(string razon, string operador, string ruta_Imagen1, string ruta_Imagen2,string pesoObtenido,string pesoBascula)
         {
             //*************************************************************APP CONFIG
-            string Correo_Destino = cfg.AppSettings.Settings["Correo_Destino"].Value;
+            string Correo_Destino1 = cfg.AppSettings.Settings["Correo_Destino1"].Value;
             string Correo_Destino2 = cfg.AppSettings.Settings["Correo_Destino2"].Value;
+            string Correo_Destino3 = cfg.AppSettings.Settings["Correo_Destino3"].Value;
+            string Correo_Destino4 = cfg.AppSettings.Settings["Correo_Destino4"].Value;
+            string Correo_Destino5 = cfg.AppSettings.Settings["Correo_Destino5"].Value;
+            string Correo_Destino6 = cfg.AppSettings.Settings["Correo_Destino6"].Value;
+            string Correo_Destino7 = cfg.AppSettings.Settings["Correo_Destino7"].Value;
+            string Correo_Destino8 = cfg.AppSettings.Settings["Correo_Destino8"].Value;
+            string Correo_Destino9 = cfg.AppSettings.Settings["Correo_Destino9"].Value;
+            string Correo_Destino10 = cfg.AppSettings.Settings["Correo_Destino10"].Value;
             string Correo_Envio = cfg.AppSettings.Settings["Correo_Envio"].Value;
             string Correo_Pasword = cfg.AppSettings.Settings["Correo_Pasword"].Value;
             string Host_Salida = cfg.AppSettings.Settings["Host_Salida"].Value;
@@ -1094,12 +1142,20 @@ namespace PronacaPlugin
             using (MailMessage mail = new MailMessage())
             {
                 mail.From = new MailAddress(Correo_Envio);
-                mail.To.Add(Correo_Destino);
+                mail.To.Add(Correo_Destino1);
                 mail.To.Add(Correo_Destino2);
+                mail.To.Add(Correo_Destino3);
+                mail.To.Add(Correo_Destino4);
+                mail.To.Add(Correo_Destino5);
+                mail.To.Add(Correo_Destino6);
+                mail.To.Add(Correo_Destino7);
+                mail.To.Add(Correo_Destino8);
+                mail.To.Add(Correo_Destino9);
+                mail.To.Add(Correo_Destino10);
                 mail.Subject = "DataBridge - Sistema de Pesaje - ";
-               // mail.Body = "<h1>Notificacion</h1></br><p>El día " + DateTime.Now.ToString() + " fue detenida la secuencia, por la razón: " + razon + " por el operador: " +operador+".</p>";
-                mail.Body = "<h1>Notificacion</h1><p> Se ha detenido la secuencia de pesaje en DataBridge.</p><table><tr><td>Fecha:</td><td>"+ DateTime.Now.ToString() + "</td></tr><tr><td>Razón:</td><td>"+razon +"</td></tr><tr><td>Operador:</td><td>"+operador+"</td></tr><tr><td>Peso obtenido:</td><td>"+pesoObtenido+"</td></tr><tr><td>Peso en báscula:</td><td>"+pesoBascula+"</td></tr></table>";
-                 mail.IsBodyHtml = true;
+                //mail.Body = "<h1>Notificacion</h1></br><p>El día " + DateTime.Now.ToString() + " fue detenida la secuencia, por la razón: " + razon + " por el operador: " +operador+".</p>";
+                mail.Body = "<h1>Notificación</h1><p> Se ha detenido la secuencia de pesaje en DataBridge.</p><table><tr><td>Fecha y hora:</td><td>" + DateTime.Now.ToString() + "</td></tr><tr><td>Razón:</td><td>" + razon + "</td></tr><tr><td>Operador:</td><td>" + operador + "</td></tr><tr><td>Peso obtenido:</td><td>" + pesoObtenido + "</td></tr><tr><td>Peso en báscula:</td><td>" + pesoBascula + "</td></tr></table>";
+                mail.IsBodyHtml = true;
                 if (ruta_Imagen1 != (""))
                 {
                     mail.Attachments.Add(new Attachment(@"C:\Camara_DataBridge\" + ruta_Imagen1 + ".jpg"));
@@ -1151,6 +1207,20 @@ namespace PronacaPlugin
 
                 // Important part!
                 bitmap.Save(filePath);
+            }
+        }
+
+        public void actualizarEstadoSalida(string transaccion)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            using (var Conn = new SqlConnection(Conexion_Bd))
+            {
+                Conn.Open();
+                using (var command = new SqlCommand("UPDATE Tb_Vehiculos set Veh_Estado='SC' WHERE Veh_Ticket=@transaccion AND Veh_Estado='SP' AND Veh_Val2='3'", Conn))
+                {
+                    command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                    int rowsAdded = command.ExecuteNonQuery();
+                }
             }
         }
 

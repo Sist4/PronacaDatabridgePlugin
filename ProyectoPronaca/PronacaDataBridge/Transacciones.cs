@@ -259,13 +259,13 @@ namespace PronacaPlugin
                     // si el chofer no Timbro o excedio el tiempo predeterminado(10 minutos) 
                     else
                     {
-                        return "El Chofer no ha Timbrado en el Biometrico. El Tiempo de espera son de " + T_Chofer + " Minutos";
+                        return "El Conductor no ha Timbrado en el Biometrico. El Tiempo de espera son de " + T_Chofer + " Minutos";
                     }
                 }
                 // FIN DEL FILTRO BIOMETRICO- CHOFER
                 else
                 {
-                    return "El chofer debe estar Creado en el Biometrico";
+                    return "El conductor no está registrado en el Biometrico";
                 }
             }
             
@@ -399,13 +399,13 @@ namespace PronacaPlugin
                     // si el chofer no Timbro o excedio el tiempo predeterminado(10 minutos) 
                     else
                     {
-                        return "El Chofer no ha Timbrado en el Biometrico, Recuerde tener abierto el software del Biometrico y que el Tiempo de espera son de " + T_Chofer + " Minutos";
+                        return "El Conductor no ha Timbrado en el Biometrico. El Tiempo de espera son de " + T_Chofer + " Minutos";
                     }
                 }
                 // FIN DEL FILTRO BIOMETRICO- CHOFER
                 else
                 {
-                    return "El chofer debe estar Creado en el Biometrico";
+                    return "El Conductor no está registrado en el Biometrico";
                 }
             }
             
@@ -416,8 +416,8 @@ namespace PronacaPlugin
             VEH.InsertarPesosObtenidos(pesosObtenidos, N_Transaccion);
             pesosObtenidos.Clear();
             banderaTransaccionEnviada = false;
-            contadorCamarasBascula = 0;
-            pesoObtenido = "N/A";
+            VEH.actualizarEstadoSalida(myTransaction.TransactionNumber);
+
         }
         public override void ScaleAboveThreshold(ScaleAboveThresholdEventArgs myEventArgs)
         {
@@ -618,7 +618,9 @@ namespace PronacaPlugin
 
                 case "2":
                     // ERROR
-                    return rec_mensaje[1];
+                    int num2 = rec_mensaje[1].IndexOf('.');
+                    string mensaje2 = rec_mensaje[1].Substring(num2 + 1, rec_mensaje[1].Length - (num2 + 1));
+                    return mensaje2;
 
                 case "3":
                     msj_recibido = "Transacción de Entrada exitosa";
@@ -630,11 +632,14 @@ namespace PronacaPlugin
                 case "4":
                     msj_recibido = rec_mensaje[1];
                     Numeral_recibido = "4";
-                    //ventanaOK("¡Pesaje Entrada Visitante exitoso!", "DataBridge Plugin");
-                    return "¡Transacción sin turno en Aries!";
+                    int num4 = rec_mensaje[1].IndexOf('.');
+                    string mensaje4 = rec_mensaje[1].Substring(num4 + 1, rec_mensaje[1].Length - (num4 + 1));
+                    return mensaje4;
                 case "5":
                     // Error del factor de conversion(aborta el pesaje)
-                    return rec_mensaje[1];
+                    int num5 = rec_mensaje[1].IndexOf('.');
+                    string mensaje5 = rec_mensaje[1].Substring(num5 + 1, rec_mensaje[1].Length - (num5 + 1));
+                    return mensaje5;
 
                 default:
                     return "Sin respuesta de Aries en la transacción de entrada. Presione el botón Aceptar e intente denuevo.";
@@ -664,7 +669,9 @@ namespace PronacaPlugin
 
                     case "2":
                         // ERROR
-                        return rec_mensaje[1];
+                        int num2 = rec_mensaje[1].IndexOf('.');
+                        string mensaje2 = rec_mensaje[1].Substring(num2 + 1, rec_mensaje[1].Length - (num2 + 1));
+                        return mensaje2;
 
                     // break;
                     case "3":
@@ -678,10 +685,14 @@ namespace PronacaPlugin
                         
                         msj_recibido = rec_mensaje[1];
                         Numeral_recibido = "4";
-                        return "¡Transacción sin turno en Aries!";
+                        int num4 = rec_mensaje[1].IndexOf('.');
+                        string mensaje4 = rec_mensaje[1].Substring(num4 + 1, rec_mensaje[1].Length - (num4 + 1));
+                        return mensaje4;
                     case "5":
                         // Error del factor de conversion(aborta el pesaje)
-                        return rec_mensaje[1];
+                        int num5 = rec_mensaje[1].IndexOf('.');
+                        string mensaje5 = rec_mensaje[1].Substring(num5 + 1, rec_mensaje[1].Length - (num5 + 1));
+                        return mensaje5;
 
                     default:
                         return "Sin respuesta de Aries en la transacción de salida. Presione el botón Completar e intente denuevo"; 
@@ -706,6 +717,41 @@ namespace PronacaPlugin
             int balanza = nScaleId;
             //****************************** BASCULA 1 ******************************************************
             if (balanza==0)
+            {
+                IP_Camara1 = cfg.AppSettings.Settings["IP_Camara1"].Value;
+                IP_Camara2 = cfg.AppSettings.Settings["IP_Camara2"].Value;
+                RespuestaPingCamara1 = HacerPing.Send(IP_Camara1, iTiempoEspera);
+                RespuestaPingCamara2 = HacerPing.Send(IP_Camara2, iTiempoEspera);
+                if (RespuestaPingCamara1.Status == IPStatus.Success || RespuestaPingCamara2.Status == IPStatus.Success)
+                    return true;
+                else
+                    return false;
+            }
+            //****************************** BASCULA 2 ******************************************************
+            else
+            {
+                IP_Camara1 = cfg.AppSettings.Settings["IP_Camara3"].Value;
+                IP_Camara2 = cfg.AppSettings.Settings["IP_Camara4"].Value;
+                RespuestaPingCamara1 = HacerPing.Send(IP_Camara1, iTiempoEspera);
+                RespuestaPingCamara2 = HacerPing.Send(IP_Camara2, iTiempoEspera);
+                if (RespuestaPingCamara1.Status == IPStatus.Success || RespuestaPingCamara2.Status == IPStatus.Success)
+                    return true;
+                else
+                    return false;
+            }
+
+        }
+        private bool ComunicacionCamaras2(TransactionModel myTransaction, int nScaleId,bool IPcam1,string IPcam2,string IPcam3,string IPcam4)
+        {
+            Ping HacerPing = new Ping();
+            int iTiempoEspera = 500;
+            PingReply RespuestaPingCamara1;
+            PingReply RespuestaPingCamara2;
+            string IP_Camara1;
+            string IP_Camara2;
+            int balanza = nScaleId;
+            //****************************** BASCULA 1 ******************************************************
+            if (balanza == 0)
             {
                 IP_Camara1 = cfg.AppSettings.Settings["IP_Camara1"].Value;
                 IP_Camara2 = cfg.AppSettings.Settings["IP_Camara2"].Value;
@@ -767,7 +813,7 @@ namespace PronacaPlugin
                     RespuestaPingCamara1 = HacerPing.Send(IP_Camara1, iTiempoEspera);
                     RespuestaPingCamara2 = HacerPing.Send(IP_Camara2, iTiempoEspera);
                     if(estado.Equals("entrada"))
-                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), operador, vehiculo, chofer, peso_Ing, operador, "0", Pin.ToString(), "",operadorEntrada,operadorSalida,"", "", "","IP", msj_recibido, Numeral_recibido);
+                        RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, peso_Ing, "", "0", Pin.ToString(), "",operadorEntrada,operadorSalida,"", "", "","IP", msj_recibido, Numeral_recibido);
                     else
                         RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, "", peso_Salida, N_Transaccion2, "", Pin.ToString(), operadorEntrada,operadorSalida,"", "", "","SP", "", "");
 
