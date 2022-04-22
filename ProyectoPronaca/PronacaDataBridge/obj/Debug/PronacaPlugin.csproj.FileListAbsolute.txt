@@ -37,3 +37,4 @@ C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDa
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CopyComplete
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.dll
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.pdb
+C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.AssemblyReference.cache

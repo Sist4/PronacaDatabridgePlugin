@@ -29,6 +29,7 @@ namespace PronacaPlugin
         string cam2;
         string cam3;
         string cam4;
+        public string mensaje { get; set; }
         public GestionVehiculos()
         {
             codeBase = Assembly.GetExecutingAssembly().CodeBase;
@@ -70,16 +71,17 @@ namespace PronacaPlugin
                 mail.To.Add(Correo_Destino1);
                 mail.To.Add(Correo_Destino2);
                 mail.To.Add(Correo_Destino3);
-                mail.To.Add(Correo_Destino4);
-                mail.To.Add(Correo_Destino5);
-                mail.To.Add(Correo_Destino6);
-                mail.To.Add(Correo_Destino7);
-                mail.To.Add(Correo_Destino8);
-                mail.To.Add(Correo_Destino9);
-                mail.To.Add(Correo_Destino10);
+                mail.Bcc.Add(Correo_Destino4);
+                mail.Bcc.Add(Correo_Destino4);
+                mail.Bcc.Add(Correo_Destino5);
+                mail.Bcc.Add(Correo_Destino6);
+                mail.Bcc.Add(Correo_Destino7);
+                mail.Bcc.Add(Correo_Destino8);
+                mail.Bcc.Add(Correo_Destino9);
+                mail.Bcc.Add(Correo_Destino10);
                 mail.Subject = "DataBridge - Sistema de Pesaje - ";
                 //mail.Body = "<h1>Notificacion</h1></br><p>La transaccion nº:" + N_Transaccion + " con placa seleccionada del operador: " + placa_seleccionada + "   no cumple con las condiciones para seguir el proceso de Pesaje.</p></br> <p>Si desea seguir con la transaccion digite el siguiente PIN:" + codigo_transaccion + "   </p>";
-                mail.Body = "<h1>Notificación</h1><p>Las cámaras no identificaron la placa seleccionada, para proceguir con la transacción digite el PIN en el sistema de pesaje DataBridge.</p><table><tr><td>Fecha y hora:</td><td>" + DateTime.Now.ToString() + "</td></tr><tr><td>N# Transacción:</td><td>" + N_Transaccion + "</td></tr><tr><td>Placa seleccionada:</td><td>" + placa_seleccionada + "</td></tr><tr><td>PIN:</td><td>" + codigo_transaccion + "</td></tr><tr></table>";
+                mail.Body = "<h1>Notificación</h1><p>Las cámaras no identificaron la placa seleccionada, para proseguir con la transacción digite el PIN en el sistema de pesaje DataBridge.</p><table><tr><td>Fecha y hora:</td><td>" + DateTime.Now.ToString() + "</td></tr><tr><td>N# Transacción:</td><td>" + N_Transaccion + "</td></tr><tr><td>Placa seleccionada:</td><td>" + placa_seleccionada + "</td></tr><tr><td>PIN:</td><td>" + codigo_transaccion + "</td></tr><tr></table>";
 
                 mail.IsBodyHtml = true;
                 if (ruta_Imagen1 != (""))
@@ -212,9 +214,9 @@ namespace PronacaPlugin
 
         }
 
-        public string validarPlaca(string placa)
+        public string validarPlaca(string placaSeleccionada,string placaEnviada, DateTime horaActual, DateTime horaRestada)
         {
-            int digitosPlaca = placa.Length;
+            int digitosPlaca = placaEnviada.Length;
             string letrasPlaca = "";
             string numerosPlaca = "";
             if(digitosPlaca==7)
@@ -687,9 +689,12 @@ namespace PronacaPlugin
                 ///*****************************************************esto no va************************************
                 string codificiacionMsj = EncodeStrToBase64(XmlEnvio);
                 string res = G_Msg(codificiacionMsj, "A", N_Transaccion);
-
-                Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
-               // Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
+                //string ejecutable = @"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\ComunicacionAries.exe " + N_Transaccion;
+                //Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\ComunicacionAries.exe "+N_Transaccion);
+                //mensaje=ejecutable;
+                //Process.Start(ejecutable);
+                // Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
+                Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\ComunicacionAries.exe ", N_Transaccion);
                 System.Threading.Thread.Sleep(3000);
                // G_Msg2();
                 //CONSULTA DE DATOS
@@ -746,57 +751,7 @@ namespace PronacaPlugin
                     ConexionSql.Close();
                 
                     return "El mensaje No fue procesado por Aries";
-
-
-
-
-
                 }
-
-
-                //FIN
-
-
-                //////////////////Calling CreateSOAPWebRequest method    
-                ////////////////HttpWebRequest request = CreateSOAPWebRequest();
-                //////////////////request.Credentials = new NetworkCredential("Aries_DataBridge", "Pronaca2021$");
-                ////////////////request.Credentials = new NetworkCredential("data_bridge_test", "UGVzMHNENHQ0QnIxZGczUHIwbmFjYSQ");
-                ////////////////XmlDocument SOAPReqBody = new XmlDocument();
-                //////////////////SOAP Body Request    
-                ////////////////SOAPReqBody.LoadXml(@"<?xml version=" + Comillas + "1.0" + Comillas + " encoding=" + Comillas + "utf-8" + Comillas + "?> " +
-                ////////////////                     "<soap:Envelope xmlns:xsi=" + Comillas + "http://www.w3.org/2001/XMLSchema-instance" + Comillas + " xmlns:xsd=" + Comillas + "http://www.w3.org/2001/XMLSchema" + Comillas + " xmlns:soap=" + Comillas + "http://schemas.xmlsoap.org/soap/envelope/" + Comillas + ">" +
-                ////////////////                     "<soap:Body>" +
-                ////////////////                     " <validarPeso xmlns=" + Comillas + "http://ln.gesalm.integracion.pronaca.com.ec" + Comillas + ">" +
-                ////////////////                     " <xmlFileBase64>" + codificiacionMsj + "</xmlFileBase64>" +
-                ////////////////                     " </validarPeso>" +
-                ////////////////                     " </soap:Body>" +
-                ////////////////                     "</soap:Envelope>");
-
-
-
-                ////////////////using (Stream stream = request.GetRequestStream())
-                ////////////////{
-                ////////////////    SOAPReqBody.Save(stream);
-                ////////////////}
-                ////////////////System.Net.ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-                ////////////////string ServiceResult;
-                //////////////////Geting response from request    
-                ////////////////using (WebResponse Serviceres = request.GetResponse())
-                ////////////////{
-                ////////////////    using (StreamReader rd = new StreamReader(Serviceres.GetResponseStream()))
-                ////////////////    {
-                ////////////////        //reading stream    
-                ////////////////        ServiceResult = rd.ReadToEnd();
-                ////////////////    }
-                ////////////////}
-                //////////////////de codificamos el xml recibido
-
-                ////////////////string xmlResultado = ServiceResult.Replace("</validarPesoResult></validarPesoResponse></soap:Body></soap:Envelope>", "");
-                ////////////////xmlResultado = xmlResultado.Replace("<?xml version=" + Comillas + "1.0" + Comillas + " encoding=" + Comillas + "utf-8" + Comillas + "?><soap:Envelope xmlns:soap=" + Comillas + "http://schemas.xmlsoap.org/soap/envelope/" + Comillas + " xmlns:xsi=" + Comillas + "http://www.w3.org/2001/XMLSchema-instance" + Comillas + " xmlns:xsd=" + Comillas + "http://www.w3.org/2001/XMLSchema" + Comillas + "><soap:Body><validarPesoResponse xmlns=" + Comillas + "http://ln.gesalm.integracion.pronaca.com.ec" + Comillas + "><validarPesoResult>", "");
-
-
-                //////////////////Procesamos el msj
-                ////////////////return leer_Xml(DecodeBase64ToString(xmlResultado));
 
             }
             catch (Exception e)
@@ -846,20 +801,20 @@ namespace PronacaPlugin
 
                 case 2:
                     // ERROR
-                    envioRes = "2/" + Estatus.ToString() + " " + Mensaje;
+                    envioRes = "2/"+" " + Mensaje;
                     break;
                 case 3:
                     // EXITO - (termina el proceso)
-                    envioRes = "3/ EL PROCESOS SE COMPLETO CON EXITO";
+                    envioRes = "3/ ¡Transacción enviada exitosamente a ARIES!";
                     break;
                 case 4:
                     // EXITO SIN TURNO(vehiculo sin carga se envia un pin no se envia al aries salida no se envia)
-                    envioRes = "4/" + Estatus.ToString() + " " + Mensaje;
+                    envioRes = "4/"+ " " + Mensaje;
                     break;
 
                 case 5:
                     // Error del factor de conversion(aborta el pesaje)
-                    envioRes = "5/" + Estatus.ToString() + " " + Mensaje;
+                    envioRes = "5/" +" " + Mensaje;
                     break;
 
                 default:
@@ -907,102 +862,24 @@ namespace PronacaPlugin
             return consulta;
         }
 
-        //private void G_Msg2()
-        //{
-        //    //*************************************************************APP CONFIG
-
-        //    //string Conexion_Bd = @"Data Source=7s1-databridge;Initial Catalog=DBVehiculos;user id=DataBridgeUser;password=Pronaca2021";
-        //    //string Conexion_Bd = @"Data Source=.\SQL;Initial Catalog=DBVehiculos;Integrated Security=True";
-        //    string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-        //    //***********************************************************FIN DEL APP CONFIG
-        //    string consulta;
-
-        //    int Codigo = 0;
-        //    int Transaccion;
-        //    string mensaje_V = "";
-        //    string mensaje_R;
-
-        //    using (SqlConnection connection = new SqlConnection(Conexion_Bd))
-        //    {
-
-
-        //        String sql = "SELECT top 10 * FROM Temporal where Tem_Estado = 'A'";
-
-        //        using (SqlCommand command = new SqlCommand(sql, connection))
-        //        {
-        //            connection.Open();
-        //            using (SqlDataReader reader = command.ExecuteReader())
-        //            {
-        //                while (reader.Read())
-        //                {
-        //                    Codigo = Convert.ToInt32(reader.GetInt32(0));
-        //                    Transaccion = Convert.ToInt32(reader.GetInt32(1));
-        //                    mensaje_V = reader.GetString(2);
-        //                }
-        //            }
-        //            connection.Close();
-        //        }
-        //    }
-        //    if (Codigo.Equals(0))
-        //    {
-
-        //    }
-        //    else
-        //    {
-        //        ///PROCESAMOS EL MESNAJE
-        //        WsRp3.ImportacionPesosAriesPortClient servicioPortClient = new WsRp3.ImportacionPesosAriesPortClient();
-        //        WsRp3.validarPeso sendBalanceData = new WsRp3.validarPeso();
-        //        servicioPortClient.ClientCredentials.UserName.UserName = @"data_bridge_test";
-        //        servicioPortClient.ClientCredentials.UserName.Password = @"UGVzMHNENHQ0QnIxZGczUHIwbmFjYSQ";
-        //        sendBalanceData.xmlFileBase64 = mensaje_V; //"PG5zMTpHZXNJbXBQZXNBciB4bWxuczpuczE9Imh0dHA6Ly9sbi5nZXNhbG0uaW50ZWdyYWNpb24ucHJvbmFjYS5jb20uZWMiPjxDb250cm9sUHJvY2Vzbz48Q29kaWdvQ29tcGFuaWE+MDAyPC9Db2RpZ29Db21wYW5pYT48Q29kaWdvU2lzdGVtYT5EQjwvQ29kaWdvU2lzdGVtYT48Q29kaWdvU2VydmljaW8+VmFsaWRhUGVzb3NEQjwvQ29kaWdvU2VydmljaW8+PFByb2Nlc28+SW5zZXJ0YXIvVmFsaWRhcjwvUHJvY2Vzbz48UmVzdWx0YWRvPjwvUmVzdWx0YWRvPjwvQ29udHJvbFByb2Nlc28+PENhYmVjZXJhPjxUaWNrZXREYXRhQnJpZGdlPjk5OTwvVGlja2V0RGF0YUJyaWRnZT48RmVjaGFUaWNrZXRQcm9jZXNvPjEwLzEwLzIwMjE8L0ZlY2hhVGlja2V0UHJvY2Vzbz48SG9yYVRpY2tldFByb2Nlc28+MTA6MDA6MDA8L0hvcmFUaWNrZXRQcm9jZXNvPjxVc3VhcmlvRGF0YUJyaWRnZT5Db25maWd1cmFkb3I8L1VzdWFyaW9EYXRhQnJpZGdlPjxOdW1lcm9CYXNjdWxhPjE8L051bWVyb0Jhc2N1bGE+PFRpcG9QZXNvPkU8L1RpcG9QZXNvPjxQZXNvVGlja2V0RGF0YUJyaWRnZT41NjAwMDwvUGVzb1RpY2tldERhdGFCcmlkZ2U+PFBsYWNhVmVoaWN1bG8+QUFBOTk5PC9QbGFjYVZlaGljdWxvPjxDZWR1bGFUcmFuc3BvcnRpc3RhPjE3NTE1OTU1NDU8L0NlZHVsYVRyYW5zcG9ydGlzdGE+PE5vbWJyZVRyYW5zcG9ydGlzdGE+QW5nZWwgQXVjYW5jZWxhPC9Ob21icmVUcmFuc3BvcnRpc3RhPjxDb2RDZW50cm9Bcmllcz48L0NvZENlbnRyb0FyaWVzPjxUaWNrZXRBcmllcz4gPC9UaWNrZXRBcmllcz48Q2VkVXN1YXJpb0FyaWVzPiA8L0NlZFVzdWFyaW9Bcmllcz48Tm9tVXN1YXJpb0FyaWVzPiA8L05vbVVzdWFyaW9Bcmllcz48RXN0YXR1c0FyaWVzPjE8L0VzdGF0dXNBcmllcz48TWVuc2FqZUFyaWVzPkVudmlhZG88L01lbnNhamVBcmllcz48L0NhYmVjZXJhPjwvbnMxOkdlc0ltcFBlc0FyPg==";
-
-        //        WsRp3.validarPesoResponse response = servicioPortClient.ImportacionPesosAries(sendBalanceData);
-        //        string XmlRespuesta = response.validarPesoResult;
-        //        ///gUARDAMOS EL MESNAJE PROCESADO
-        //        ///
-
-
-        //        consulta = "UPDATE TEMPORAL SET [Temp_MensajeRecibido]='" + XmlRespuesta + "', [Tem_Estado] ='Procesado' where Tem_Codigo='" + Codigo + "' ";
-
-        //        SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-        //        ConexionSql.Open();
-        //        SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-        //        consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
-        //        ConexionSql.Close();
-
-
-        //        //   MessageBox.Show(XmlRespuesta);
-
-        //    }
-
-
-
-
-
-        //}
-        public void InsertarPesosObtenidos(ArrayList pesosObtenidos,string transaccion)
+        public void InsertarPesosObtenidos(List<PesoObtenido> pesosObtenidos,string transaccion,int bascula)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-            string consulta = "";
-            foreach(String peso in pesosObtenidos)
+            foreach(PesoObtenido peso in pesosObtenidos)
             {
-                try
+                if(peso.Bascula==bascula)
                 {
-                    consulta = "update Tb_Vehiculos set Veh_PesosObtenidos= Veh_PesosObtenidos+'"+ peso+ "'+';' where  Veh_Ticket='" + transaccion + "'";
-                    SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                    ConexionSql.Open();
-                    SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                    consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
-                    ConexionSql.Close();
-                }
-                finally
-                {
-
-                    if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
+                    using (var Conn = new SqlConnection(Conexion_Bd))
                     {
-                        ConexionSql.Close();
+                        Conn.Open();
+                        using (var command = new SqlCommand("UPDATE Tb_Vehiculos set Veh_PesosObtenidos = Veh_PesosObtenidos + @peso+'; ' where  Veh_Ticket=@transaccion", Conn))
+                        {
+                            command.Parameters.Add(new SqlParameter("@peso", peso.Peso));
+                            command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                            int rowsAdded = command.ExecuteNonQuery();
+                        }
                     }
-                }
+                }       
             }
             
            
@@ -1145,13 +1022,14 @@ namespace PronacaPlugin
                 mail.To.Add(Correo_Destino1);
                 mail.To.Add(Correo_Destino2);
                 mail.To.Add(Correo_Destino3);
-                mail.To.Add(Correo_Destino4);
-                mail.To.Add(Correo_Destino5);
-                mail.To.Add(Correo_Destino6);
-                mail.To.Add(Correo_Destino7);
-                mail.To.Add(Correo_Destino8);
-                mail.To.Add(Correo_Destino9);
-                mail.To.Add(Correo_Destino10);
+                mail.Bcc.Add(Correo_Destino4);
+                mail.Bcc.Add(Correo_Destino4);
+                mail.Bcc.Add(Correo_Destino5);
+                mail.Bcc.Add(Correo_Destino6);
+                mail.Bcc.Add(Correo_Destino7);
+                mail.Bcc.Add(Correo_Destino8);
+                mail.Bcc.Add(Correo_Destino9);
+                mail.Bcc.Add(Correo_Destino10);
                 mail.Subject = "DataBridge - Sistema de Pesaje - ";
                 //mail.Body = "<h1>Notificacion</h1></br><p>El día " + DateTime.Now.ToString() + " fue detenida la secuencia, por la razón: " + razon + " por el operador: " +operador+".</p>";
                 mail.Body = "<h1>Notificación</h1><p> Se ha detenido la secuencia de pesaje en DataBridge.</p><table><tr><td>Fecha y hora:</td><td>" + DateTime.Now.ToString() + "</td></tr><tr><td>Razón:</td><td>" + razon + "</td></tr><tr><td>Operador:</td><td>" + operador + "</td></tr><tr><td>Peso obtenido:</td><td>" + pesoObtenido + "</td></tr><tr><td>Peso en báscula:</td><td>" + pesoBascula + "</td></tr></table>";
@@ -1210,19 +1088,51 @@ namespace PronacaPlugin
             }
         }
 
-        public void actualizarEstadoSalida(string transaccion)
+        public void actualizarEstadoSalida(string transaccion, string mensaje_recibido,string numeral_recibido)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
             using (var Conn = new SqlConnection(Conexion_Bd))
             {
                 Conn.Open();
-                using (var command = new SqlCommand("UPDATE Tb_Vehiculos set Veh_Estado='SC' WHERE Veh_Ticket=@transaccion AND Veh_Estado='SP' AND Veh_Val2='3'", Conn))
+                using (var command = new SqlCommand("UPDATE Tb_Vehiculos set Veh_Estado='SC',Veh_Val1=@msj_recibido,Veh_Val3=@numeral_recibido WHERE Veh_Ticket=@transaccion AND Veh_Estado='SP' AND Veh_Val2='3'", Conn))
                 {
                     command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                    command.Parameters.Add(new SqlParameter("@msj_recibido", mensaje_recibido));
+                    command.Parameters.Add(new SqlParameter("@numeral_recibido",numeral_recibido ));
                     int rowsAdded = command.ExecuteNonQuery();
                 }
             }
         }
+
+        public void actualizarImagenesPINEntrada(string imgEntrada,string transaccion)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            using (var Conn = new SqlConnection(Conexion_Bd))
+            {
+                Conn.Open();
+                using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_RutaImgIng=@imgEntrada WHERE Veh_Ticket=@transaccion", Conn))
+                {
+                    command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                    command.Parameters.Add(new SqlParameter("@imgEntrada", imgEntrada));
+                    int rowsAdded = command.ExecuteNonQuery();
+                }
+            }
+        }
+        public void actualizarImagenesPINSalida(string imgSalida, string transaccion)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            using (var Conn = new SqlConnection(Conexion_Bd))
+            {
+                Conn.Open();
+                using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_RutaImgSal=@imgSalida WHERE Veh_Ticket=@transaccion", Conn))
+                {
+                    command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                    command.Parameters.Add(new SqlParameter("@imgSalida", imgSalida));
+                    int rowsAdded = command.ExecuteNonQuery();
+                }
+            }
+        }
+
 
 
         #endregion
