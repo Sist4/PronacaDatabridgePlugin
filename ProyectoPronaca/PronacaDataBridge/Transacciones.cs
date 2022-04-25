@@ -477,7 +477,6 @@ namespace PronacaPlugin
         }
         public override void ScaleAccessStateChanged(int nScaleId, ScaleAccessStateChangedEventArgs args)
         {
-            ventanaOK("se cambio de bascula","plugin");
         }
         #endregion
 
@@ -568,8 +567,8 @@ namespace PronacaPlugin
                 {
                     CameraModel myCamera = CameraModel.GetByName(Nom_Camara);
                     int CameraId = myCamera.Id;
-                    int ImageWidth = 600;
-                    int ImageHeight = 800;
+                    int ImageWidth = 800;
+                    int ImageHeight = 600;
                     int Quality = myCamera.ImageQuality;
                     ImageFormat myImageFormat = ImageFormat.Jpeg;
 
@@ -599,9 +598,9 @@ namespace PronacaPlugin
                 }
                 catch (Exception ex)
                 {
-                    ServiceManager.LogMgr.WriteError("Failed to create transaction", ex);
-                    Nombre_Archivo = "";
-
+                    //throw new ExcepcionNegocio("Error en la captura de la imagen");
+                    ventanaOK("Error en la captura de la imagen de la cámara "+Nom_Camara,"DataBridge Plugin");
+                    return "";
                 }
 
                 return Nombre_Archivo;

@@ -1065,27 +1065,31 @@ namespace PronacaPlugin
         }
         public void escribirImagen(string ruta, string pesoBascula)
         {
-            var filePath = @"C:\Camara_DataBridge\" + ruta + ".jpg";
-            Bitmap bitmap = null;
-
-            // Create from a stream so we don't keep a lock on the file.
-            using (var stream = File.OpenRead(filePath))
+            if(ruta!="")
             {
-                bitmap = (Bitmap)Bitmap.FromStream(stream);
-            }
+                var filePath = @"C:\Camara_DataBridge\" + ruta + ".jpg";
+                Bitmap bitmap = null;
 
-            using (bitmap)
-            using (var graphics = Graphics.FromImage(bitmap))
-            using (var font = new Font("Arial", 18, FontStyle.Regular))
-            {
-                // Do what you want using the Graphics object here.
-                //graphics.DrawString("Fecha: 08-03-2022", font, Brushes.Red, 0, 650);
-                //graphics.DrawString("Placa: ABCD1234", font, Brushes.Red, 0, 670);
-                  graphics.DrawString("Peso en báscula: "+pesoBascula, font, Brushes.Red, 0, 520);
+                // Create from a stream so we don't keep a lock on the file.
+                using (var stream = File.OpenRead(filePath))
+                {
+                    bitmap = (Bitmap)Bitmap.FromStream(stream);
+                }
 
-                // Important part!
-                bitmap.Save(filePath);
+                using (bitmap)
+                using (var graphics = Graphics.FromImage(bitmap))
+                using (var font = new Font("Arial", 18, FontStyle.Regular))
+                {
+                    // Do what you want using the Graphics object here.
+                    //graphics.DrawString("Fecha: 08-03-2022", font, Brushes.Red, 0, 650);
+                    //graphics.DrawString("Placa: ABCD1234", font, Brushes.Red, 0, 670);
+                    graphics.DrawString("Peso en báscula: " + pesoBascula, font, Brushes.Red, 0, 520);
+
+                    // Important part!
+                    bitmap.Save(filePath);
+                }
             }
+            
         }
 
         public void actualizarEstadoSalida(string transaccion, string mensaje_recibido,string numeral_recibido)
