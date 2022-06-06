@@ -16,6 +16,11 @@ using System.Xml;
 using System.Diagnostics;
 using System.Collections;
 using System.Drawing;
+using Caliburn.Micro;
+using DataBridge.Attended.ViewModel;
+using DataBridge.Core.Services;
+using Ninject;
+using Application = System.Windows.Application;
 
 namespace PronacaPlugin
 {
@@ -30,6 +35,7 @@ namespace PronacaPlugin
         string cam3;
         string cam4;
         public string mensaje { get; set; }
+        string[] Correo_Destino;
         public GestionVehiculos()
         {
             codeBase = Assembly.GetExecutingAssembly().CodeBase;
@@ -37,48 +43,48 @@ namespace PronacaPlugin
             path = Uri.UnescapeDataString(uri.Path);
             cfg = ConfigurationManager.OpenExeConfiguration(path);
             cam1 = cfg.AppSettings.Settings["Nom_Camara1"].Value.Substring(0, 8);
-            cam1 = cfg.AppSettings.Settings["Nom_Camara1"].Value.Substring(0, 8);
             cam2 = cfg.AppSettings.Settings["Nom_Camara2"].Value.Substring(0, 8);
             cam3 = cfg.AppSettings.Settings["Nom_Camara3"].Value.Substring(0, 8);
             cam4 = cfg.AppSettings.Settings["Nom_Camara4"].Value.Substring(0, 8);
-
         }
         #region Correo
         public string EnvioCorreo(string N_Transaccion, string codigo_transaccion, string placa_seleccionada, string ruta_Imagen1, string ruta_Imagen2)
         {
             //*************************************************************APP CONFIG
-            string Correo_Destino1 = cfg.AppSettings.Settings["Correo_Destino1"].Value;
-            string Correo_Destino2 = cfg.AppSettings.Settings["Correo_Destino2"].Value;
-            string Correo_Destino3 = cfg.AppSettings.Settings["Correo_Destino3"].Value;
-            string Correo_Destino4 = cfg.AppSettings.Settings["Correo_Destino4"].Value;
-            string Correo_Destino5 = cfg.AppSettings.Settings["Correo_Destino5"].Value;
-            string Correo_Destino6 = cfg.AppSettings.Settings["Correo_Destino6"].Value;
-            string Correo_Destino7 = cfg.AppSettings.Settings["Correo_Destino7"].Value;
-            string Correo_Destino8 = cfg.AppSettings.Settings["Correo_Destino8"].Value;
-            string Correo_Destino9 = cfg.AppSettings.Settings["Correo_Destino9"].Value;
-            string Correo_Destino10 = cfg.AppSettings.Settings["Correo_Destino10"].Value;
+            Correo_Destino = new string[11];
+            int numero_Correos = Converter.ConvertToInt32(cfg.AppSettings.Settings["Numero_Correos_Destino"].Value);
+            Correo_Destino[1] = cfg.AppSettings.Settings["Correo_Destino1"].Value;
+            Correo_Destino[2] = cfg.AppSettings.Settings["Correo_Destino2"].Value;
+            Correo_Destino[3] = cfg.AppSettings.Settings["Correo_Destino3"].Value;
+            Correo_Destino[4] = cfg.AppSettings.Settings["Correo_Destino4"].Value;
+            Correo_Destino[5] = cfg.AppSettings.Settings["Correo_Destino5"].Value;
+            Correo_Destino[6] = cfg.AppSettings.Settings["Correo_Destino6"].Value;
+            Correo_Destino[7] = cfg.AppSettings.Settings["Correo_Destino7"].Value;
+            Correo_Destino[8] = cfg.AppSettings.Settings["Correo_Destino8"].Value;
+            Correo_Destino[9] = cfg.AppSettings.Settings["Correo_Destino9"].Value;
+            Correo_Destino[10] = cfg.AppSettings.Settings["Correo_Destino10"].Value;
             string Correo_Envio = cfg.AppSettings.Settings["Correo_Envio"].Value;
             string Correo_Pasword = cfg.AppSettings.Settings["Correo_Pasword"].Value;
             string Host_Salida = cfg.AppSettings.Settings["Host_Salida"].Value;
             string Host_Puerto = cfg.AppSettings.Settings["Host_Puerto"].Value;
             bool ssl = Boolean.Parse(cfg.AppSettings.Settings["SSL"].Value);
-
+            string directorio = @"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Camaras\";
             //***********************************************************FIN DEL APP CONFIG*****
 
             using (MailMessage mail = new MailMessage())
             {
                 mail.From = new MailAddress(Correo_Envio);
-                mail.To.Add(Correo_Destino1);
-                mail.To.Add(Correo_Destino2);
-                mail.To.Add(Correo_Destino3);
-                mail.Bcc.Add(Correo_Destino4);
-                mail.Bcc.Add(Correo_Destino4);
-                mail.Bcc.Add(Correo_Destino5);
-                mail.Bcc.Add(Correo_Destino6);
-                mail.Bcc.Add(Correo_Destino7);
-                mail.Bcc.Add(Correo_Destino8);
-                mail.Bcc.Add(Correo_Destino9);
-                mail.Bcc.Add(Correo_Destino10);
+                for (int i = 1; i <= numero_Correos; i++)
+                {
+                    mail.To.Add(Correo_Destino[i]);
+                }
+                //copia oculta
+
+                //for (int i = numero_Correos + 1; i <= 10; i++)
+                //{
+                //    mail.Bcc.Add(Correo_Destino[i]);
+                //}
+
                 mail.Subject = "DataBridge - Sistema de Pesaje - ";
                 //mail.Body = "<h1>Notificacion</h1></br><p>La transaccion nº:" + N_Transaccion + " con placa seleccionada del operador: " + placa_seleccionada + "   no cumple con las condiciones para seguir el proceso de Pesaje.</p></br> <p>Si desea seguir con la transaccion digite el siguiente PIN:" + codigo_transaccion + "   </p>";
                 mail.Body = "<h1>Notificación</h1><p>Las cámaras no identificaron la placa seleccionada, para proseguir con la transacción digite el PIN en el sistema de pesaje DataBridge.</p><table><tr><td>Fecha y hora:</td><td>" + DateTime.Now.ToString() + "</td></tr><tr><td>N# Transacción:</td><td>" + N_Transaccion + "</td></tr><tr><td>Placa seleccionada:</td><td>" + placa_seleccionada + "</td></tr><tr><td>PIN:</td><td>" + codigo_transaccion + "</td></tr><tr></table>";
@@ -86,11 +92,11 @@ namespace PronacaPlugin
                 mail.IsBodyHtml = true;
                 if (ruta_Imagen1 != (""))
                 {
-                    mail.Attachments.Add(new Attachment(@"C:\Camara_DataBridge\" + ruta_Imagen1 + ".jpg"));
+                    mail.Attachments.Add(new Attachment(directorio + ruta_Imagen1 + ".jpg"));
                 }
                 if (ruta_Imagen2 != (""))
                 {
-                    mail.Attachments.Add(new Attachment(@"C:\Camara_DataBridge\" + ruta_Imagen2 + ".jpg"));
+                    mail.Attachments.Add(new Attachment(directorio + ruta_Imagen2 + ".jpg"));
                 }
                 using (SmtpClient smtp = new SmtpClient(Host_Salida, Convert.ToInt32(Host_Puerto)))
                 {
@@ -120,10 +126,9 @@ namespace PronacaPlugin
 
 
 
-        public String listarFTP(string placa_enviada, int nScaleId)
+        public bool listarFTP(string placa_enviada, int nScaleId)
         {
-
-            string respuesta = "La placa no coicide:" + placa_enviada;
+            bool val = false;
             try
             {    //*************************************************************APP CONFIG
                 string codeBase = Assembly.GetExecutingAssembly().CodeBase;
@@ -139,7 +144,7 @@ namespace PronacaPlugin
                 using (SftpClient cliente = new SftpClient(new PasswordConnectionInfo(Ip_Sftp, Usuario_Sftp, Password_Sftp)))
                 {
                     cliente.Connect();
-                    buscarImagenesSFTP(cliente, "/Camara", placa_enviada, ref respuesta, nScaleId);
+                    val=buscarImagenesSFTP(cliente, "/Camara", placa_enviada, nScaleId);
                     cliente.Disconnect();
                 }
             } catch (Exception ex)
@@ -148,13 +153,12 @@ namespace PronacaPlugin
             }
 
 
-            return respuesta;
+            return val;
 
         }
 
-        private void buscarImagenesSFTP(SftpClient cliente, string directorioServidor, string placa_enviada, ref string respuesta, int nScaleId)
+        private bool buscarImagenesSFTP(SftpClient cliente, string directorioServidor, string placa_enviada, int nScaleId)
         {
-
 
             //*************************************************************APP CONFIG
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;
@@ -162,77 +166,92 @@ namespace PronacaPlugin
             string Ubicacion = Uri.UnescapeDataString(uri.Path);
             Configuration cfg = ConfigurationManager.OpenExeConfiguration(Ubicacion);
             string T_Camion = cfg.AppSettings.Settings["T_Camion"].Value;
+            StringBuilder placaNumeros = new StringBuilder();
+            StringBuilder placaLetras = new StringBuilder();
+            StringBuilder placaLeida = new StringBuilder();
+            bool digitosPlaca = false;
             //***********************************************************FIN DEL APP CONFIG
-
 
             var paths = cliente.ListDirectory(directorioServidor).Select(s => s.Name);
             foreach (var path in paths)
             {
                 if (path.ToString().Contains(".jpg"))
                 {
-
                     string[] array = path.ToString().Split('_');
                     //FECHA Y HORA EN EL array[0] ;la placa en el array[1]
                     string sucursalBasculaCamaras = array[0];
                     string FEC = array[1];
-                    string placa = array[2].Replace(".jpg", "");
+                    string placa = array[2];
+                    DateTime Fecha_Leida = new DateTime(Convert.ToInt32(FEC.Substring(0, 4)),
+                        Convert.ToInt32(FEC.Substring(4, 2)),
+                        Convert.ToInt32(FEC.Substring(6, 2)),
+                        Convert.ToInt32(FEC.Substring(8, 2)),
+                        Convert.ToInt32(FEC.Substring(10, 2)),
+                        Convert.ToInt32(FEC.Substring(12, 2)));
                     //obtenemos la fecha y la hora 
-                    string años = FEC.Substring(0, 4);
-                    string mes = FEC.Substring(4, 2);
-                    string dia = FEC.Substring(6, 2);
-                    string horas = FEC.Substring(8, 2);
-                    string minutos = FEC.Substring(10, 2);
-                    string segundos = FEC.Substring(12, 2);
-                    DateTime hora_foto = Convert.ToDateTime(años + "-" + mes + "-" + dia + " " + horas + ":" + minutos + ":" + segundos);
+                    //string años = FEC.Substring(0, 4);
+                    //string mes = FEC.Substring(4, 2);
+                    //string dia = FEC.Substring(6, 2);
+                    //string horas = FEC.Substring(8, 2);
+                    //string minutos = FEC.Substring(10, 2);
+                    //string segundos = FEC.Substring(12, 2);
+                    //DateTime hora_foto = Convert.ToDateTime(años + "-" + mes + "-" + dia + " " + horas + ":" + minutos + ":" + segundos);
                     DateTime Fecha_Actual = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    Fecha_Actual = Convert.ToDateTime(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")).AddMinutes(5);
                     DateTime Fecha_restada = (Fecha_Actual.AddMinutes(-Convert.ToUInt32(T_Camion)));
-                    string placa_con_cero = placa.Substring(0, 3) + "0" + placa.Substring(3, (placa.Length - 3));
-                    placa_enviada = placa_enviada.Replace("-", "");
-                    placa = placa.Replace("-", "");
+
+                    placaLeida.Append(placa);
+                    placaLeida.Replace(".jpg", "");
+                    placaLeida.Replace("-", "");
+                    //digitosPlaca = placaLeida.Length == 6 ? true : false;
+                    //placaLetras.Append(placaLeida);
+                    //placaLetras.Remove(3, placaLeida.Length - 3);
+                    //placaLetras.Replace('0', 'O');
+                    //placaLetras.Replace('1', 'I');
+                    //placaLetras.Replace('8', 'B');
+                    //placaLetras.Replace('6', 'G');
+                    //placaNumeros.Append(placaLeida);
+                    //placaNumeros.Remove(0, 3);
+                    //if (digitosPlaca == true)
+                    //    placaNumeros.Insert(0, '0');
+
+                    //placaNumeros.Replace('O', '0');
+                    //placaNumeros.Replace('Q', '0');
+                    //placaNumeros.Replace('I', '1');
+                    //placaNumeros.Replace('B', '8');
+                    //placaNumeros.Replace('G', '6');
+                    //placaLeida.Clear();
+                    //placaLeida.Append(placaLetras);
+                    //placaLeida.Append(placaNumeros);
+                    placa = placaLeida.ToString();
+
+
                     if (nScaleId == 0 && (sucursalBasculaCamaras.Equals(cam1) || sucursalBasculaCamaras.Equals(cam2)))
                     {
-                        if ((placa.Equals(placa_enviada) || placa_con_cero.Equals(placa_enviada)) && (hora_foto.CompareTo(Fecha_restada) >= 0 && hora_foto.CompareTo(Fecha_Actual) <= 0))
+                        if ((placa.Equals(placa_enviada)) && (Fecha_Leida.CompareTo(Fecha_restada) >= 0))
                         {
-
-                            respuesta = "";
+                            return true ;
                         }
                     }
                     else if (nScaleId == 1 && (sucursalBasculaCamaras.Equals(cam3) || sucursalBasculaCamaras.Equals(cam4)))
                     {
-                        if ((placa.Equals(placa_enviada) || placa_con_cero.Equals(placa_enviada)) && (hora_foto.CompareTo(Fecha_restada) >= 0 && hora_foto.CompareTo(Fecha_Actual) <= 0))
+                        if ((placa.Equals(placa_enviada)) && (Fecha_Leida.CompareTo(Fecha_restada) >= 0 ))
                         {
-
-                            respuesta = "";
+                            return true ;
                         }
                     }
-                     
-
+                    placaLeida.Clear();
+                    placaLetras.Clear();
+                    placaNumeros.Clear();
                 }
 
-
             }
+
+            return false;
 
         }
 
-        public string validarPlaca(string placaSeleccionada,string placaEnviada, DateTime horaActual, DateTime horaRestada)
-        {
-            int digitosPlaca = placaEnviada.Length;
-            string letrasPlaca = "";
-            string numerosPlaca = "";
-            if(digitosPlaca==7)
-            {
-                letrasPlaca.Substring(0, 3);
-                //numerosPlaca.Substring()
-            }
-            else
-            {
-                if(digitosPlaca==6)
-                {
-
-                }
-            }
-            return "";
-        }
+  
         #endregion
 
         #region ConexionBdDataBridge
@@ -694,7 +713,7 @@ namespace PronacaPlugin
                 //mensaje=ejecutable;
                 //Process.Start(ejecutable);
                 // Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
-                Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\ComunicacionAries.exe ", N_Transaccion);
+                Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Comunicación Aries\ComunicacionAries.exe ", N_Transaccion);
                 System.Threading.Thread.Sleep(3000);
                // G_Msg2();
                 //CONSULTA DE DATOS
@@ -705,9 +724,7 @@ namespace PronacaPlugin
 
                 using (SqlConnection connection = new SqlConnection(Conexion_Bd))
                 {
-
-
-                    String sql = "SELECT top 10 * FROM Temporal where Tem_Estado = 'Procesado' AND Tem_Transaccion='" + N_Transaccion + "'";
+                    String sql = "SELECT top 1* FROM ComunicacionAries where ComAries_Estado = 'Procesado' AND ComAries_Transaccion='" + N_Transaccion + "' ORDER BY ComAries_Codigo DESC";
 
                     using (SqlCommand command = new SqlCommand(sql, connection))
                     {
@@ -718,31 +735,32 @@ namespace PronacaPlugin
                             {
                                 Codigo = Convert.ToInt32(reader.GetInt32(0));
                                 mensaje_R = reader.GetString(3);
-                                Estado = reader.GetString(4);
+                                Estado = reader.GetString(6);
                             }
                         }
                         connection.Close();
                     }
                 }
 
-
                 if (Estado != "")
                 {
 
-                    string consulta = "UPDATE TEMPORAL SET  [Tem_Estado] ='Fin' where Tem_Codigo='" + Codigo + "' ";
+                    string consulta = "UPDATE ComunicacionAries SET  [ComAries_Estado] ='Fin' where ComAries_Codigo='" + Codigo + "' ";
 
                     SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
                     ConexionSql.Open();
                     SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
                     consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
                     ConexionSql.Close();
+                    ventanaOK("ya se cambio estado a fin", "ventana");
+                   // actualizarEstatusMensajeAries(DecodeBase64ToString(mensaje_R), Codigo);
                     return leer_Xml(DecodeBase64ToString(mensaje_R));
 
                 }
                 else
                 {
 
-                    string consulta = "DELETE FROM TEMPORAL  where Tem_Codigo='" + Codigo + "'  AND [Tem_Estado] ='A'";
+                    string consulta = "DELETE FROM ComunicacionAries  where ComAries_Codigo='" + Codigo + "'  AND [ComAries_Estado] ='A'";
 
                     SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
                     ConexionSql.Open();
@@ -758,6 +776,132 @@ namespace PronacaPlugin
             {
                 return e.ToString();
                 //MessageBox.Show("problemas de comunicacion" + e);
+            }
+
+        }
+
+        public void InvokeService2(string N_Transaccion, string FechaTicketProceso, string HoraTicketProceso, string UsuarioDataBridge, string NumeroBascula, string TipoPeso, string Peso_Ing,
+                                  string Vehiculo, string Cedula, string Chofer, string centroTransaccion, ref string mensajeAries, ref int estatusAries)
+        {
+
+            try
+            {
+                //*************************************************************APP CONFIG
+                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+                UriBuilder uri = new UriBuilder(codeBase);
+                string path = Uri.UnescapeDataString(uri.Path);
+                Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
+                string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+                string Centro = cfg.AppSettings.Settings["Centro_Distribucion"].Value;
+
+                //***********************************************************FIN DEL APP CONFIG
+
+                const string Comillas = "\"";
+
+                if (centroTransaccion.Equals(""))
+                {
+                    centroTransaccion = Centro;
+                }
+
+                string XmlEnvio = "<ns1:GesImpPesAr xmlns:ns1=" + Comillas + "http://ln.gesalm.integracion.pronaca.com.ec" + Comillas + ">" +
+                                "<ControlProceso>" +
+                                "<CodigoCompania>002</CodigoCompania>" +
+                                "<CodigoSistema>DB</CodigoSistema>" +
+                                "<CodigoServicio>ValidaPesosDB</CodigoServicio>" +
+                                "<Proceso>Insertar/Validar</Proceso>" +
+                                "<Resultado></Resultado>" +
+                                "</ControlProceso>" +
+                                "<Cabecera>" +
+                                "<TicketDataBridge>" + N_Transaccion + "</TicketDataBridge>" +
+                                "<FechaTicketProceso>" + FechaTicketProceso + "</FechaTicketProceso>" +
+                                "<HoraTicketProceso>" + HoraTicketProceso + "</HoraTicketProceso>" +
+                                "<UsuarioDataBridge>" + UsuarioDataBridge + "</UsuarioDataBridge>" +
+                                "<NumeroBascula>" + NumeroBascula + "</NumeroBascula>" +
+                                "<TipoPeso>" + TipoPeso + "</TipoPeso>" +
+                                "<PesoTicketDataBridge>" + Peso_Ing + "</PesoTicketDataBridge>" +
+                                "<PlacaVehiculo>" + Vehiculo + "</PlacaVehiculo>" +
+                                "<CedulaTransportista>" + Cedula + "</CedulaTransportista>" +
+                                "<NombreTransportista>" + Chofer + "</NombreTransportista>" +
+                                "<CodCentroAries>" + centroTransaccion + "</CodCentroAries>" +
+                                "<TicketAries> </TicketAries>" +
+                                "<CedUsuarioAries> </CedUsuarioAries>" +
+                                "<NomUsuarioAries> </NomUsuarioAries>" +
+                                "<EstatusAries>1</EstatusAries>" +
+                                "<MensajeAries>Enviado</MensajeAries>" +
+                                "</Cabecera>" +
+                                "</ns1:GesImpPesAr>";
+
+                ///*****************************************************esto no va************************************
+                string codificiacionMsj = EncodeStrToBase64(XmlEnvio);
+                string res = G_Msg(codificiacionMsj, "A", N_Transaccion);
+                //string ejecutable = @"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\ComunicacionAries.exe " + N_Transaccion;
+                //Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\ComunicacionAries.exe "+N_Transaccion);
+                //mensaje=ejecutable;
+                //Process.Start(ejecutable);
+                // Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
+                Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Comunicación Aries\ComunicacionAries.exe ", N_Transaccion);
+                System.Threading.Thread.Sleep(3000);
+                // G_Msg2();
+                //CONSULTA DE DATOS
+                int Codigo = 0;
+                int Transaccion;
+                string mensaje_R = "";
+                string Estado = "";
+
+                using (SqlConnection connection = new SqlConnection(Conexion_Bd))
+                {
+                    String sql = "SELECT top 1* FROM ComunicacionAries where ComAries_Estado = 'Procesado' AND ComAries_Transaccion='" + N_Transaccion + "' ORDER BY ComAries_Codigo DESC";
+
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    {
+                        connection.Open();
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                Codigo = Convert.ToInt32(reader.GetInt32(0));
+                                mensaje_R = reader.GetString(3);
+                                Estado = reader.GetString(6);
+                            }
+                        }
+                        connection.Close();
+                    }
+                }
+                
+                //if (Estado != "")
+                if(mensaje_R!="")
+                {
+
+                    string consulta = "UPDATE ComunicacionAries SET  [ComAries_Estado] ='Fin' where ComAries_Codigo='" + Codigo + "' ";
+
+                    SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
+                    ConexionSql.Open();
+                    SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
+                    consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
+                    ConexionSql.Close();
+                    mensajeAries = leerMensaje_Xml(DecodeBase64ToString(mensaje_R));
+                    estatusAries = leerEstatus_Xml(DecodeBase64ToString(mensaje_R));
+                    actualizarEstatusMensajeAries(DecodeBase64ToString(mensaje_R), Codigo,mensajeAries,estatusAries);
+
+                }
+                else
+                {
+                    estatusAries = 0;
+                    mensajeAries = "";
+                    //string consulta = "DELETE FROM ComunicacionAries  where ComAries_Codigo='" + Codigo + "'  AND [ComAries_Estado] ='A'";
+
+                    //SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
+                    //ConexionSql.Open();
+                    //SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
+                    //consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
+                    //ConexionSql.Close();
+                }
+
+            }
+            catch (Exception e)
+            {
+                estatusAries = 1;
+                mensajeAries = e.Message;
             }
 
         }
@@ -826,6 +970,156 @@ namespace PronacaPlugin
 
             return envioRes;
         }
+        public int leerEstatus_Xml(string Xml)
+        {
+            const string Comillas = "\"";
+            string res_xml = Xml.Replace("<ns1:GesImpPesAr xmlns:ns1=" + Comillas + "http://ln.gesalm.integracion.pronaca.com.ec" + Comillas + ">", "<ns1>");
+            res_xml = res_xml.Replace("ns1:GesImpPesAr", "ns1");
+
+            XmlDocument xmltest = new XmlDocument();
+            xmltest.LoadXml(res_xml);
+            XmlNodeList nodes = xmltest.SelectNodes("//ns1/Cabecera");
+            int Estatus = 0;
+            string Mensaje = "";
+            foreach (XmlNode node in nodes)
+            {
+                Estatus = Convert.ToInt32(node["EstatusAries"].InnerText);
+                Mensaje = node["MensajeAries"].InnerText;
+            }
+            if (Estatus != 0)
+                return Estatus;
+            else
+            {
+                res_xml = Xml.Replace("<GesImpPesAr xmlns=" + Comillas + "http://ln.gesalm.integracion.pronaca.com.ec" + Comillas + ">", "<ns1>");
+                res_xml = res_xml.Replace("GesImpPesAr", "ns1");
+                xmltest = new XmlDocument();
+                xmltest.LoadXml(res_xml);
+                nodes = xmltest.SelectNodes("//ns1/Cabecera");
+                Estatus = 0;
+                Mensaje = "";
+                foreach (XmlNode node in nodes)
+                {
+                    Estatus = Convert.ToInt32(node["EstatusAries"].InnerText);
+                    Mensaje = node["MensajeAries"].InnerText;
+                }
+                if (Estatus != 0)
+                    return Estatus;
+                else
+                    return 1;
+            }
+        }
+        public string leerMensaje_Xml(string Xml)
+        {
+            const string Comillas = "\"";
+            string res_xml = Xml.Replace("<ns1:GesImpPesAr xmlns:ns1=" + Comillas + "http://ln.gesalm.integracion.pronaca.com.ec" + Comillas + ">", "<ns1>");
+            res_xml = res_xml.Replace("ns1:GesImpPesAr", "ns1");
+
+            XmlDocument xmltest = new XmlDocument();
+            xmltest.LoadXml(res_xml);
+            XmlNodeList nodes = xmltest.SelectNodes("//ns1/Cabecera");
+            int Estatus = 0;
+            string Mensaje = "";
+            foreach (XmlNode node in nodes)
+            {
+                Estatus = Convert.ToInt32(node["EstatusAries"].InnerText);
+                Mensaje = node["MensajeAries"].InnerText;
+            }
+
+            if (Mensaje != "")
+                return Mensaje;
+            else
+            {
+                res_xml = Xml.Replace("<GesImpPesAr xmlns=" + Comillas + "http://ln.gesalm.integracion.pronaca.com.ec" + Comillas + ">", "<ns1>");
+                res_xml = res_xml.Replace("GesImpPesAr", "ns1");
+                xmltest = new XmlDocument();
+                xmltest.LoadXml(res_xml);
+                nodes = xmltest.SelectNodes("//ns1/Cabecera");
+                Estatus = 0;
+                Mensaje = "";
+                foreach (XmlNode node in nodes)
+                {
+                    Estatus = Convert.ToInt32(node["EstatusAries"].InnerText);
+                    Mensaje = node["MensajeAries"].InnerText;
+                }
+
+                if (Mensaje != "")
+                    return Mensaje;
+                else
+                    return Xml;
+            }
+        }
+
+        public void actualizarEstatusMensajeAries(string Xml,int Codigo,string mensajeAries,int estatusAries)
+        {
+            const string Comillas = "\"";
+            string res_xml = Xml.Replace("<ns1:GesImpPesAr xmlns:ns1=" + Comillas + "http://ln.gesalm.integracion.pronaca.com.ec" + Comillas + ">", "<ns1>");
+            res_xml = res_xml.Replace("ns1:GesImpPesAr", "ns1");
+
+            XmlDocument xmltest = new XmlDocument();
+            xmltest.LoadXml(res_xml);
+            XmlNodeList nodes = xmltest.SelectNodes("//ns1/Cabecera");
+            int Estatus = 0;
+            string Mensaje = "";
+            string TipoPeso = "F";
+            foreach (XmlNode node in nodes)
+            {
+                Estatus = Convert.ToInt32(node["EstatusAries"].InnerText);
+                Mensaje = node["MensajeAries"].InnerText;
+                TipoPeso= node["TipoPeso"].InnerText;
+            }
+            if(!Mensaje.Equals(""))
+            {
+                string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open(); 
+                    using (var command = new SqlCommand("UPDATE ComunicacionAries SET ComAries_EstatusRecibido=@estatus, ComAries_MensajeRecibido=@mensaje,ComAries_TipoPeso=@tipoPeso WHERE ComAries_Codigo=@codigo", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@estatus", estatusAries));
+                        command.Parameters.Add(new SqlParameter("@mensaje", mensajeAries));
+                        command.Parameters.Add(new SqlParameter("@codigo", Codigo));
+                        command.Parameters.Add(new SqlParameter("@tipoPeso", TipoPeso));
+                        int rowsAdded = command.ExecuteNonQuery();
+                    }
+                }
+            }
+            else
+            {
+                res_xml = Xml.Replace("<GesImpPesAr xmlns=" + Comillas + "http://ln.gesalm.integracion.pronaca.com.ec" + Comillas + ">", "<ns1>");
+                res_xml = res_xml.Replace("GesImpPesAr", "ns1");
+                xmltest = new XmlDocument();
+                xmltest.LoadXml(res_xml);
+                nodes = xmltest.SelectNodes("//ns1/Cabecera");
+                Estatus = 0;
+                Mensaje = "";
+                TipoPeso = "F";
+                foreach (XmlNode node in nodes)
+                {
+                    Estatus = Convert.ToInt32(node["EstatusAries"].InnerText);
+                    Mensaje = node["MensajeAries"].InnerText;
+                    TipoPeso = node["TipoPeso"].InnerText;
+                }
+                string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open();
+                    using (var command = new SqlCommand("UPDATE ComunicacionAries SET ComAries_EstatusRecibido=@estatus, ComAries_MensajeRecibido=@mensaje,ComAries_TipoPeso=@tipoPeso WHERE ComAries_Codigo=@codigo", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@estatus", estatusAries));
+                        command.Parameters.Add(new SqlParameter("@mensaje", mensajeAries));
+                        command.Parameters.Add(new SqlParameter("@codigo", Codigo));
+                        command.Parameters.Add(new SqlParameter("@tipoPeso", TipoPeso));
+                        int rowsAdded = command.ExecuteNonQuery();
+                    }
+                }
+               
+
+            }
+            
+
+
+
+        }
 
         //*************FIN Lectura del XML*****************************
 
@@ -842,7 +1136,7 @@ namespace PronacaPlugin
             string consulta;
             try
             {
-                consulta = "INSERT INTO [dbo].[Temporal]  ([Tem_Mensaje],[Tem_Estado],Tem_Transaccion)VALUES('" + Mensaje + "','A'," + Tem_Transaccion + ")";
+                consulta = "INSERT INTO [dbo].[ComunicacionAries]  ([ComAries_XMLEnviado],[ComAries_Estado],ComAries_Transaccion)VALUES('" + Mensaje + "','A'," + Tem_Transaccion + ")";
 
                 SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
                 ConexionSql.Open();
@@ -862,27 +1156,22 @@ namespace PronacaPlugin
             return consulta;
         }
 
-        public void InsertarPesosObtenidos(List<PesoObtenido> pesosObtenidos,string transaccion,int bascula)
+        public void InsertarPesosObtenidos(string pesosObtenidos,string transaccion,int bascula)
         {
+
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-            foreach(PesoObtenido peso in pesosObtenidos)
+            using (var Conn = new SqlConnection(Conexion_Bd))
             {
-                if(peso.Bascula==bascula)
+                Conn.Open();
+                using (var command = new SqlCommand("UPDATE Tb_Vehiculos set Veh_PesosObtenidos = Veh_PesosObtenidos + @peso where  Veh_Ticket=@transaccion", Conn))
                 {
-                    using (var Conn = new SqlConnection(Conexion_Bd))
-                    {
-                        Conn.Open();
-                        using (var command = new SqlCommand("UPDATE Tb_Vehiculos set Veh_PesosObtenidos = Veh_PesosObtenidos + @peso+'; ' where  Veh_Ticket=@transaccion", Conn))
-                        {
-                            command.Parameters.Add(new SqlParameter("@peso", peso.Peso));
-                            command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
-                            int rowsAdded = command.ExecuteNonQuery();
-                        }
-                    }
-                }       
+                    command.Parameters.Add(new SqlParameter("@peso", pesosObtenidos));
+                    command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                    int rowsAdded = command.ExecuteNonQuery();
+                }
             }
-            
-           
+
+
         }
 
         public void anularTransacción(string transaccion)
@@ -936,28 +1225,18 @@ namespace PronacaPlugin
             }
 
         }
-        public void eliminarTransaccionPendiente()
+        public void eliminarTransaccionPendiente(int bascula)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
 
             //***********************************************************FIN DEL APP CONFIG
-            string consulta2;
-            try
+            using (var Conn = new SqlConnection(Conexion_Bd))
             {
-                consulta2 = "DELETE FROM [dbo].[Tb_Vehiculos] WHERE Veh_Estado='IP';";
-
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta2, ConexionSql);
-                consulta2 = Convert.ToString(Comando_Sql.ExecuteNonQuery());
-                ConexionSql.Close();
-            }
-            finally
-            {
-
-                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
+                Conn.Open();
+                using (var command = new SqlCommand("DELETE FROM [dbo].[Tb_Vehiculos] WHERE Veh_Estado='IP' AND Veh_BASCULA=@bascula;", Conn))
                 {
-                    ConexionSql.Close();
+                    command.Parameters.Add(new SqlParameter("@bascula", bascula));
+                    int rowsAdded = command.ExecuteNonQuery();
                 }
             }
         }
@@ -998,49 +1277,45 @@ namespace PronacaPlugin
         public string EnvioCorreoSecuenciaDetenida(string razon, string operador, string ruta_Imagen1, string ruta_Imagen2,string pesoObtenido,string pesoBascula)
         {
             //*************************************************************APP CONFIG
-            string Correo_Destino1 = cfg.AppSettings.Settings["Correo_Destino1"].Value;
-            string Correo_Destino2 = cfg.AppSettings.Settings["Correo_Destino2"].Value;
-            string Correo_Destino3 = cfg.AppSettings.Settings["Correo_Destino3"].Value;
-            string Correo_Destino4 = cfg.AppSettings.Settings["Correo_Destino4"].Value;
-            string Correo_Destino5 = cfg.AppSettings.Settings["Correo_Destino5"].Value;
-            string Correo_Destino6 = cfg.AppSettings.Settings["Correo_Destino6"].Value;
-            string Correo_Destino7 = cfg.AppSettings.Settings["Correo_Destino7"].Value;
-            string Correo_Destino8 = cfg.AppSettings.Settings["Correo_Destino8"].Value;
-            string Correo_Destino9 = cfg.AppSettings.Settings["Correo_Destino9"].Value;
-            string Correo_Destino10 = cfg.AppSettings.Settings["Correo_Destino10"].Value;
+            Correo_Destino = new string[11];
+            int numero_Correos = Converter.ConvertToInt32(cfg.AppSettings.Settings["Numero_Correos_Destino"].Value);
+            Correo_Destino[1] = cfg.AppSettings.Settings["Correo_Destino1"].Value;
+            Correo_Destino[2] = cfg.AppSettings.Settings["Correo_Destino2"].Value;
+            Correo_Destino[3] = cfg.AppSettings.Settings["Correo_Destino3"].Value;
+            Correo_Destino[4] = cfg.AppSettings.Settings["Correo_Destino4"].Value;
+            Correo_Destino[5] = cfg.AppSettings.Settings["Correo_Destino5"].Value;
+            Correo_Destino[6] = cfg.AppSettings.Settings["Correo_Destino6"].Value;
+            Correo_Destino[7] = cfg.AppSettings.Settings["Correo_Destino7"].Value;
+            Correo_Destino[8] = cfg.AppSettings.Settings["Correo_Destino8"].Value;
+            Correo_Destino[9] = cfg.AppSettings.Settings["Correo_Destino9"].Value;
+            Correo_Destino[10] = cfg.AppSettings.Settings["Correo_Destino10"].Value;
             string Correo_Envio = cfg.AppSettings.Settings["Correo_Envio"].Value;
             string Correo_Pasword = cfg.AppSettings.Settings["Correo_Pasword"].Value;
             string Host_Salida = cfg.AppSettings.Settings["Host_Salida"].Value;
             string Host_Puerto = cfg.AppSettings.Settings["Host_Puerto"].Value;
             bool ssl = Boolean.Parse(cfg.AppSettings.Settings["SSL"].Value);
-
+            string directorio = @"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Camaras\";
             //***********************************************************FIN DEL APP CONFIG
 
             using (MailMessage mail = new MailMessage())
             {
                 mail.From = new MailAddress(Correo_Envio);
-                mail.To.Add(Correo_Destino1);
-                mail.To.Add(Correo_Destino2);
-                mail.To.Add(Correo_Destino3);
-                mail.Bcc.Add(Correo_Destino4);
-                mail.Bcc.Add(Correo_Destino4);
-                mail.Bcc.Add(Correo_Destino5);
-                mail.Bcc.Add(Correo_Destino6);
-                mail.Bcc.Add(Correo_Destino7);
-                mail.Bcc.Add(Correo_Destino8);
-                mail.Bcc.Add(Correo_Destino9);
-                mail.Bcc.Add(Correo_Destino10);
+                mail.From = new MailAddress(Correo_Envio);
+                for (int i = 1; i <= numero_Correos; i++)
+                {
+                    mail.To.Add(Correo_Destino[i]);
+                }
                 mail.Subject = "DataBridge - Sistema de Pesaje - ";
                 //mail.Body = "<h1>Notificacion</h1></br><p>El día " + DateTime.Now.ToString() + " fue detenida la secuencia, por la razón: " + razon + " por el operador: " +operador+".</p>";
                 mail.Body = "<h1>Notificación</h1><p> Se ha detenido la secuencia de pesaje en DataBridge.</p><table><tr><td>Fecha y hora:</td><td>" + DateTime.Now.ToString() + "</td></tr><tr><td>Razón:</td><td>" + razon + "</td></tr><tr><td>Operador:</td><td>" + operador + "</td></tr><tr><td>Peso obtenido:</td><td>" + pesoObtenido + "</td></tr><tr><td>Peso en báscula:</td><td>" + pesoBascula + "</td></tr></table>";
                 mail.IsBodyHtml = true;
                 if (ruta_Imagen1 != (""))
                 {
-                    mail.Attachments.Add(new Attachment(@"C:\Camara_DataBridge\" + ruta_Imagen1 + ".jpg"));
+                    mail.Attachments.Add(new Attachment(directorio + ruta_Imagen1 + ".jpg"));
                 }
                 if (ruta_Imagen2 != (""))
                 {
-                    mail.Attachments.Add(new Attachment(@"C:\Camara_DataBridge\" + ruta_Imagen2 + ".jpg"));
+                    mail.Attachments.Add(new Attachment(directorio + ruta_Imagen2 + ".jpg"));
                 }
                 using (SmtpClient smtp = new SmtpClient(Host_Salida, Convert.ToInt32(Host_Puerto)))
                 {
@@ -1065,9 +1340,10 @@ namespace PronacaPlugin
         }
         public void escribirImagen(string ruta, string pesoBascula)
         {
-            if(ruta!="")
+            string directorio = @"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Camaras\";
+            if (ruta!="")
             {
-                var filePath = @"C:\Camara_DataBridge\" + ruta + ".jpg";
+                var filePath =directorio + ruta + ".jpg";
                 Bitmap bitmap = null;
 
                 // Create from a stream so we don't keep a lock on the file.
@@ -1092,17 +1368,19 @@ namespace PronacaPlugin
             
         }
 
-        public void actualizarEstadoSalida(string transaccion, string mensaje_recibido,string numeral_recibido)
+        public void actualizarEstadoSalida(string transaccion, string mensaje_recibido,string numeral_recibido,int bascula,string pesoSalida)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
             using (var Conn = new SqlConnection(Conexion_Bd))
             {
                 Conn.Open();
-                using (var command = new SqlCommand("UPDATE Tb_Vehiculos set Veh_Estado='SC',Veh_Val1=@msj_recibido,Veh_Val3=@numeral_recibido WHERE Veh_Ticket=@transaccion AND Veh_Estado='SP' AND Veh_Val2='3'", Conn))
+                using (var command = new SqlCommand("UPDATE Tb_Vehiculos set Veh_BasculaSalida=@bascula,Veh_Estado='SC',Veh_Val1=@msj_recibido,Veh_Val3=@numeral_recibido,Veh_Peso_Salida=@pesoSalida WHERE Veh_Ticket=@transaccion AND Veh_Estado='SP' AND Veh_Val2='3'", Conn))
                 {
+                    command.Parameters.Add(new SqlParameter("@bascula", bascula));
                     command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
                     command.Parameters.Add(new SqlParameter("@msj_recibido", mensaje_recibido));
                     command.Parameters.Add(new SqlParameter("@numeral_recibido",numeral_recibido ));
+                    command.Parameters.Add(new SqlParameter("@pesoSalida", pesoSalida));
                     int rowsAdded = command.ExecuteNonQuery();
                 }
             }
@@ -1137,7 +1415,70 @@ namespace PronacaPlugin
             }
         }
 
+        public string estatusRecibidoAries(string transaccion)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            string estado = "";
+            using (var Conn = new SqlConnection(Conexion_Bd))
+            {
+                Conn.Open();
+                using (var command = new SqlCommand("SELECT TOP 1 ComAries_EstatusRecibido FROM ComunicacionAries WHERE ComAries_Transaccion=@transaccion AND ComAries_TipoPeso='S' AND ComAries_EstatusRecibido='3' ORDER BY ComAries_Codigo DESC", Conn))
+                {
+                    command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                    estado = Convert.ToString(command.ExecuteScalar());
+                }
+            }
+            return estado;
+        }
 
+        public void actualizarEstadoPendienteEntrada(int bascula)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            using (var Conn = new SqlConnection(Conexion_Bd))
+            {
+                Conn.Open();
+                using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_Estado='TI' WHERE Veh_Estado='IP' AND Veh_Bascula=@bascula", Conn))
+                {
+                    command.Parameters.Add(new SqlParameter("@bascula", bascula));
+                    int rowsAdded = command.ExecuteNonQuery();
+                }
+            }
+        }
+        public void actualizarFechaEntrada(int bascula,string transaccion,DateTime fechaIngreso)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            using (var Conn = new SqlConnection(Conexion_Bd))
+            {
+                Conn.Open();
+                using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_Fecha_Ingreso=@fechaIngreso WHERE Veh_Ticket=@transaccion AND Veh_Bascula=@bascula", Conn))
+                {
+                    command.Parameters.Add(new SqlParameter("@bascula", bascula));
+                    command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                    command.Parameters.Add(new SqlParameter("@fechaIngreso", fechaIngreso));
+                    int rowsAdded = command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        private void ventanaOK(string texto, String titulo)
+        {
+            try
+            {
+                IWindowManager windowManager = ServiceLocator.GetKernel().Get<IWindowManager>();
+                CustomOkDialogViewModel viewModel = new CustomOkDialogViewModel(texto);
+                viewModel.CustomWindowTitle = titulo;
+                viewModel.OkButtonText = "OK";
+                Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    windowManager.ShowDialog(viewModel);
+
+                });
+            }
+            catch (Exception ex)
+            {
+                ServiceManager.LogMgr.WriteError("Error", ex);
+            }
+        }
 
         #endregion
 

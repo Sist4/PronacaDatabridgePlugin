@@ -38,3 +38,35 @@ C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDa
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.dll
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.pdb
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.AssemblyReference.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.dll.config
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.xml
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.AssemblyReference.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CoreCompileInputs.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\XamlC.stamp
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CopyComplete
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.dll.config
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.xml
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CoreCompileInputs.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\PronacaDataBridge\obj\Debug\XamlC.stamp
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CopyComplete
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.dll.config
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.xml
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CoreCompileInputs.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\PronacaDataBridge\obj\Debug\XamlC.stamp
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CopyComplete
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.AssemblyReference.cache

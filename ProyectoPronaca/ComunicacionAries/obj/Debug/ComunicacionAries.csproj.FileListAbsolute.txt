@@ -1,0 +1,20 @@
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\ComunicacionAries\bin\Debug\ComunicacionAries.exe.config
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\ComunicacionAries\bin\Debug\ComunicacionAries.exe
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\ComunicacionAries\bin\Debug\ComunicacionAries.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.Form1.resources
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.Properties.Resources.resources
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.csproj.GenerateResource.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.csproj.CoreCompileInputs.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.exe
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.csproj.AssemblyReference.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\ComunicacionAries\bin\Debug\ComunicacionAries.exe.config
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\ComunicacionAries\bin\Debug\ComunicacionAries.exe
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\ComunicacionAries\bin\Debug\ComunicacionAries.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.csproj.AssemblyReference.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.Form1.resources
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.Properties.Resources.resources
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.csproj.GenerateResource.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.csproj.CoreCompileInputs.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.exe
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.pdb

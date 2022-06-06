@@ -37,3 +37,21 @@ C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\o
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.dll
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.pdb
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.AssemblyReference.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\bin\Debug\Camaras.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\bin\Debug\Camaras.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.AssemblyReference.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.CoreCompileInputs.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\Camaras\bin\Debug\Camaras.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\Camaras\bin\Debug\Camaras.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.AssemblyReference.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.CoreCompileInputs.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\Camaras\obj\Debug\Camaras.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes\ProyectoPronaca\Camaras\obj\Debug\Camaras.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\Camaras\bin\Debug\Camaras.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\Camaras\bin\Debug\Camaras.pdb
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.AssemblyReference.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.CoreCompileInputs.cache
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\Camaras\obj\Debug\Camaras.dll
+C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin-cambiosPendientes - PRUEBAS\ProyectoPronaca\Camaras\obj\Debug\Camaras.pdb
