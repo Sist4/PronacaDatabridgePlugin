@@ -138,141 +138,13 @@ namespace PronacaPlugin
         }
         public override string TransactionAccepting(int nScaleId, TransactionModel myTransaction) 
         {
-            string T_Chofer = cfg.AppSettings.Settings["T_Chofer"].Value; //tiempo que tiene el chofer para timbrar en el biometrico
-            string chofer = myTransaction.Loads[0].Driver.Name; //cédula del chofer que conduce el vehículo 
-            string vehiculo = myTransaction.Loads[0].Vehicle.Name; //la placa del vehículo
-            operador = myTransaction.Loads[0].Pass1Operator; //operador de databridge
-            pesoObtenido[nScaleId] = myTransaction.Loads[0].GrossWeight; //peso obtenido en esa báscula
-            estado = "entrada";
-            LoadModel myLoad = myTransaction.FirstLoad;
-            foreach (LoadCDEModel myLoadCDE in myLoad.LoadCDEs)
+            try
             {
-                if (String.Compare(myLoadCDE.CustomDataEntry.CustomDataCollection.Name, "Centro", true) == 0)
-                {
-                    centro = myLoadCDE.CustomDataEntry.Name;
-                }
+                return validarTicketEntrada(nScaleId, myTransaction);
             }
-            if ((nScaleId==0 && transaccionEnviada[nScaleId]==1) || (nScaleId==1 && transaccionEnviada[nScaleId]==1))
+            catch (Exception ex)
             {
-                return "";
-            }
-            else
-            {
-                //*****************************FILTRO DEL CHOFER*********************************************************
-                //Tomar en cuenta que debe estar abierto el progrma ZKAccess3.5 Security System del biometrico  
-                //Consultamos si el chofer existe en el biometrico 
-                if (VEH.consulta_ExisteChofer(chofer) != "")
-                {
-                    //ventanaOK("Si se identifico al chofer", "DataBridge Plugin");
-                    //*****************************FILTRO DEL BIOMETRICO*********************************************************
-                    // si existe procedemosa verificar si se tomo la lectura en el trascuroso de los 10 minutos
-                    if (VEH.consulta_BiometricoChofer(chofer) != "")
-                    {
-                        //ventanaOK("peso obtenido: " + myTransaction.Loads[0].Pass1Weight + " peso actual: " + pesoActualEntrada + " peso actual -10: " + (pesoActualEntrada - 10) +
-                        //  "peso actual +10: " + (pesoActualEntrada + 10), "ventana pesos");
-                        if (myTransaction.Loads[0].Pass1Weight >= (pesoActualBascula[nScaleId] - 10) && myTransaction.Loads[0].Pass1Weight <= (pesoActualBascula[nScaleId] + 10))
-                        {
-                            //pasa el primer filtro del chofer 
-                            //********************** FILTRO DE LA PLACA AL INGRESO*******************************************************************   
-                            string Ping_Ingreso = VEH.consulta_PlacaIngreso(vehiculo);
-                            //ventanaOK("Si timbro el chofer", "DataBridge Plugin");
-                            if (Ping_Ingreso != "")
-                            {
-                                //si el vehiculo anteriormente se registro un pin el operador ya debio haber registrado 
-                                ventanaOK("Se envió un email al coordinador con un PIN para terminar la transacción de entrada ", "DataBridge Plugin");
-                                string Nota = ventanaImput("Ingrese el PIN ", "DataBridge Plugin", "PIN");
-                                if (Ping_Ingreso.Equals(Nota))
-                                {
-                                    //************************************************COMUNICACION CON EL ARIES *****************************************************
-                                    //ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
-                                    return AriesEntrada(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
-                                    //return "";          
-                                }
-                                else
-                                {
-                                    return "El PIN ingresado no coincide";
-                                }
-                            }
-                            else
-                            {
-                                //************************************************COMUNICACION CAMARAS *****************************************************
-                                if (ComunicacionCamaras(myTransaction, nScaleId) == true)
-                                {
-                                    banderaCamaras = true;
-                                    //si la respuesta es positiva de cualquiera de las dos camaras
-                                    ///BUSCAMOS EN LA RUTA DEL FTP SI LOS DEVUELVE EN BLANCO ES Q SI ENCONTRO LA FOTO
-                                        if (VEH.listarFTP(vehiculo, nScaleId)==true)
-                                        {
-                                        //************************************************COMUNICACION CON EL ARIES *****************************************************
-                                        //    ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
-                                        string RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, Convert.ToString(myTransaction.Loads[0].Pass1Weight),"", VEH.consulta_TransaccionDB(),"", "", myTransaction.Loads[0].Pass1Operator,"","", "","", "IP", msj_recibido, Numeral_recibido);
-                                        return AriesEntrada(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
-                                            //return "";
-                                        }
-                                        else
-                                        {
-                                        //************************************************NOTIFICACION POR CORREO **************************************************
-                                            if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
-                                            {
-                                                try
-                                                {
-                                                    return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
-                                                }
-                                                catch (Exception ex)
-                                                {
-                                                    return ex.Message;
-                                                }
-                                                 
-                                            }
-                                             else
-                                            {
-                                                 return "Porfavor seleccione la báscula correcta y continue la transacción";
-                                            }
-                                    }
-                                    
-
-                                    
-                                }
-                                else
-                                {
-                                    //************************************************NOTIFICACION POR CORREO *****************************************************   
-                                    if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
-                                    {
-                                        try
-                                        {
-                                            return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            return ex.Message;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        return "Porfavor seleccione la báscula correcta y continue la transacción";
-                                    }
-                                }
-
-                            }
-
-                        }
-                        else
-                        {
-                            return "El peso obtenido no es igual al peso actual en la báscula, vuelva a obtener el peso porfavor";
-                        }
-
-                    }
-                    // si el chofer no Timbro o excedio el tiempo predeterminado(10 minutos) 
-                    else
-                    {
-                        return "El Conductor no ha Timbrado en el Biometrico. El Tiempo de espera son de " + T_Chofer + " Minutos";
-                    }
-                }
-                // FIN DEL FILTRO BIOMETRICO- CHOFER
-                else
-                {
-                    return "El conductor no está registrado en el Biometrico";
-                }
+                return ex.Message;
             }
             
         }
@@ -301,123 +173,14 @@ namespace PronacaPlugin
         }
         public override string TransactionCompleting(int nScaleId, TransactionModel myTransaction)
         {
-           vehiculo = myTransaction.Loads[0].Vehicle.Name;
-           string Peso_Salida = myTransaction.Loads[0].Pass2Weight.ToString();
-           string chofer = myTransaction.Loads[0].Driver.Name.ToString();
-           string N_Transaccion = myTransaction.Loads[0].TransactionNumber; 
-           string T_pesaje = VEH.consulta_TipoIngreso(N_Transaccion);
-           string T_Chofer = cfg.AppSettings.Settings["T_Chofer"].Value;
-            operador = myTransaction.Loads[0].Pass2Operator;
-            pesoObtenido[nScaleId] = myTransaction.Loads[0].GrossWeight;
-            estado = "salida";
-            LoadModel myLoad = myTransaction.FirstLoad;
-            foreach (LoadCDEModel myLoadCDE in myLoad.LoadCDEs)
+            try
             {
-                if (String.Compare(myLoadCDE.CustomDataEntry.CustomDataCollection.Name, "Centro", true) == 0)
-                {
-                    centro = myLoadCDE.CustomDataEntry.Name;
-                }
+                return validarTicketSalida(nScaleId, myTransaction);
             }
-            if ((nScaleId == 0 && transaccionEnviada[nScaleId] == 1) || (nScaleId == 1 && transaccionEnviada[nScaleId] == 1))
+            catch (Exception ex)
             {
-                return "";
+                return ex.Message;
             }
-            else
-            {
-                if (VEH.consulta_ExisteChofer(chofer) != "")
-                {
-                    if (VEH.consulta_BiometricoChofer(chofer) != "")
-                    {
-                        if (myTransaction.Loads[0].Pass2Weight >= (pesoActualBascula[nScaleId] - 10) && myTransaction.Loads[0].Pass2Weight <= (pesoActualBascula[nScaleId] + 10))
-                        {
-                            string Ping_Salida = VEH.consulta_PinSalida(N_Transaccion);
-                            if (Ping_Salida != "")
-                            {
-                                string Nota = ventanaImput("Ingrese el PIN:", "DataBridge Plugin", "PIN");
-                                if (Ping_Salida.Equals(Nota))
-                                {
-                                    String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), vehiculo, chofer, "", Peso_Salida, N_Transaccion, "", Ping_Salida,"",operador, "", "", "", "SP", "", "");
-                                    //ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
-                                    return AriesSalida(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
-                                    //return "";
-                                }
-                                else
-                                {
-                                    return "El PIN Ingresado No Coincide";
-                                }
-                            }
-                            else
-                            {
-                                if (ComunicacionCamaras(myTransaction, nScaleId) == true)
-                                {
-                                    banderaCamaras = true;
-                                    if (VEH.listarFTP(vehiculo, nScaleId) == true)
-                                    {
-                                        String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), vehiculo, chofer, "", Peso_Salida, N_Transaccion, "", "","",operador, "", "", "", "SP", "", "");
-
-                                        //ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
-                                        return AriesSalida(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
-                                        //return "";
-                                    }
-                                    else
-                                    {
-                                        if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
-                                        {
-                                            try
-                                            {
-                                                return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                return ex.Message;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            return "Porfavor seleccione la báscula correcta y continue la transacción";
-                                        }
-                                            
-                                    }    
-                                }
-                                else
-                                {
-                                    if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
-                                    {
-                                        try
-                                        {
-                                            return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            return ex.Message;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        return "Porfavor seleccione la báscula correcta y continue la transacción";
-                                    }
-                                }
-
-                            }
-                        }
-                        else
-                        {
-                            return "El peso obtenido no es igual al peso actual, vuelva a obtener el peso porfavor";
-                        }
-                    }
-                    // si el chofer no Timbro o excedio el tiempo predeterminado(10 minutos) 
-                    else
-                    {
-                        return "El Conductor no ha Timbrado en el Biometrico. El Tiempo de espera son de " + T_Chofer + " Minutos";
-                    }
-                }
-                // FIN DEL FILTRO BIOMETRICO- CHOFER
-                else
-                {
-                    return "El Conductor no está registrado en el Biometrico";
-                }
-            }
-            
         }
         public override void TransactionCompleted(int nScaleId, TransactionModel myTransaction)
         {
@@ -493,6 +256,12 @@ namespace PronacaPlugin
             VEH.EnvioCorreoSecuenciaDetenida(razon, operador, ruta1, ruta2, pesoObtenido[nScaleId].ToString(), peso.ToString());
             VEH.actualizarEstadoPendienteEntrada(nScaleId);
         }
+
+        //public override string SettingOperationalData(int nScaleId, TransactionModel myTransaction, OperationalDataType myOperationalDataType, BaseOperationalDataModel myOperationalData)
+        //{
+            
+        //    return "";
+        //}
 
         #endregion
 
@@ -976,15 +745,259 @@ namespace PronacaPlugin
             pesoActualBascula[nScaleId] = peso;
         }
 
-        public void actualizarRutasImagenesEntrada(string img1,string img2,string transaccion)
+        private void actualizarRutasImagenesEntrada(string img1,string img2,string transaccion)
         {
             string imgEntrada = img1 + "; " + img2;
             VEH.actualizarImagenesPINEntrada(imgEntrada,transaccion);
         }
-        public void actualizarRutasImagenesSalida(string img1, string img2, string transaccion)
+        private void actualizarRutasImagenesSalida(string img1, string img2, string transaccion)
         {
             string imgSalida = img1 + "; " + img2;
             VEH.actualizarImagenesPINSalida(imgSalida, transaccion);
+        }
+
+        private string validarTicketEntrada(int nScaleId, TransactionModel myTransaction)
+        {
+            string T_Chofer = cfg.AppSettings.Settings["T_Chofer"].Value; //tiempo que tiene el chofer para timbrar en el biometrico
+            string chofer = myTransaction.Loads[0].Driver.Name; //cédula del chofer que conduce el vehículo 
+            string vehiculo = myTransaction.Loads[0].Vehicle.Name; //la placa del vehículo
+            operador = myTransaction.Loads[0].Pass1Operator; //operador de databridge
+            pesoObtenido[nScaleId] = myTransaction.Loads[0].GrossWeight; //peso obtenido en esa báscula
+            estado = "entrada";
+            LoadModel myLoad = myTransaction.FirstLoad;
+            foreach (LoadCDEModel myLoadCDE in myLoad.LoadCDEs)
+            {
+                if (String.Compare(myLoadCDE.CustomDataEntry.CustomDataCollection.Name, "Centro", true) == 0)
+                {
+                    centro = myLoadCDE.CustomDataEntry.Name;
+                }
+            }
+            if ((nScaleId == 0 && transaccionEnviada[nScaleId] == 1) || (nScaleId == 1 && transaccionEnviada[nScaleId] == 1))
+            {
+                return "";
+            }
+            else
+            {
+                //*****************************FILTRO DEL CHOFER*********************************************************
+                //Tomar en cuenta que debe estar abierto el progrma ZKAccess3.5 Security System del biometrico  
+                //Consultamos si el chofer existe en el biometrico 
+                if (VEH.consulta_ExisteChofer(chofer) != "")
+                {
+                    //ventanaOK("Si se identifico al chofer", "DataBridge Plugin");
+                    //*****************************FILTRO DEL BIOMETRICO*********************************************************
+                    // si existe procedemosa verificar si se tomo la lectura en el trascuroso de los 10 minutos
+                    if (VEH.consulta_BiometricoChofer(chofer) != "")
+                    {
+                        //ventanaOK("peso obtenido: " + myTransaction.Loads[0].Pass1Weight + " peso actual: " + pesoActualEntrada + " peso actual -10: " + (pesoActualEntrada - 10) +
+                        //  "peso actual +10: " + (pesoActualEntrada + 10), "ventana pesos");
+                        if (myTransaction.Loads[0].Pass1Weight >= (pesoActualBascula[nScaleId] - 10) && myTransaction.Loads[0].Pass1Weight <= (pesoActualBascula[nScaleId] + 10))
+                        {
+                            //pasa el primer filtro del chofer 
+                            //********************** FILTRO DE LA PLACA AL INGRESO*******************************************************************   
+                            string Ping_Ingreso = VEH.consulta_PlacaIngreso(vehiculo);
+                            //ventanaOK("Si timbro el chofer", "DataBridge Plugin");
+                            if (Ping_Ingreso != "")
+                            {
+                                //si el vehiculo anteriormente se registro un pin el operador ya debio haber registrado 
+                                ventanaOK("Se envió un email al coordinador con un PIN para terminar la transacción de entrada ", "DataBridge Plugin");
+                                string Nota = ventanaImput("Ingrese el PIN ", "DataBridge Plugin", "PIN");
+                                if (Ping_Ingreso.Equals(Nota))
+                                {
+                                    //************************************************COMUNICACION CON EL ARIES *****************************************************
+                                    //ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
+                                    return AriesEntrada(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
+                                    //return "";          
+                                }
+                                else
+                                {
+                                    return "El PIN ingresado no coincide";
+                                }
+                            }
+                            else
+                            {
+                                //************************************************COMUNICACION CAMARAS *****************************************************
+                                if (ComunicacionCamaras(myTransaction, nScaleId) == true)
+                                {
+                                    banderaCamaras = true;
+                                    //si la respuesta es positiva de cualquiera de las dos camaras
+                                    ///BUSCAMOS EN LA RUTA DEL FTP SI LOS DEVUELVE EN BLANCO ES Q SI ENCONTRO LA FOTO
+                                    if (VEH.listarFTP(vehiculo, nScaleId) == true)
+                                    {
+                                        //************************************************COMUNICACION CON EL ARIES *****************************************************
+                                        //    ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
+                                        string RES = VEH.Gestion_Pesaje(nScaleId.ToString(), "", vehiculo, chofer, Convert.ToString(myTransaction.Loads[0].Pass1Weight), "", VEH.consulta_TransaccionDB(), "", "", myTransaction.Loads[0].Pass1Operator, "", "", "", "", "IP", msj_recibido, Numeral_recibido);
+                                        return AriesEntrada(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
+                                        //return "";
+                                    }
+                                    else
+                                    {
+                                        //************************************************NOTIFICACION POR CORREO **************************************************
+                                        if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
+                                        {
+                                            return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                        }
+                                        else
+                                        {
+                                            return "Porfavor seleccione la báscula correcta y continue la transacción";
+                                        }
+                                    }
+
+
+
+                                }
+                                else
+                                {
+                                    //************************************************NOTIFICACION POR CORREO *****************************************************   
+                                    if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
+                                    {
+                                        return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                    }
+                                    else
+                                    {
+                                        return "Porfavor seleccione la báscula correcta y continue la transacción";
+                                    }
+                                }
+
+                            }
+
+                        }
+                        else
+                        {
+                            return "El peso obtenido no es igual al peso actual en la báscula, vuelva a obtener el peso porfavor";
+                        }
+
+                    }
+                    // si el chofer no Timbro o excedio el tiempo predeterminado(10 minutos) 
+                    else
+                    {
+                        return "El Conductor no ha Timbrado en el Biometrico. El Tiempo de espera son de " + T_Chofer + " Minutos";
+                    }
+                }
+                // FIN DEL FILTRO BIOMETRICO- CHOFER
+                else
+                {
+                    return "El conductor no está registrado en el Biometrico";
+                }
+            }
+        }
+        private string validarTicketSalida(int nScaleId, TransactionModel myTransaction)
+        {
+            vehiculo = myTransaction.Loads[0].Vehicle.Name;
+            string Peso_Salida = myTransaction.Loads[0].Pass2Weight.ToString();
+            string chofer = myTransaction.Loads[0].Driver.Name.ToString();
+            string N_Transaccion = myTransaction.Loads[0].TransactionNumber;
+            string T_pesaje = VEH.consulta_TipoIngreso(N_Transaccion);
+            string T_Chofer = cfg.AppSettings.Settings["T_Chofer"].Value;
+            operador = myTransaction.Loads[0].Pass2Operator;
+            pesoObtenido[nScaleId] = myTransaction.Loads[0].GrossWeight;
+            estado = "salida";
+            LoadModel myLoad = myTransaction.FirstLoad;
+            foreach (LoadCDEModel myLoadCDE in myLoad.LoadCDEs)
+            {
+                if (String.Compare(myLoadCDE.CustomDataEntry.CustomDataCollection.Name, "Centro", true) == 0)
+                {
+                    centro = myLoadCDE.CustomDataEntry.Name;
+                }
+            }
+            if ((nScaleId == 0 && transaccionEnviada[nScaleId] == 1) || (nScaleId == 1 && transaccionEnviada[nScaleId] == 1))
+            {
+                return "";
+            }
+            else
+            {
+                if (VEH.consulta_ExisteChofer(chofer) != "")
+                {
+                    if (VEH.consulta_BiometricoChofer(chofer) != "")
+                    {
+                        if (myTransaction.Loads[0].Pass2Weight >= (pesoActualBascula[nScaleId] - 10) && myTransaction.Loads[0].Pass2Weight <= (pesoActualBascula[nScaleId] + 10))
+                        {
+                            string Ping_Salida = VEH.consulta_PinSalida(N_Transaccion);
+                            if (Ping_Salida != "")
+                            {
+                                string Nota = ventanaImput("Ingrese el PIN:", "DataBridge Plugin", "PIN");
+                                if (Ping_Salida.Equals(Nota))
+                                {
+                                    String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), vehiculo, chofer, "", Peso_Salida, N_Transaccion, "", Ping_Salida, "", operador, "", "", "", "SP", "", "");
+                                    //ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
+                                    return AriesSalida(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
+                                    //return "";
+                                }
+                                else
+                                {
+                                    return "El PIN Ingresado No Coincide";
+                                }
+                            }
+                            else
+                            {
+                                if (ComunicacionCamaras(myTransaction, nScaleId) == true)
+                                {
+                                    banderaCamaras = true;
+                                    if (VEH.listarFTP(vehiculo, nScaleId) == true)
+                                    {
+                                        String RES = VEH.Gestion_Pesaje(nScaleId.ToString(), nScaleId.ToString(), vehiculo, chofer, "", Peso_Salida, N_Transaccion, "", "", "", operador, "", "", "", "SP", "", "");
+
+                                        //ventanaOK("¡Transacción Exitosa!", "DataBridge Plugin");
+                                        return AriesSalida(myTransaction, nScaleId, ref msj_recibido, ref Numeral_recibido);
+                                        //return "";
+                                    }
+                                    else
+                                    {
+                                        if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
+                                        {
+                                            try
+                                            {
+                                                return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                return ex.Message;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            return "Porfavor seleccione la báscula correcta y continue la transacción";
+                                        }
+
+                                    }
+                                }
+                                else
+                                {
+                                    if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
+                                    {
+                                        try
+                                        {
+                                            return NotificacionCorreo(myTransaction, nScaleId, banderaCamaras, estado);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            return ex.Message;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        return "Porfavor seleccione la báscula correcta y continue la transacción";
+                                    }
+                                }
+
+                            }
+                        }
+                        else
+                        {
+                            return "El peso obtenido no es igual al peso actual, vuelva a obtener el peso porfavor";
+                        }
+                    }
+                    // si el chofer no Timbro o excedio el tiempo predeterminado(10 minutos) 
+                    else
+                    {
+                        return "El Conductor no ha Timbrado en el Biometrico. El Tiempo de espera son de " + T_Chofer + " Minutos";
+                    }
+                }
+                // FIN DEL FILTRO BIOMETRICO- CHOFER
+                else
+                {
+                    return "El Conductor no está registrado en el Biometrico";
+                }
+            }
         }
 
         #endregion

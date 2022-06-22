@@ -129,7 +129,8 @@
   <ItemGroup>
     <Compile Include="Aplicacion.cs" />
     <Compile Include="DbaApi.cs" />
-    <Compile Include="ExepcionNegocio.cs" />
+    <Compile Include="ExcepcionNegocio.cs" />
+    <Compile Include="ExcepcionSQL.cs" />
     <Compile Include="GestionVehiculos.cs" />
     <Compile Include="PesoObtenido.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

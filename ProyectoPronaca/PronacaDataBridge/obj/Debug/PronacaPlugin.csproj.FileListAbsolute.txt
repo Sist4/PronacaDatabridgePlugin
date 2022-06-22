@@ -43,7 +43,6 @@ C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Prona
 C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.pdb
 C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.dll
 C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.xml
-C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.AssemblyReference.cache
 C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CoreCompileInputs.cache
 C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\XamlC.stamp
 C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CopyComplete

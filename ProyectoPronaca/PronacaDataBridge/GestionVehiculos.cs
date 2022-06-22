@@ -149,7 +149,8 @@ namespace PronacaPlugin
                 }
             } catch (Exception ex)
             {
-
+                //throw new ExcepcionNegocio("Error en la conexión con el servidor SFTP");
+                ventanaOK("Error en la conexión con el servidor SFTP", "DataBridge Plugin");
             }
 
 
@@ -287,6 +288,10 @@ namespace PronacaPlugin
                 consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
                 ConexionSql.Close();
             }
+            catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
+            }
             finally
             {
 
@@ -323,6 +328,10 @@ namespace PronacaPlugin
                 consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
                 ConexionSql.Close();
             }
+            catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
+            }
             finally
             {
 
@@ -356,6 +365,10 @@ namespace PronacaPlugin
                 SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
                 consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
                 ConexionSql.Close();
+            }
+            catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
             finally
             {
@@ -402,6 +415,10 @@ namespace PronacaPlugin
                 consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
                 ConexionSql.Close();
             }
+            catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
+            }
             finally
             {
 
@@ -436,6 +453,10 @@ namespace PronacaPlugin
                 SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
                 consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
                 ConexionSql.Close();
+            }
+            catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
             finally
             {
@@ -482,6 +503,10 @@ namespace PronacaPlugin
                 consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
                 ConexionSql.Close();
             }
+            catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
+            }
             finally
             {
 
@@ -518,6 +543,10 @@ namespace PronacaPlugin
                 SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
                 consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
                 ConexionSql.Close();
+            }
+            catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
             finally
             {
@@ -566,6 +595,9 @@ namespace PronacaPlugin
                     consulta = "1";
                 }
                 ConexionSql.Close();
+            }catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
             finally
             {
@@ -601,6 +633,10 @@ namespace PronacaPlugin
                 SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
                 consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
                 ConexionSql.Close();
+            }
+            catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
             finally
             {
@@ -774,7 +810,7 @@ namespace PronacaPlugin
             }
             catch (Exception e)
             {
-                return e.ToString();
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
                 //MessageBox.Show("problemas de comunicacion" + e);
             }
 
@@ -902,6 +938,7 @@ namespace PronacaPlugin
             {
                 estatusAries = 1;
                 mensajeAries = e.Message;
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
 
         }
@@ -1144,6 +1181,10 @@ namespace PronacaPlugin
                 consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
                 ConexionSql.Close();
             }
+            catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
+            }
             finally
             {
 
@@ -1158,18 +1199,24 @@ namespace PronacaPlugin
 
         public void InsertarPesosObtenidos(string pesosObtenidos,string transaccion,int bascula)
         {
-
-            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-            using (var Conn = new SqlConnection(Conexion_Bd))
+            try
             {
-                Conn.Open();
-                using (var command = new SqlCommand("UPDATE Tb_Vehiculos set Veh_PesosObtenidos = Veh_PesosObtenidos + @peso where  Veh_Ticket=@transaccion", Conn))
+                string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+                using (var Conn = new SqlConnection(Conexion_Bd))
                 {
-                    command.Parameters.Add(new SqlParameter("@peso", pesosObtenidos));
-                    command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
-                    int rowsAdded = command.ExecuteNonQuery();
+                    Conn.Open();
+                    using (var command = new SqlCommand("UPDATE Tb_Vehiculos set Veh_PesosObtenidos = Veh_PesosObtenidos + @peso where  Veh_Ticket=@transaccion", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@peso", pesosObtenidos));
+                        command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                        int rowsAdded = command.ExecuteNonQuery();
+                    }
                 }
+            }catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
+           
 
 
         }
@@ -1190,6 +1237,10 @@ namespace PronacaPlugin
                 SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
                 consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
                 ConexionSql.Close();
+            }
+            catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
             finally
             {
@@ -1245,33 +1296,49 @@ namespace PronacaPlugin
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
             string consultaOperador = "";
-            using (var Conn = new SqlConnection(Conexion_Bd))
+            try
             {
-                Conn.Open();
-                using (var command = new SqlCommand("SELECT TOP 1 operador FROM login order by Fecha desc", Conn))
+                using (var Conn = new SqlConnection(Conexion_Bd))
                 {
-                    consultaOperador = Convert.ToString(command.ExecuteScalar());
+                    Conn.Open();
+                    using (var command = new SqlCommand("SELECT TOP 1 operador FROM login order by Fecha desc", Conn))
+                    {
+                        consultaOperador = Convert.ToString(command.ExecuteScalar());
+                    }
                 }
             }
+            catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
+            }
+           
             return consultaOperador;
         }
 
         public void detenerSecuencia(string operador,string razon,int bascula,string pesoObtenido,string pesoBascula)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-            using (var Conn = new SqlConnection(Conexion_Bd))
+            try
             {
-                Conn.Open();
-                using (var command = new SqlCommand("INSERT INTO[dbo].[Secuencia] VALUES(GETDATE(),@operador,@razon,@bascula,@pesoObtenido,@pesoBascula)", Conn))
+                using (var Conn = new SqlConnection(Conexion_Bd))
                 {
-                    command.Parameters.Add(new SqlParameter("@operador", operador));
-                    command.Parameters.Add(new SqlParameter("@razon", razon));
-                    command.Parameters.Add(new SqlParameter("@bascula", bascula));
-                    command.Parameters.Add(new SqlParameter("@pesoObtenido", pesoObtenido));
-                    command.Parameters.Add(new SqlParameter("@pesoBascula", pesoBascula));
-                    int rowsAdded = command.ExecuteNonQuery();
+                    Conn.Open();
+                    using (var command = new SqlCommand("INSERT INTO[dbo].[Secuencia] VALUES(GETDATE(),@operador,@razon,@bascula,@pesoObtenido,@pesoBascula)", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@operador", operador));
+                        command.Parameters.Add(new SqlParameter("@razon", razon));
+                        command.Parameters.Add(new SqlParameter("@bascula", bascula));
+                        command.Parameters.Add(new SqlParameter("@pesoObtenido", pesoObtenido));
+                        command.Parameters.Add(new SqlParameter("@pesoBascula", pesoBascula));
+                        int rowsAdded = command.ExecuteNonQuery();
+                    }
                 }
             }
+            catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
+            }
+            
         }
 
         public string EnvioCorreoSecuenciaDetenida(string razon, string operador, string ruta_Imagen1, string ruta_Imagen2,string pesoObtenido,string pesoBascula)
@@ -1322,14 +1389,14 @@ namespace PronacaPlugin
                     smtp.UseDefaultCredentials = false;
                     smtp.Credentials = new NetworkCredential(Correo_Envio, Correo_Pasword);
                     smtp.EnableSsl = ssl; //pronaca en false
-                                            // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
+                                          // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
                     try
                     {
                         smtp.Send(mail);
                     }
                     catch (Exception ex)
                     {
-                        throw;
+                        throw new ExcepcionNegocio("Error en el envío del correo");
                     }
 
                 }
@@ -1371,19 +1438,26 @@ namespace PronacaPlugin
         public void actualizarEstadoSalida(string transaccion, string mensaje_recibido,string numeral_recibido,int bascula,string pesoSalida)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-            using (var Conn = new SqlConnection(Conexion_Bd))
+            try
             {
-                Conn.Open();
-                using (var command = new SqlCommand("UPDATE Tb_Vehiculos set Veh_BasculaSalida=@bascula,Veh_Estado='SC',Veh_Val1=@msj_recibido,Veh_Val3=@numeral_recibido,Veh_Peso_Salida=@pesoSalida WHERE Veh_Ticket=@transaccion AND Veh_Estado='SP' AND Veh_Val2='3'", Conn))
+                using (var Conn = new SqlConnection(Conexion_Bd))
                 {
-                    command.Parameters.Add(new SqlParameter("@bascula", bascula));
-                    command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
-                    command.Parameters.Add(new SqlParameter("@msj_recibido", mensaje_recibido));
-                    command.Parameters.Add(new SqlParameter("@numeral_recibido",numeral_recibido ));
-                    command.Parameters.Add(new SqlParameter("@pesoSalida", pesoSalida));
-                    int rowsAdded = command.ExecuteNonQuery();
+                    Conn.Open();
+                    using (var command = new SqlCommand("UPDATE Tb_Vehiculos set Veh_BasculaSalida=@bascula,Veh_Estado='SC',Veh_Val1=@msj_recibido,Veh_Val3=@numeral_recibido,Veh_Peso_Salida=@pesoSalida WHERE Veh_Ticket=@transaccion AND Veh_Estado='SP' AND Veh_Val2='3'", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@bascula", bascula));
+                        command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                        command.Parameters.Add(new SqlParameter("@msj_recibido", mensaje_recibido));
+                        command.Parameters.Add(new SqlParameter("@numeral_recibido", numeral_recibido));
+                        command.Parameters.Add(new SqlParameter("@pesoSalida", pesoSalida));
+                        int rowsAdded = command.ExecuteNonQuery();
+                    }
                 }
+            }catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
+            
         }
 
         public void actualizarImagenesPINEntrada(string imgEntrada,string transaccion)
@@ -1419,15 +1493,22 @@ namespace PronacaPlugin
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
             string estado = "";
-            using (var Conn = new SqlConnection(Conexion_Bd))
+            try
             {
-                Conn.Open();
-                using (var command = new SqlCommand("SELECT TOP 1 ComAries_EstatusRecibido FROM ComunicacionAries WHERE ComAries_Transaccion=@transaccion AND ComAries_TipoPeso='S' AND ComAries_EstatusRecibido='3' ORDER BY ComAries_Codigo DESC", Conn))
+                using (var Conn = new SqlConnection(Conexion_Bd))
                 {
-                    command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
-                    estado = Convert.ToString(command.ExecuteScalar());
+                    Conn.Open();
+                    using (var command = new SqlCommand("SELECT TOP 1 ComAries_EstatusRecibido FROM ComunicacionAries WHERE ComAries_Transaccion=@transaccion AND ComAries_TipoPeso='S' AND ComAries_EstatusRecibido='3' ORDER BY ComAries_Codigo DESC", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                        estado = Convert.ToString(command.ExecuteScalar());
+                    }
                 }
+            }catch(Exception ex)
+            {
+                throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
+            
             return estado;
         }
 
