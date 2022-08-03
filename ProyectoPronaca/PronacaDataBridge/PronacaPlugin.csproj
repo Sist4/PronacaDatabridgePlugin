@@ -34,8 +34,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Caliburn.Micro">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\Caliburn.Micro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Caliburn.Micro.Platform">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\Caliburn.Micro.Platform.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\Caliburn.Micro.Platform.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="DataBridge">
@@ -71,7 +75,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="DataBridge.IOManager">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\DataBridge.IOManager.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\DataBridge.IOManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="DataBridge.ScaleLibrary">
@@ -79,11 +83,11 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="DataBridge.ScaleManager">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\DataBridge.ScaleManager.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\DataBridge.ScaleManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="DataBridge.TransactionLibrary">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\DataBridge.TransactionLibrary.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\METTLER TOLEDO\DataBridge\Application\DataBridge.TransactionLibrary.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="DataBridge.VideoServerLibrary">
@@ -132,10 +136,11 @@
     <Compile Include="ExcepcionNegocio.cs" />
     <Compile Include="ExcepcionSQL.cs" />
     <Compile Include="GestionVehiculos.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="PesoObtenido.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Ticket.cs" />
     <Compile Include="Transacciones.cs" />
-    <Compile Include="Vehiculo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

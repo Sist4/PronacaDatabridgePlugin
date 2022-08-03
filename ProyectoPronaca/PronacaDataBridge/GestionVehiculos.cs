@@ -48,9 +48,10 @@ namespace PronacaPlugin
             cam4 = cfg.AppSettings.Settings["Nom_Camara4"].Value.Substring(0, 8);
         }
         #region Correo
-        public string EnvioCorreo(string N_Transaccion, string codigo_transaccion, string placa_seleccionada, string ruta_Imagen1, string ruta_Imagen2)
+        public bool EnvioCorreoPin(string N_Transaccion, string codigo_transaccion, string placa_seleccionada, string ruta_Imagen1, string ruta_Imagen2)
         {
             //*************************************************************APP CONFIG
+            bool envio = false;
             Correo_Destino = new string[11];
             int numero_Correos = Converter.ConvertToInt32(cfg.AppSettings.Settings["Numero_Correos_Destino"].Value);
             Correo_Destino[1] = cfg.AppSettings.Settings["Correo_Destino1"].Value;
@@ -107,6 +108,73 @@ namespace PronacaPlugin
                     try
                     {
                         smtp.Send(mail);
+                        envio = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        envio=false;
+                        throw new ExcepcionNegocio("No se pudo enviar el correo, Porfavor revise la conexión a internet");
+                        
+                    }
+
+                }
+                //// fin del proyecto
+                return envio;
+
+            }
+        }
+        public string EnvioCorreoSecuenciaDetenida(string razon, string operador, string ruta_Imagen1, string ruta_Imagen2, string pesoObtenido, string pesoBascula)
+        {
+            //*************************************************************APP CONFIG
+            Correo_Destino = new string[11];
+            int numero_Correos = Converter.ConvertToInt32(cfg.AppSettings.Settings["Numero_Correos_Destino"].Value);
+            Correo_Destino[1] = cfg.AppSettings.Settings["Correo_Destino1"].Value;
+            Correo_Destino[2] = cfg.AppSettings.Settings["Correo_Destino2"].Value;
+            Correo_Destino[3] = cfg.AppSettings.Settings["Correo_Destino3"].Value;
+            Correo_Destino[4] = cfg.AppSettings.Settings["Correo_Destino4"].Value;
+            Correo_Destino[5] = cfg.AppSettings.Settings["Correo_Destino5"].Value;
+            Correo_Destino[6] = cfg.AppSettings.Settings["Correo_Destino6"].Value;
+            Correo_Destino[7] = cfg.AppSettings.Settings["Correo_Destino7"].Value;
+            Correo_Destino[8] = cfg.AppSettings.Settings["Correo_Destino8"].Value;
+            Correo_Destino[9] = cfg.AppSettings.Settings["Correo_Destino9"].Value;
+            Correo_Destino[10] = cfg.AppSettings.Settings["Correo_Destino10"].Value;
+            string Correo_Envio = cfg.AppSettings.Settings["Correo_Envio"].Value;
+            string Correo_Pasword = cfg.AppSettings.Settings["Correo_Pasword"].Value;
+            string Host_Salida = cfg.AppSettings.Settings["Host_Salida"].Value;
+            string Host_Puerto = cfg.AppSettings.Settings["Host_Puerto"].Value;
+            bool ssl = Boolean.Parse(cfg.AppSettings.Settings["SSL"].Value);
+            string directorio = @"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Camaras\";
+            //***********************************************************FIN DEL APP CONFIG
+
+            using (MailMessage mail = new MailMessage())
+            {
+                mail.From = new MailAddress(Correo_Envio);
+                mail.From = new MailAddress(Correo_Envio);
+                for (int i = 1; i <= numero_Correos; i++)
+                {
+                    mail.To.Add(Correo_Destino[i]);
+                }
+                mail.Subject = "DataBridge - Sistema de Pesaje - ";
+                //mail.Body = "<h1>Notificacion</h1></br><p>El día " + DateTime.Now.ToString() + " fue detenida la secuencia, por la razón: " + razon + " por el operador: " +operador+".</p>";
+                mail.Body = "<h1>Notificación</h1><p> Se ha detenido la secuencia de pesaje en DataBridge.</p><table><tr><td>Fecha y hora:</td><td>" + DateTime.Now.ToString() + "</td></tr><tr><td>Razón:</td><td>" + razon + "</td></tr><tr><td>Operador:</td><td>" + operador + "</td></tr><tr><td>Peso obtenido:</td><td>" + pesoObtenido + "</td></tr><tr><td>Peso en báscula:</td><td>" + pesoBascula + "</td></tr></table>";
+                mail.IsBodyHtml = true;
+                if (ruta_Imagen1 != (""))
+                {
+                    mail.Attachments.Add(new Attachment(directorio + ruta_Imagen1 + ".jpg"));
+                }
+                if (ruta_Imagen2 != (""))
+                {
+                    mail.Attachments.Add(new Attachment(directorio + ruta_Imagen2 + ".jpg"));
+                }
+                using (SmtpClient smtp = new SmtpClient(Host_Salida, Convert.ToInt32(Host_Puerto)))
+                {
+                    smtp.UseDefaultCredentials = false;
+                    smtp.Credentials = new NetworkCredential(Correo_Envio, Correo_Pasword);
+                    smtp.EnableSsl = ssl; //pronaca en false
+                                          // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
+                    try
+                    {
+                        smtp.Send(mail);
                     }
                     catch (Exception ex)
                     {
@@ -118,6 +186,36 @@ namespace PronacaPlugin
                 return "";
 
             }
+        }
+
+        public void escribirImagen(string ruta, string pesoBascula)
+        {
+            string directorio = @"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Camaras\";
+            if (ruta != "")
+            {
+                var filePath = directorio + ruta + ".jpg";
+                Bitmap bitmap = null;
+
+                // Create from a stream so we don't keep a lock on the file.
+                using (var stream = File.OpenRead(filePath))
+                {
+                    bitmap = (Bitmap)Bitmap.FromStream(stream);
+                }
+
+                using (bitmap)
+                using (var graphics = Graphics.FromImage(bitmap))
+                using (var font = new Font("Arial", 18, FontStyle.Regular))
+                {
+                    // Do what you want using the Graphics object here.
+                    //graphics.DrawString("Fecha: 08-03-2022", font, Brushes.Red, 0, 650);
+                    //graphics.DrawString("Placa: ABCD1234", font, Brushes.Red, 0, 670);
+                    graphics.DrawString("Peso en báscula: " + pesoBascula, font, Brushes.Red, 0, 520);
+
+                    // Important part!
+                    bitmap.Save(filePath);
+                }
+            }
+
         }
 
         #endregion
@@ -252,424 +350,112 @@ namespace PronacaPlugin
 
         }
 
-  
-        #endregion
-
-        #region ConexionBdDataBridge
-
-
-
-        SqlConnection ConexionSql = null;
-        SqlCommand ComandoSql = null;
-        string query = null;
-        SqlDataReader LectorDatos = null;
-        SqlDataAdapter AdaptadorSql = null;
-
-
-        //Consulta 
-        public string consulta_PinSalida(string N_Transaccion)
-        {
-            //*************************************************************APP CONFIG
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-
-            //***********************************************************FIN DEL APP CONFIG
-            string consulta;
-            try
-            {
-                consulta = "select Veh_PinSalida from tb_vehiculos where veh_ticket='" + N_Transaccion + "' AND  Veh_Estado='SP' ";
-
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
-                ConexionSql.Close();
-            }
-            catch(Exception ex)
-            {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
-            }
-            finally
-            {
-
-                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
-                {
-                    ConexionSql.Close();
-                }
-            }
-
-            return consulta;
-        }
-
-        //INSERTAR EL DATO CON EL PIN GENERADO
-
-        public string Insertar_Dato(string Veh_Bascula, string Veh_Placa, string Veh_Chofer, string Veh_Peso_Ingreso,
-                                       string Veh_Ticket, string Veh_Estado)
-        {
-            //*************************************************************APP CONFIG
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-
-            //***********************************************************FIN DEL APP CONFIG
-            string consulta;
-            try
-            {
-                consulta = "INSERT INTO [dbo].[Tb_Vehiculos] ([Veh_Bascula],[Veh_Placa],[Veh_Chofer],[Veh_Peso_Ingreso],[Veh_Ticket],[Veh_Estado],[Veh_Fecha_Ingreso]) VALUES('" + Veh_Bascula + "','" + Veh_Placa + "','" + Veh_Chofer + "','" + Veh_Peso_Ingreso + "','" + Veh_Ticket + "','" + Veh_Estado + "',getdate())";
-
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
-                ConexionSql.Close();
-            }
-            catch(Exception ex)
-            {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
-            }
-            finally
-            {
-
-                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
-                {
-                    ConexionSql.Close();
-                }
-            }
-
-            return consulta;
-
-        }
-
-        public string Peso_Salida(string Veh_BasculaSalida, string Veh_Peso_Salida, string Veh_Ticket, string Veh_PinSalida, string Veh_RutaImg)
-        {
-            //*************************************************************APP CONFIG
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-
-            //***********************************************************FIN DEL APP CONFIG
-            string consulta;
-            try
-            {
-                consulta = "update Tb_Vehiculos set Veh_BasculaSalida='" + Veh_BasculaSalida + "',Veh_Peso_Salida='" + Veh_Peso_Salida + "',Veh_Fecha_Salida=GETDATE(),Veh_PinSalida='" + Veh_PinSalida + "',Veh_RutaImg='" + Veh_RutaImg + "'  where  Veh_Ticket='" + Veh_Ticket + "'";
-
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
-                ConexionSql.Close();
-            }
-            catch(Exception ex)
-            {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
-            }
-            finally
-            {
-
-                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
-                {
-                    ConexionSql.Close();
-                }
-            }
-
-            return consulta;
-
-        }
-
 
         #endregion
-
-
-        //final 
         #region Biometrico
-
-
-
         public string consulta_BiometricoChofer(string Cedula_Chofer)
         {
-            //*************************************************************APP CONFIG
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_BDBiometrico"].Value;
-            string T_Chofer = cfg.AppSettings.Settings["T_Chofer"].Value;
-
-            //***********************************************************FIN DEL APP CONFIG
-            string consulta;
+            int T_Chofer = Convert.ToInt32(cfg.AppSettings.Settings["T_Chofer"].Value);
+            string consulta = "";
             try
             {
-                //consulta = "select USERINFO.USERID ,USERINFO.Name,CHECKTIME  from USERINFO inner join CHECKINOUT on USERINFO.USERID= CHECKINOUT.USERID where USERINFO.Name='"+ Cedula_Chofer + "' and   CHECKTIME BETWEEN DATEADD(minute, -11, GETDATE() )  and getdate()";
-                //consulta = "select USERINFO.USERID ,USERINFO.CardNo,CHECKTIME  from USERINFO inner join CHECKINOUT on USERINFO.USERID= CHECKINOUT.USERID where USERINFO.CardNo='" + Cedula_Chofer + "' and   CHECKTIME BETWEEN DATEADD(minute, -" + (Convert.ToInt32(T_Chofer) + 1) + ", GETDATE() )  and getdate()";
-                consulta = "SELECT personnel_employee.emp_code,iclock_transaction.punch_time FROM personnel_employee INNER JOIN iclock_transaction ON personnel_employee.emp_code=iclock_transaction.emp_code WHERE personnel_employee.first_name='" + Cedula_Chofer + "' AND punch_time BETWEEN DATEADD(minute, -" + (Convert.ToInt32(T_Chofer) + 1) + ", GETDATE() )  and getdate()";
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
-                ConexionSql.Close();
-            }
-            catch(Exception ex)
-            {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
-            }
-            finally
-            {
-
-                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
+                using (var Conn = new SqlConnection(Conexion_Bd))
                 {
-                    ConexionSql.Close();
+                    Conn.Open();
+                    using (var command = new SqlCommand("SELECT personnel_employee.emp_code,iclock_transaction.punch_time FROM personnel_employee INNER JOIN iclock_transaction ON personnel_employee.emp_code=iclock_transaction.emp_code WHERE personnel_employee.first_name=@conductor AND punch_time BETWEEN DATEADD(minute, -@tiempo, GETDATE() )  and getdate()", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@conductor", Cedula_Chofer));
+                        command.Parameters.Add(new SqlParameter("@tiempo", T_Chofer));
+                        consulta = Convert.ToString(command.ExecuteScalar());
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+
+
 
             return consulta;
         }
-
-
-
         public string consulta_ExisteChofer(string Cedula_Chofer)
         {
-            //*************************************************************APP CONFIG
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_BDBiometrico"].Value;
-
-            //***********************************************************FIN DEL APP CONFIG
-            string consulta;
+            string consulta = "";
             try
             {
-                //consulta = "select top 1 * from USERINFO where USERINFO.CardNo='" + Cedula_Chofer + "'";
-                consulta = "SELECT top 1 * FROM personnel_employee where personnel_employee.first_name = '" + Cedula_Chofer + "'";
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
-                ConexionSql.Close();
-            }
-            catch(Exception ex)
-            {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
-            }
-            finally
-            {
-
-                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
+                using (var Conn = new SqlConnection(Conexion_Bd))
                 {
-                    ConexionSql.Close();
+                    Conn.Open();
+                    using (var command = new SqlCommand("SELECT top 1 * FROM personnel_employee where personnel_employee.first_name =@conductor", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@conductor", Cedula_Chofer));
+                        consulta = Convert.ToString(command.ExecuteScalar());
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+
 
             return consulta;
         }
-
 
         #endregion
-
-
-        #region Pesaje_Ingreso
-        //verificamos si el pesaje de ing. existe un ping generado se guarda en el campo 
-        public string consulta_PlacaIngreso(string Placa_Seleccionada)
-        {
-            //*************************************************************APP CONFIG
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-
-            //***********************************************************FIN DEL APP CONFIG
-
-            //*************VEN_ESTADO**********
-
-            //            iP=IngresoParcial
-            //            IC=IngresoCompleto  
-
-            string consulta;
-            try
-            {
-                consulta = "select Veh_PinEntrada from tb_vehiculos where veh_placa='" + Placa_Seleccionada + "' and veh_estado ='IP'";
-
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
-                ConexionSql.Close();
-            }
-            catch(Exception ex)
-            {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
-            }
-            finally
-            {
-
-                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
-                {
-                    ConexionSql.Close();
-                }
-            }
-
-            return consulta;
-        }
-
-
-        public string Gestion_Pesaje(String Veh_Bascula, String Veh_BasculaSalida, String Veh_Placa
-        , String Veh_Chofer, String Veh_Peso_Ingreso, String Veh_Peso_Salida
-        , String Veh_Ticket,String Veh_PinEntrada, String Veh_PinSalida,String Veh_OperadorEntrada, String Veh_OperadorSalida
-        , String Veh_RutaImgIng, String Veh_RutaImgSal, string pesosObtenidos,String Veh_Estado, string msj_recibido, string Numeral_recibido)
-        {
-            //*************************************************************APP CONFIG
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-
-            //***********************************************************FIN DEL APP CONFIG
-            string consulta;
-            try
-            {
-                consulta = "EXECUTE P_TBVehiculos N'" + Veh_Bascula + "',N'" + Veh_BasculaSalida + "',N'" + Veh_Placa + "',N'" + Veh_Chofer + "',N'" + Veh_Peso_Ingreso + "',N'" + Veh_Peso_Salida + "',N'" + Veh_Ticket + "',N'" + Veh_PinEntrada + "',N'" + Veh_PinSalida + "',N'" +Veh_OperadorEntrada + "',N'" +Veh_OperadorSalida + "',N'" + Veh_RutaImgIng + "',N'" + Veh_RutaImgSal + "',N'" +pesosObtenidos+"',N'"+ Veh_Estado + "',N'" + msj_recibido + "',N'" + Numeral_recibido + "',N''";
-
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
-                ConexionSql.Close();
-            }
-            catch(Exception ex)
-            {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
-            }
-            finally
-            {
-
-                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
-                {
-                    ConexionSql.Close();
-                }
-            }
-
-            return consulta;
-
-        }
-
-
-
-        #endregion
-
-
-
-
-        #region ComunicacionDataBridge
-
-        //Codigo de Transaccion del DataBridge
+        #region DataBridge
         public string consulta_TransaccionDB()
         {
-            //*************************************************************APP CONFIG
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_DB"].Value;
-
-            //***********************************************************FIN DEL APP CONFIG
-            string consulta;
+            string consulta = "";
             try
             {
-                consulta = "SELECT MAX(CONVERT(int,[TransactionNumber])) + 1 FROM  DataBridge.[Transaction]";
-
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
-                if (consulta.Equals(""))
+                using (var Conn = new SqlConnection(Conexion_Bd))
                 {
-                    consulta = "1";
-                }
-                ConexionSql.Close();
-            }catch(Exception ex)
-            {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
-            }
-            finally
-            {
-
-                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
-                {
-                    ConexionSql.Close();
+                    Conn.Open();
+                    using (var command = new SqlCommand("SELECT MAX(CONVERT(int,[TransactionNumber])) + 1 FROM  DataBridge.[Transaction]", Conn))
+                    {
+                        consulta = Convert.ToString(command.ExecuteScalar());
+                        if (consulta.Equals(""))
+                        {
+                            consulta = "1";
+                        }
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+
+
 
             return consulta;
         }
-        //*************************************Codigo de Transaccion del DataBridge
-
-        //Consultamos el valor si es un pesjae de visitante
-        public string consulta_TipoIngreso(string ntransaccion)
+        private void ventanaOK(string texto, String titulo)
         {
-            //*************************************************************APP CONFIG
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value; 
-
-            //***********************************************************FIN DEL APP CONFIG
-            string consulta;
             try
             {
-                consulta = "select Veh_Val2 from Tb_Vehiculos where Veh_Ticket='" + ntransaccion + "'";
-
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                consulta = Convert.ToString(Comando_Sql.ExecuteScalar());
-                ConexionSql.Close();
-            }
-            catch(Exception ex)
-            {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
-            }
-            finally
-            {
-
-                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
+                IWindowManager windowManager = ServiceLocator.GetKernel().Get<IWindowManager>();
+                CustomOkDialogViewModel viewModel = new CustomOkDialogViewModel(texto);
+                viewModel.CustomWindowTitle = titulo;
+                viewModel.OkButtonText = "OK";
+                Application.Current?.Dispatcher.Invoke(() =>
                 {
-                    ConexionSql.Close();
-                }
+                    windowManager.ShowDialog(viewModel);
+
+                });
             }
-
-            return consulta;
+            catch (Exception ex)
+            {
+                ServiceManager.LogMgr.WriteError("Error", ex);
+            }
         }
-        //**********fin*********************
-
-        public static string DecodeBase64ToString(string valor)
-        {
-            byte[] myBase64ret = Convert.FromBase64String(valor);
-            string myStr = System.Text.Encoding.UTF8.GetString(myBase64ret);
-            return myStr;
-        }
-        /// <summary>
-        /// Convierte texto string en Base64
-        /// </summary>
-        /// <param name="valor">Valor a reemplazar</param>
-        /// <returns></returns>
-        //Codificamos el valor de 64 bits estandar de Pronaca 
-        public static string EncodeStrToBase64(string valor)
-        {
-            byte[] myByte = System.Text.Encoding.UTF8.GetBytes(valor);
-            string myBase64 = Convert.ToBase64String(myByte);
-            return myBase64;
-        }
-
+        #endregion
+        #region Web Service
         public HttpWebRequest CreateSOAPWebRequest()
         {
             //Making Web Request    
@@ -690,148 +476,13 @@ namespace PronacaPlugin
             //return HttpWebRequest    
             return Req;
         }
-        public string InvokeService(string N_Transaccion, string FechaTicketProceso, string HoraTicketProceso, string UsuarioDataBridge, string NumeroBascula, string TipoPeso, string Peso_Ing,
-                                  string Vehiculo, string Cedula, string Chofer,string centroTransaccion)
+        public void InvokeServiceEntrada(Ticket ticket, string TipoPeso, string centroTransaccion, string nombreConductor, ref string mensajeAries, ref int estatusAries)
         {
 
             try
             {
-                //*************************************************************APP CONFIG
-                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-                UriBuilder uri = new UriBuilder(codeBase);
-                string path = Uri.UnescapeDataString(uri.Path);
-                Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
                 string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
                 string Centro = cfg.AppSettings.Settings["Centro_Distribucion"].Value;
-
-                //***********************************************************FIN DEL APP CONFIG
-
-                const string Comillas = "\"";
-
-                if(centroTransaccion.Equals(""))
-                {
-                    centroTransaccion = Centro;
-                }
-
-                string XmlEnvio = "<ns1:GesImpPesAr xmlns:ns1=" + Comillas + "http://ln.gesalm.integracion.pronaca.com.ec" + Comillas + ">" +
-                                "<ControlProceso>" +
-                                "<CodigoCompania>002</CodigoCompania>" +
-                                "<CodigoSistema>DB</CodigoSistema>" +
-                                "<CodigoServicio>ValidaPesosDB</CodigoServicio>" +
-                                "<Proceso>Insertar/Validar</Proceso>" +
-                                "<Resultado></Resultado>" +
-                                "</ControlProceso>" +
-                                "<Cabecera>" +
-                                "<TicketDataBridge>" + N_Transaccion + "</TicketDataBridge>" +
-                                "<FechaTicketProceso>" + FechaTicketProceso + "</FechaTicketProceso>" +
-                                "<HoraTicketProceso>" + HoraTicketProceso + "</HoraTicketProceso>" +
-                                "<UsuarioDataBridge>" + UsuarioDataBridge + "</UsuarioDataBridge>" +
-                                "<NumeroBascula>" + NumeroBascula + "</NumeroBascula>" +
-                                "<TipoPeso>" + TipoPeso + "</TipoPeso>" +
-                                "<PesoTicketDataBridge>" + Peso_Ing + "</PesoTicketDataBridge>" +
-                                "<PlacaVehiculo>" + Vehiculo + "</PlacaVehiculo>" +
-                                "<CedulaTransportista>" + Cedula + "</CedulaTransportista>" +
-                                "<NombreTransportista>" + Chofer + "</NombreTransportista>" +
-                                "<CodCentroAries>" + centroTransaccion + "</CodCentroAries>" +
-                                "<TicketAries> </TicketAries>" +
-                                "<CedUsuarioAries> </CedUsuarioAries>" +
-                                "<NomUsuarioAries> </NomUsuarioAries>" +
-                                "<EstatusAries>1</EstatusAries>" +
-                                "<MensajeAries>Enviado</MensajeAries>" +
-                                "</Cabecera>" +
-                                "</ns1:GesImpPesAr>";
-
-                ///*****************************************************esto no va************************************
-                string codificiacionMsj = EncodeStrToBase64(XmlEnvio);
-                string res = G_Msg(codificiacionMsj, "A", N_Transaccion);
-                //string ejecutable = @"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\ComunicacionAries.exe " + N_Transaccion;
-                //Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\ComunicacionAries.exe "+N_Transaccion);
-                //mensaje=ejecutable;
-                //Process.Start(ejecutable);
-                // Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
-                Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Comunicación Aries\ComunicacionAries.exe ", N_Transaccion);
-                System.Threading.Thread.Sleep(3000);
-               // G_Msg2();
-                //CONSULTA DE DATOS
-                int Codigo = 0;
-                int Transaccion;
-                string mensaje_R = "";
-                string Estado = "";
-
-                using (SqlConnection connection = new SqlConnection(Conexion_Bd))
-                {
-                    String sql = "SELECT top 1* FROM ComunicacionAries where ComAries_Estado = 'Procesado' AND ComAries_Transaccion='" + N_Transaccion + "' ORDER BY ComAries_Codigo DESC";
-
-                    using (SqlCommand command = new SqlCommand(sql, connection))
-                    {
-                        connection.Open();
-                        using (SqlDataReader reader = command.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                Codigo = Convert.ToInt32(reader.GetInt32(0));
-                                mensaje_R = reader.GetString(3);
-                                Estado = reader.GetString(6);
-                            }
-                        }
-                        connection.Close();
-                    }
-                }
-
-                if (Estado != "")
-                {
-
-                    string consulta = "UPDATE ComunicacionAries SET  [ComAries_Estado] ='Fin' where ComAries_Codigo='" + Codigo + "' ";
-
-                    SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                    ConexionSql.Open();
-                    SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                    consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
-                    ConexionSql.Close();
-                    ventanaOK("ya se cambio estado a fin", "ventana");
-                   // actualizarEstatusMensajeAries(DecodeBase64ToString(mensaje_R), Codigo);
-                    return leer_Xml(DecodeBase64ToString(mensaje_R));
-
-                }
-                else
-                {
-
-                    string consulta = "DELETE FROM ComunicacionAries  where ComAries_Codigo='" + Codigo + "'  AND [ComAries_Estado] ='A'";
-
-                    SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                    ConexionSql.Open();
-                    SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                    consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
-                    ConexionSql.Close();
-                
-                    return "El mensaje No fue procesado por Aries";
-                }
-
-            }
-            catch (Exception e)
-            {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
-                //MessageBox.Show("problemas de comunicacion" + e);
-            }
-
-        }
-
-        public void InvokeService2(string N_Transaccion, string FechaTicketProceso, string HoraTicketProceso, string UsuarioDataBridge, string NumeroBascula, string TipoPeso, string Peso_Ing,
-                                  string Vehiculo, string Cedula, string Chofer, string centroTransaccion, ref string mensajeAries, ref int estatusAries)
-        {
-
-            try
-            {
-                //*************************************************************APP CONFIG
-                string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-                UriBuilder uri = new UriBuilder(codeBase);
-                string path = Uri.UnescapeDataString(uri.Path);
-                Configuration cfg = ConfigurationManager.OpenExeConfiguration(path);
-                string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-                string Centro = cfg.AppSettings.Settings["Centro_Distribucion"].Value;
-
-                //***********************************************************FIN DEL APP CONFIG
-
                 const string Comillas = "\"";
 
                 if (centroTransaccion.Equals(""))
@@ -848,16 +499,16 @@ namespace PronacaPlugin
                                 "<Resultado></Resultado>" +
                                 "</ControlProceso>" +
                                 "<Cabecera>" +
-                                "<TicketDataBridge>" + N_Transaccion + "</TicketDataBridge>" +
-                                "<FechaTicketProceso>" + FechaTicketProceso + "</FechaTicketProceso>" +
-                                "<HoraTicketProceso>" + HoraTicketProceso + "</HoraTicketProceso>" +
-                                "<UsuarioDataBridge>" + UsuarioDataBridge + "</UsuarioDataBridge>" +
-                                "<NumeroBascula>" + NumeroBascula + "</NumeroBascula>" +
+                                "<TicketDataBridge>" + ticket.NumeroTicket + "</TicketDataBridge>" +
+                                "<FechaTicketProceso>" + ticket.FechaIngreso.ToString("dd/MM/yyyy") + "</FechaTicketProceso>" +
+                                "<HoraTicketProceso>" + ticket.FechaIngreso.ToString("HH:MM") + "</HoraTicketProceso>" +
+                                "<UsuarioDataBridge>" + ticket.OperadorIngreso + "</UsuarioDataBridge>" +
+                                "<NumeroBascula>" + ticket.Bascula + "</NumeroBascula>" +
                                 "<TipoPeso>" + TipoPeso + "</TipoPeso>" +
-                                "<PesoTicketDataBridge>" + Peso_Ing + "</PesoTicketDataBridge>" +
-                                "<PlacaVehiculo>" + Vehiculo + "</PlacaVehiculo>" +
-                                "<CedulaTransportista>" + Cedula + "</CedulaTransportista>" +
-                                "<NombreTransportista>" + Chofer + "</NombreTransportista>" +
+                                "<PesoTicketDataBridge>" + ticket.PesoIngreso + "</PesoTicketDataBridge>" +
+                                "<PlacaVehiculo>" + ticket.Placa + "</PlacaVehiculo>" +
+                                "<CedulaTransportista>" + ticket.Chofer + "</CedulaTransportista>" +
+                                "<NombreTransportista>" + nombreConductor + "</NombreTransportista>" +
                                 "<CodCentroAries>" + centroTransaccion + "</CodCentroAries>" +
                                 "<TicketAries> </TicketAries>" +
                                 "<CedUsuarioAries> </CedUsuarioAries>" +
@@ -869,13 +520,13 @@ namespace PronacaPlugin
 
                 ///*****************************************************esto no va************************************
                 string codificiacionMsj = EncodeStrToBase64(XmlEnvio);
-                string res = G_Msg(codificiacionMsj, "A", N_Transaccion);
+                string res = G_Msg(codificiacionMsj, "A", ticket.NumeroTicket);
                 //string ejecutable = @"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\ComunicacionAries.exe " + N_Transaccion;
                 //Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\ComunicacionAries.exe "+N_Transaccion);
                 //mensaje=ejecutable;
                 //Process.Start(ejecutable);
                 // Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
-                Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Comunicación Aries\ComunicacionAries.exe ", N_Transaccion);
+                Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Comunicación Aries\ComunicacionAries.exe ", ticket.NumeroTicket);
                 System.Threading.Thread.Sleep(3000);
                 // G_Msg2();
                 //CONSULTA DE DATOS
@@ -886,7 +537,7 @@ namespace PronacaPlugin
 
                 using (SqlConnection connection = new SqlConnection(Conexion_Bd))
                 {
-                    String sql = "SELECT top 1* FROM ComunicacionAries where ComAries_Estado = 'Procesado' AND ComAries_Transaccion='" + N_Transaccion + "' ORDER BY ComAries_Codigo DESC";
+                    String sql = "SELECT top 1* FROM ComunicacionAries where ComAries_Estado = 'Procesado' AND ComAries_Transaccion='" + ticket.NumeroTicket + "' ORDER BY ComAries_Codigo DESC";
 
                     using (SqlCommand command = new SqlCommand(sql, connection))
                     {
@@ -903,9 +554,9 @@ namespace PronacaPlugin
                         connection.Close();
                     }
                 }
-                
+
                 //if (Estado != "")
-                if(mensaje_R!="")
+                if (mensaje_R != "")
                 {
 
                     string consulta = "UPDATE ComunicacionAries SET  [ComAries_Estado] ='Fin' where ComAries_Codigo='" + Codigo + "' ";
@@ -917,7 +568,7 @@ namespace PronacaPlugin
                     ConexionSql.Close();
                     mensajeAries = leerMensaje_Xml(DecodeBase64ToString(mensaje_R));
                     estatusAries = leerEstatus_Xml(DecodeBase64ToString(mensaje_R));
-                    actualizarEstatusMensajeAries(DecodeBase64ToString(mensaje_R), Codigo,mensajeAries,estatusAries);
+                    actualizarEstatusMensajeAries(DecodeBase64ToString(mensaje_R), Codigo, mensajeAries, estatusAries);
 
                 }
                 else
@@ -938,14 +589,127 @@ namespace PronacaPlugin
             {
                 estatusAries = 1;
                 mensajeAries = e.Message;
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
             }
 
         }
+        public void InvokeServiceSalida(Ticket ticket, string TipoPeso, string centroTransaccion, string nombreConductor, ref string mensajeAries, ref int estatusAries)
+        {
 
+            try
+            {
+                string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+                string Centro = cfg.AppSettings.Settings["Centro_Distribucion"].Value;
+                const string Comillas = "\"";
 
+                if (centroTransaccion.Equals(""))
+                {
+                    centroTransaccion = Centro;
+                }
 
-        //*************Lectura del XML*****************************
+                string XmlEnvio = "<ns1:GesImpPesAr xmlns:ns1=" + Comillas + "http://ln.gesalm.integracion.pronaca.com.ec" + Comillas + ">" +
+                                "<ControlProceso>" +
+                                "<CodigoCompania>002</CodigoCompania>" +
+                                "<CodigoSistema>DB</CodigoSistema>" +
+                                "<CodigoServicio>ValidaPesosDB</CodigoServicio>" +
+                                "<Proceso>Insertar/Validar</Proceso>" +
+                                "<Resultado></Resultado>" +
+                                "</ControlProceso>" +
+                                "<Cabecera>" +
+                                "<TicketDataBridge>" + ticket.NumeroTicket + "</TicketDataBridge>" +
+                                "<FechaTicketProceso>" + ticket.FechaSalida.ToString("dd/MM/yyyy") + "</FechaTicketProceso>" +
+                                "<HoraTicketProceso>" + ticket.FechaSalida.ToString("HH:MM") + "</HoraTicketProceso>" +
+                                "<UsuarioDataBridge>" + ticket.OperadorSalida + "</UsuarioDataBridge>" +
+                                "<NumeroBascula>" + ticket.BasculaSalida + "</NumeroBascula>" +
+                                "<TipoPeso>" + TipoPeso + "</TipoPeso>" +
+                                "<PesoTicketDataBridge>" + ticket.PesoSalida + "</PesoTicketDataBridge>" +
+                                "<PlacaVehiculo>" + ticket.Placa + "</PlacaVehiculo>" +
+                                "<CedulaTransportista>" + ticket.Chofer + "</CedulaTransportista>" +
+                                "<NombreTransportista>" + nombreConductor + "</NombreTransportista>" +
+                                "<CodCentroAries>" + centroTransaccion + "</CodCentroAries>" +
+                                "<TicketAries> </TicketAries>" +
+                                "<CedUsuarioAries> </CedUsuarioAries>" +
+                                "<NomUsuarioAries> </NomUsuarioAries>" +
+                                "<EstatusAries>1</EstatusAries>" +
+                                "<MensajeAries>Enviado</MensajeAries>" +
+                                "</Cabecera>" +
+                                "</ns1:GesImpPesAr>";
+
+                ///*****************************************************esto no va************************************
+                string codificiacionMsj = EncodeStrToBase64(XmlEnvio);
+                string res = G_Msg(codificiacionMsj, "A", ticket.NumeroTicket);
+                //string ejecutable = @"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\ComunicacionAries.exe " + N_Transaccion;
+                //Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\ComunicacionAries.exe "+N_Transaccion);
+                //mensaje=ejecutable;
+                //Process.Start(ejecutable);
+                // Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
+                Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Comunicación Aries\ComunicacionAries.exe ", ticket.NumeroTicket);
+                System.Threading.Thread.Sleep(3000);
+                // G_Msg2();
+                //CONSULTA DE DATOS
+                int Codigo = 0;
+                int Transaccion;
+                string mensaje_R = "";
+                string Estado = "";
+
+                using (SqlConnection connection = new SqlConnection(Conexion_Bd))
+                {
+                    String sql = "SELECT top 1* FROM ComunicacionAries where ComAries_Estado = 'Procesado' AND ComAries_Transaccion='" + ticket.NumeroTicket + "' ORDER BY ComAries_Codigo DESC";
+
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    {
+                        connection.Open();
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                Codigo = Convert.ToInt32(reader.GetInt32(0));
+                                mensaje_R = reader.GetString(3);
+                                Estado = reader.GetString(6);
+                            }
+                        }
+                        connection.Close();
+                    }
+                }
+
+                //if (Estado != "")
+                if (mensaje_R != "")
+                {
+
+                    string consulta = "UPDATE ComunicacionAries SET  [ComAries_Estado] ='Fin' where ComAries_Codigo='" + Codigo + "' ";
+
+                    SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
+                    ConexionSql.Open();
+                    SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
+                    consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
+                    ConexionSql.Close();
+                    mensajeAries = leerMensaje_Xml(DecodeBase64ToString(mensaje_R));
+                    estatusAries = leerEstatus_Xml(DecodeBase64ToString(mensaje_R));
+                    actualizarEstatusMensajeAries(DecodeBase64ToString(mensaje_R), Codigo, mensajeAries, estatusAries);
+
+                }
+                else
+                {
+                    estatusAries = 0;
+                    mensajeAries = "";
+                    //string consulta = "DELETE FROM ComunicacionAries  where ComAries_Codigo='" + Codigo + "'  AND [ComAries_Estado] ='A'";
+
+                    //SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
+                    //ConexionSql.Open();
+                    //SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
+                    //consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
+                    //ConexionSql.Close();
+                }
+
+            }
+            catch (Exception e)
+            {
+                estatusAries = 1;
+                mensajeAries = e.Message;
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+
+        }
         public string leer_Xml(string Xml)
         {
             const string Comillas = "\"";
@@ -982,7 +746,7 @@ namespace PronacaPlugin
 
                 case 2:
                     // ERROR
-                    envioRes = "2/"+" " + Mensaje;
+                    envioRes = "2/" + " " + Mensaje;
                     break;
                 case 3:
                     // EXITO - (termina el proceso)
@@ -990,12 +754,12 @@ namespace PronacaPlugin
                     break;
                 case 4:
                     // EXITO SIN TURNO(vehiculo sin carga se envia un pin no se envia al aries salida no se envia)
-                    envioRes = "4/"+ " " + Mensaje;
+                    envioRes = "4/" + " " + Mensaje;
                     break;
 
                 case 5:
                     // Error del factor de conversion(aborta el pesaje)
-                    envioRes = "5/" +" " + Mensaje;
+                    envioRes = "5/" + " " + Mensaje;
                     break;
 
                 default:
@@ -1085,8 +849,7 @@ namespace PronacaPlugin
                     return Xml;
             }
         }
-
-        public void actualizarEstatusMensajeAries(string Xml,int Codigo,string mensajeAries,int estatusAries)
+        public void actualizarEstatusMensajeAries(string Xml, int Codigo, string mensajeAries, int estatusAries)
         {
             const string Comillas = "\"";
             string res_xml = Xml.Replace("<ns1:GesImpPesAr xmlns:ns1=" + Comillas + "http://ln.gesalm.integracion.pronaca.com.ec" + Comillas + ">", "<ns1>");
@@ -1102,14 +865,14 @@ namespace PronacaPlugin
             {
                 Estatus = Convert.ToInt32(node["EstatusAries"].InnerText);
                 Mensaje = node["MensajeAries"].InnerText;
-                TipoPeso= node["TipoPeso"].InnerText;
+                TipoPeso = node["TipoPeso"].InnerText;
             }
-            if(!Mensaje.Equals(""))
+            if (!Mensaje.Equals(""))
             {
                 string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
                 using (var Conn = new SqlConnection(Conexion_Bd))
                 {
-                    Conn.Open(); 
+                    Conn.Open();
                     using (var command = new SqlCommand("UPDATE ComunicacionAries SET ComAries_EstatusRecibido=@estatus, ComAries_MensajeRecibido=@mensaje,ComAries_TipoPeso=@tipoPeso WHERE ComAries_Codigo=@codigo", Conn))
                     {
                         command.Parameters.Add(new SqlParameter("@estatus", estatusAries));
@@ -1149,17 +912,26 @@ namespace PronacaPlugin
                         int rowsAdded = command.ExecuteNonQuery();
                     }
                 }
-               
+
 
             }
-            
+
 
 
 
         }
-
-        //*************FIN Lectura del XML*****************************
-
+        public static string DecodeBase64ToString(string valor)
+        {
+            byte[] myBase64ret = Convert.FromBase64String(valor);
+            string myStr = System.Text.Encoding.UTF8.GetString(myBase64ret);
+            return myStr;
+        }
+        public static string EncodeStrToBase64(string valor)
+        {
+            byte[] myByte = System.Text.Encoding.UTF8.GetBytes(valor);
+            string myBase64 = Convert.ToBase64String(myByte);
+            return myBase64;
+        }
         private string G_Msg(string Mensaje, string Estado, string Tem_Transaccion)
         {
             //*************************************************************APP CONFIG
@@ -1171,33 +943,168 @@ namespace PronacaPlugin
 
             //***********************************************************FIN DEL APP CONFIG
             string consulta;
+
             try
             {
-                consulta = "INSERT INTO [dbo].[ComunicacionAries]  ([ComAries_XMLEnviado],[ComAries_Estado],ComAries_Transaccion)VALUES('" + Mensaje + "','A'," + Tem_Transaccion + ")";
-
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
-                ConexionSql.Close();
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open();
+                    using (var command = new SqlCommand("INSERT INTO [dbo].[ComunicacionAries] ([ComAries_XMLEnviado],[ComAries_Estado],ComAries_Transaccion)VALUES(@mensaje,'A',@estado)", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@mensaje", Mensaje));
+                        command.Parameters.Add(new SqlParameter("@estado", Tem_Transaccion));
+                        consulta = Convert.ToString(command.ExecuteNonQuery());
+                    }
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
-            finally
-            {
 
-                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
-                {
-                    ConexionSql.Close();
-                }
-            }
 
             return consulta;
         }
 
-        public void InsertarPesosObtenidos(string pesosObtenidos,string transaccion,int bascula)
+        #endregion
+        #region Transacción
+        public void Gestion_Pesaje(Ticket ticket)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            string consulta = "";
+            try
+            {
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open();
+                    using (var command = new SqlCommand("P_TBVehiculos", Conn))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@Veh_Bascula", ticket.Bascula);
+                        command.Parameters.AddWithValue("@Veh_BasculaSalida", ticket.BasculaSalida);
+                        command.Parameters.AddWithValue("@Veh_Placa", ticket.Placa);
+                        command.Parameters.AddWithValue("@Veh_Chofer", ticket.Chofer);
+                        command.Parameters.AddWithValue("@Veh_Peso_Ingreso", ticket.PesoIngreso);
+                        command.Parameters.AddWithValue("@Veh_Peso_Salida", ticket.PesoSalida);
+                        command.Parameters.AddWithValue("@Veh_Ticket", ticket.NumeroTicket);
+                        command.Parameters.AddWithValue("@Veh_PinEntrada", ticket.PinEntrada);
+                        command.Parameters.AddWithValue("@Veh_PinSalida", ticket.PinSalida);
+                        command.Parameters.AddWithValue("@Veh_OperadorEntrada", ticket.OperadorIngreso);
+                        command.Parameters.AddWithValue("@Veh_OperadorSalida", ticket.OperadorSalida);
+                        command.Parameters.AddWithValue("@Veh_PesosObtenidos", ticket.PesosObtenidos);
+                        command.Parameters.AddWithValue("@Veh_Estado", ticket.Estado);
+                        int dato = command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+
+        }
+        public string consulta_PinSalida(string N_Transaccion)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            string consulta = "";
+            try
+            {
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open();
+                    using (var command = new SqlCommand("SELECT Veh_PinSalida FROM tb_vehiculos WHERE veh_ticket=@transaccion AND  Veh_Estado='SP' ", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@transaccion", N_Transaccion));
+                        consulta = Convert.ToString(command.ExecuteScalar());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+
+
+            return consulta;
+        }
+        public string Peso_Salida(string Veh_BasculaSalida, string Veh_Peso_Salida, string Veh_Ticket, string Veh_PinSalida, string Veh_RutaImg)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            string consulta = "";
+            try
+            {
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open();
+                    using (var command = new SqlCommand("UPDATE Tb_Vehiculos set Veh_BasculaSalida=@basculaSalida,Veh_Peso_Salida=@pesoSalida,Veh_Fecha_Salida=GETDATE(),Veh_PinSalida=@pinSalida,Veh_RutaImg=@rutaSalida WHERE  Veh_Ticket=@transaccion", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@basculaSalida", Veh_BasculaSalida));
+                        command.Parameters.Add(new SqlParameter("@pesoSalida", Veh_Peso_Salida));
+                        command.Parameters.Add(new SqlParameter("@pinSalida", Veh_PinSalida));
+                        command.Parameters.Add(new SqlParameter("@rutaSalida", Veh_RutaImg));
+                        command.Parameters.Add(new SqlParameter("@transaccion", Veh_Ticket));
+                        int rowsAdded = command.ExecuteNonQuery();
+                    }
+                }
+            }
+
+            catch (Exception ex)
+            {
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+
+
+            return consulta;
+
+        }
+        public string consulta_PlacaIngreso(string Placa_Seleccionada)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            string consulta = "";
+            try
+            {
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open();
+                    using (var command = new SqlCommand("SELECT Veh_PinEntrada from tb_vehiculos WHERE veh_placa=@placa AND veh_estado ='IP'", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@placa", Placa_Seleccionada));
+                        consulta = Convert.ToString(command.ExecuteScalar());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+
+            return consulta;
+        }
+        public string consulta_TipoIngreso(string ntransaccion)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            string consulta = "";
+            try
+            {
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open();
+                    using (var command = new SqlCommand("SELECT Veh_Val2 from Tb_Vehiculos where Veh_Ticket =@transaccion", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@transaccion", ntransaccion));
+                        consulta = Convert.ToString(command.ExecuteScalar());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+
+
+            return consulta;
+        }
+        public void InsertarPesosObtenidos(string pesosObtenidos, string transaccion, int bascula)
         {
             try
             {
@@ -1212,44 +1119,40 @@ namespace PronacaPlugin
                         int rowsAdded = command.ExecuteNonQuery();
                     }
                 }
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
-           
+
 
 
         }
-
-        public void anularTransacción(string transaccion)
+        public int anularTransacción(string transaccion)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-            string consulta;
+            int consulta = 0;
             string pesoSalida;
             //Cambio de estado a TA(Transaccion anulada)
 
+
             try
             {
-                consulta = "update Tb_Vehiculos set Veh_Estado='TA' where  Veh_Ticket='" + transaccion + "'";
-
-                SqlConnection ConexionSql = new SqlConnection(Conexion_Bd);
-                ConexionSql.Open();
-                SqlCommand Comando_Sql = new SqlCommand(consulta, ConexionSql);
-                consulta = Convert.ToString(Comando_Sql.ExecuteNonQuery());
-                ConexionSql.Close();
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open();
+                    using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_Estado='TA' Where Veh_Codigo=(SELECT TOP(1) Veh_Codigo FROM Tb_Vehiculos WHERE  Veh_Ticket=@transaccion ORDER BY Veh_Codigo DESC)", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                        consulta = command.ExecuteNonQuery();
+                    }
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
-            finally
-            {
 
-                if (ConexionSql != null && ConexionSql.State != ConnectionState.Closed)
-                {
-                    ConexionSql.Close();
-                }
-            }
             //consulto si tiene peso de salida
             using (var Conn = new SqlConnection(Conexion_Bd))
             {
@@ -1262,7 +1165,7 @@ namespace PronacaPlugin
             }
 
             //si solo fue transaccion de entrada, actualizo a peso de salida 0
-            if(pesoSalida.Equals(""))
+            if (pesoSalida.Equals(""))
             {
                 using (var Conn = new SqlConnection(Conexion_Bd))
                 {
@@ -1275,6 +1178,7 @@ namespace PronacaPlugin
                 }
             }
 
+            return consulta;
         }
         public void eliminarTransaccionPendiente(int bascula)
         {
@@ -1291,7 +1195,6 @@ namespace PronacaPlugin
                 }
             }
         }
-
         public string obtenerOperador()
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
@@ -1307,15 +1210,14 @@ namespace PronacaPlugin
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
-           
+
             return consultaOperador;
         }
-
-        public void detenerSecuencia(string operador,string razon,int bascula,string pesoObtenido,string pesoBascula)
+        public void detenerSecuencia(string operador, string razon, int bascula, string pesoObtenido, string pesoBascula)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
             try
@@ -1334,108 +1236,13 @@ namespace PronacaPlugin
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
-            
+
         }
-
-        public string EnvioCorreoSecuenciaDetenida(string razon, string operador, string ruta_Imagen1, string ruta_Imagen2,string pesoObtenido,string pesoBascula)
-        {
-            //*************************************************************APP CONFIG
-            Correo_Destino = new string[11];
-            int numero_Correos = Converter.ConvertToInt32(cfg.AppSettings.Settings["Numero_Correos_Destino"].Value);
-            Correo_Destino[1] = cfg.AppSettings.Settings["Correo_Destino1"].Value;
-            Correo_Destino[2] = cfg.AppSettings.Settings["Correo_Destino2"].Value;
-            Correo_Destino[3] = cfg.AppSettings.Settings["Correo_Destino3"].Value;
-            Correo_Destino[4] = cfg.AppSettings.Settings["Correo_Destino4"].Value;
-            Correo_Destino[5] = cfg.AppSettings.Settings["Correo_Destino5"].Value;
-            Correo_Destino[6] = cfg.AppSettings.Settings["Correo_Destino6"].Value;
-            Correo_Destino[7] = cfg.AppSettings.Settings["Correo_Destino7"].Value;
-            Correo_Destino[8] = cfg.AppSettings.Settings["Correo_Destino8"].Value;
-            Correo_Destino[9] = cfg.AppSettings.Settings["Correo_Destino9"].Value;
-            Correo_Destino[10] = cfg.AppSettings.Settings["Correo_Destino10"].Value;
-            string Correo_Envio = cfg.AppSettings.Settings["Correo_Envio"].Value;
-            string Correo_Pasword = cfg.AppSettings.Settings["Correo_Pasword"].Value;
-            string Host_Salida = cfg.AppSettings.Settings["Host_Salida"].Value;
-            string Host_Puerto = cfg.AppSettings.Settings["Host_Puerto"].Value;
-            bool ssl = Boolean.Parse(cfg.AppSettings.Settings["SSL"].Value);
-            string directorio = @"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Camaras\";
-            //***********************************************************FIN DEL APP CONFIG
-
-            using (MailMessage mail = new MailMessage())
-            {
-                mail.From = new MailAddress(Correo_Envio);
-                mail.From = new MailAddress(Correo_Envio);
-                for (int i = 1; i <= numero_Correos; i++)
-                {
-                    mail.To.Add(Correo_Destino[i]);
-                }
-                mail.Subject = "DataBridge - Sistema de Pesaje - ";
-                //mail.Body = "<h1>Notificacion</h1></br><p>El día " + DateTime.Now.ToString() + " fue detenida la secuencia, por la razón: " + razon + " por el operador: " +operador+".</p>";
-                mail.Body = "<h1>Notificación</h1><p> Se ha detenido la secuencia de pesaje en DataBridge.</p><table><tr><td>Fecha y hora:</td><td>" + DateTime.Now.ToString() + "</td></tr><tr><td>Razón:</td><td>" + razon + "</td></tr><tr><td>Operador:</td><td>" + operador + "</td></tr><tr><td>Peso obtenido:</td><td>" + pesoObtenido + "</td></tr><tr><td>Peso en báscula:</td><td>" + pesoBascula + "</td></tr></table>";
-                mail.IsBodyHtml = true;
-                if (ruta_Imagen1 != (""))
-                {
-                    mail.Attachments.Add(new Attachment(directorio + ruta_Imagen1 + ".jpg"));
-                }
-                if (ruta_Imagen2 != (""))
-                {
-                    mail.Attachments.Add(new Attachment(directorio + ruta_Imagen2 + ".jpg"));
-                }
-                using (SmtpClient smtp = new SmtpClient(Host_Salida, Convert.ToInt32(Host_Puerto)))
-                {
-                    smtp.UseDefaultCredentials = false;
-                    smtp.Credentials = new NetworkCredential(Correo_Envio, Correo_Pasword);
-                    smtp.EnableSsl = ssl; //pronaca en false
-                                          // smtp.TargetName = "STARTTLS/smtp-mail.outlook.com"; //solo si el servidor de correo tiene TTLS
-                    try
-                    {
-                        smtp.Send(mail);
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new ExcepcionNegocio("Error en el envío del correo");
-                    }
-
-                }
-                //// fin del proyecto
-                return "";
-
-            }
-        }
-        public void escribirImagen(string ruta, string pesoBascula)
-        {
-            string directorio = @"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Camaras\";
-            if (ruta!="")
-            {
-                var filePath =directorio + ruta + ".jpg";
-                Bitmap bitmap = null;
-
-                // Create from a stream so we don't keep a lock on the file.
-                using (var stream = File.OpenRead(filePath))
-                {
-                    bitmap = (Bitmap)Bitmap.FromStream(stream);
-                }
-
-                using (bitmap)
-                using (var graphics = Graphics.FromImage(bitmap))
-                using (var font = new Font("Arial", 18, FontStyle.Regular))
-                {
-                    // Do what you want using the Graphics object here.
-                    //graphics.DrawString("Fecha: 08-03-2022", font, Brushes.Red, 0, 650);
-                    //graphics.DrawString("Placa: ABCD1234", font, Brushes.Red, 0, 670);
-                    graphics.DrawString("Peso en báscula: " + pesoBascula, font, Brushes.Red, 0, 520);
-
-                    // Important part!
-                    bitmap.Save(filePath);
-                }
-            }
-            
-        }
-
-        public void actualizarEstadoSalida(string transaccion, string mensaje_recibido,string numeral_recibido,int bascula,string pesoSalida)
+        public void actualizarEstadoSalida(string transaccion, string mensaje_recibido, string numeral_recibido, int bascula, string pesoSalida)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
             try
@@ -1453,14 +1260,14 @@ namespace PronacaPlugin
                         int rowsAdded = command.ExecuteNonQuery();
                     }
                 }
-            }catch(Exception ex)
-            {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
-            
-        }
+            catch (Exception ex)
+            {
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
 
-        public void actualizarImagenesPINEntrada(string imgEntrada,string transaccion)
+        }
+        public void actualizarImagenesPINEntrada(string imgEntrada, string transaccion)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
             using (var Conn = new SqlConnection(Conexion_Bd))
@@ -1488,7 +1295,6 @@ namespace PronacaPlugin
                 }
             }
         }
-
         public string estatusRecibidoAries(string transaccion)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
@@ -1504,28 +1310,32 @@ namespace PronacaPlugin
                         estado = Convert.ToString(command.ExecuteScalar());
                     }
                 }
-            }catch(Exception ex)
-            {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
             }
-            
+            catch (Exception ex)
+            {
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+
             return estado;
         }
-
-        public void actualizarEstadoPendienteEntrada(int bascula)
+        public void actualizarEstadoPendienteEntrada(int bascula, Ticket ticket, string PesoBascula, string evento)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            int rowsAdded = 0;
             using (var Conn = new SqlConnection(Conexion_Bd))
             {
                 Conn.Open();
-                using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_Estado='TI' WHERE Veh_Estado='IP' AND Veh_Bascula=@bascula", Conn))
+                using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_Estado='TI' WHERE Veh_Codigo=(SELECT TOP(1) Veh_Codigo FROM Tb_Vehiculos WHERE Veh_Estado='IP' AND Veh_Placa=@vehiculo AND Veh_Bascula=@bascula ORDER BY Veh_Codigo DESC)", Conn))
                 {
+                    command.Parameters.Add(new SqlParameter("@vehiculo", ticket.Placa));
                     command.Parameters.Add(new SqlParameter("@bascula", bascula));
-                    int rowsAdded = command.ExecuteNonQuery();
+                    rowsAdded = command.ExecuteNonQuery();
                 }
             }
+            if(rowsAdded!=0)
+                Log.transacción(ticket, PesoBascula, evento, bascula);
         }
-        public void actualizarFechaEntrada(int bascula,string transaccion,DateTime fechaIngreso)
+        public void actualizarFechaEntrada(int bascula, string transaccion, DateTime fechaIngreso)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
             using (var Conn = new SqlConnection(Conexion_Bd))
@@ -1540,28 +1350,129 @@ namespace PronacaPlugin
                 }
             }
         }
-
-        private void ventanaOK(string texto, String titulo)
+        public string estatusRecibidoAriesEntrada(string transaccion)
         {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            string estado = "";
             try
             {
-                IWindowManager windowManager = ServiceLocator.GetKernel().Get<IWindowManager>();
-                CustomOkDialogViewModel viewModel = new CustomOkDialogViewModel(texto);
-                viewModel.CustomWindowTitle = titulo;
-                viewModel.OkButtonText = "OK";
-                Application.Current?.Dispatcher.Invoke(() =>
+                using (var Conn = new SqlConnection(Conexion_Bd))
                 {
-                    windowManager.ShowDialog(viewModel);
-
-                });
+                    Conn.Open();
+                    using (var command = new SqlCommand("SELECT TOP 1 ComAries_EstatusRecibido FROM ComunicacionAries WHERE ComAries_Transaccion=@transaccion AND ComAries_Estado='Fin' AND ComAries_TipoPeso='E' AND ComAries_EstatusRecibido='3' ORDER BY ComAries_Codigo DESC", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                        estado = Convert.ToString(command.ExecuteScalar());
+                    }
+                }
             }
             catch (Exception ex)
             {
-                ServiceManager.LogMgr.WriteError("Error", ex);
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
             }
+
+            return estado;
+        }
+        public int actualizarEstadoRecibidoEntrada(int bascula, string transaccion)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            int rowsAdded = 0;
+            try
+            {
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open();
+                    using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_Val1='3', Veh_Val2='Entrada Exitosa' WHERE Veh_Codigo=(SELECT TOP(1) Veh_Codigo FROM  Tb_Vehiculos WHERE Veh_Ticket=@transaccion AND Veh_Bascula=@bascula AND Veh_Estado='IC' ORDER BY Veh_Codigo DESC)", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@bascula", bascula));
+                        command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                        rowsAdded = command.ExecuteNonQuery();
+                    }
+                }
+                return rowsAdded;
+            }catch(Exception ex)
+            {
+                return rowsAdded;
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+            
+        }
+        public string estatusRecibidoAriesSalida(string transaccion)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            string estado = "";
+            try
+            {
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open();
+                    using (var command = new SqlCommand("SELECT TOP 1 ComAries_EstatusRecibido FROM ComunicacionAries WHERE ComAries_Transaccion=@transaccion AND ComAries_Estado='Fin' AND ComAries_TipoPeso='S' AND ComAries_EstatusRecibido='3' ORDER BY ComAries_Codigo DESC", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                        estado = Convert.ToString(command.ExecuteScalar());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+
+            return estado;
+        }
+        public int actualizarEstadoRecibidoSalida(int bascula, string transaccion)
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            int rowsAdded = 0;
+            try
+            {
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open();
+                    using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_Val3='3', Veh_Val2='Salida Exitosa' WHERE Veh_Codigo=(SELECT TOP(1) Veh_Codigo FROM  Tb_Vehiculos WHERE Veh_Ticket=@transaccion AND Veh_BasculaSalida=@bascula AND Veh_Estado='SC' ORDER BY Veh_Codigo DESC)", Conn))
+                    {
+                        command.Parameters.Add(new SqlParameter("@bascula", bascula));
+                        command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                        rowsAdded = command.ExecuteNonQuery();
+                    }
+                }
+                return rowsAdded;
+            }catch(Exception ex)
+            {
+                return rowsAdded;
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+        }
+        public int revisarTransaccionEntradaTerminada()
+        {
+            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
+            int rowAdded=0;
+            try
+            {
+                using (var Conn = new SqlConnection(Conexion_Bd))
+                {
+                    Conn.Open();
+                    using (var command = new SqlCommand("RevisarTransaccionEntradaTerminada", Conn))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        rowAdded = command.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+            }
+
+            return rowAdded;
         }
 
         #endregion
+
+
+
+
+
 
 
     }
