@@ -37,3 +37,12 @@ C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Prueb
 C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.csproj.CoreCompileInputs.cache
 C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.exe
 C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.pdb
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PruebasComunicacion\bin\Debug\PruebasComunicacion.exe.config
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PruebasComunicacion\bin\Debug\PruebasComunicacion.exe
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PruebasComunicacion\bin\Debug\PruebasComunicacion.pdb
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.Form1.resources
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.Properties.Resources.resources
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.csproj.GenerateResource.cache
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.csproj.CoreCompileInputs.cache
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.exe
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PruebasComunicacion\obj\Debug\PruebasComunicacion.pdb

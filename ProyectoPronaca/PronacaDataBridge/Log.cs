@@ -9,6 +9,7 @@ namespace PronacaPlugin
 {
     class Log
     {
+        public static string operadorLog;
         public static void transacción(Ticket ticket,string pesoBascula,string evento,int bascula)
         {
             string path = @"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Log.txt";
@@ -46,6 +47,11 @@ namespace PronacaPlugin
                     sw.Close();
                 }
             }
+        }
+
+        public static void operadorActual(string operador)
+        {
+            operadorLog = operador;
         }
 
     }

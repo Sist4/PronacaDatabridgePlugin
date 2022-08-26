@@ -113,7 +113,7 @@ namespace PronacaPlugin
                     catch (Exception ex)
                     {
                         envio=false;
-                        throw new ExcepcionNegocio("No se pudo enviar el correo, Porfavor revise la conexión a internet");
+                        throw new ExcepcionNegocio("No se pudo enviar el correo, Porfavor revisar que se encuentre en red y que el servidor de correos está habilitado");
                         
                     }
 
@@ -123,7 +123,7 @@ namespace PronacaPlugin
 
             }
         }
-        public string EnvioCorreoSecuenciaDetenida(string razon, string operador, string ruta_Imagen1, string ruta_Imagen2, string pesoObtenido, string pesoBascula)
+        public string EnvioCorreoSecuenciaDetenida(string razon, string operador, string ruta_Imagen1, string ruta_Imagen2, string pesoObtenido, string pesoBascula,string texto)
         {
             //*************************************************************APP CONFIG
             Correo_Destino = new string[11];
@@ -154,9 +154,11 @@ namespace PronacaPlugin
                 {
                     mail.To.Add(Correo_Destino[i]);
                 }
+
+
                 mail.Subject = "DataBridge - Sistema de Pesaje - ";
                 //mail.Body = "<h1>Notificacion</h1></br><p>El día " + DateTime.Now.ToString() + " fue detenida la secuencia, por la razón: " + razon + " por el operador: " +operador+".</p>";
-                mail.Body = "<h1>Notificación</h1><p> Se ha detenido la secuencia de pesaje en DataBridge.</p><table><tr><td>Fecha y hora:</td><td>" + DateTime.Now.ToString() + "</td></tr><tr><td>Razón:</td><td>" + razon + "</td></tr><tr><td>Operador:</td><td>" + operador + "</td></tr><tr><td>Peso obtenido:</td><td>" + pesoObtenido + "</td></tr><tr><td>Peso en báscula:</td><td>" + pesoBascula + "</td></tr></table>";
+                mail.Body = "<h1>Notificación</h1><p>"+texto+"</p><table><tr><td>Fecha y hora:</td><td>" + DateTime.Now.ToString() + "</td></tr><tr><td>Razón:</td><td>" + razon + "</td></tr><tr><td>Operador:</td><td>" + operador + "</td></tr><tr><td>Peso obtenido:</td><td>" + pesoObtenido + "</td></tr><tr><td>Peso en báscula:</td><td>" + pesoBascula + "</td></tr></table>";
                 mail.IsBodyHtml = true;
                 if (ruta_Imagen1 != (""))
                 {
@@ -178,7 +180,7 @@ namespace PronacaPlugin
                     }
                     catch (Exception ex)
                     {
-                        throw new ExcepcionNegocio("Error en el envío del correo");
+                        throw new ExcepcionNegocio("No se pudo enviar el correo, Porfavor revisar que se encuentre en red y que el servidor de correos está habilitado");
                     }
 
                 }
@@ -220,10 +222,6 @@ namespace PronacaPlugin
 
         #endregion
         #region Camara_FTP
-        //code
-
-
-
         public bool listarFTP(string placa_enviada, int nScaleId)
         {
             bool val = false;
@@ -247,8 +245,8 @@ namespace PronacaPlugin
                 }
             } catch (Exception ex)
             {
-                //throw new ExcepcionNegocio("Error en la conexión con el servidor SFTP");
-                ventanaOK("Error en la conexión con el servidor SFTP", "DataBridge Plugin");
+                throw new ExcepcionNegocio("Error en la conexión con el servidor SFTP");
+                //ventanaOK("Error en la conexión con el servidor SFTP", "DataBridge Plugin");
             }
 
 
@@ -302,26 +300,26 @@ namespace PronacaPlugin
                     placaLeida.Append(placa);
                     placaLeida.Replace(".jpg", "");
                     placaLeida.Replace("-", "");
-                    //digitosPlaca = placaLeida.Length == 6 ? true : false;
-                    //placaLetras.Append(placaLeida);
-                    //placaLetras.Remove(3, placaLeida.Length - 3);
-                    //placaLetras.Replace('0', 'O');
-                    //placaLetras.Replace('1', 'I');
-                    //placaLetras.Replace('8', 'B');
-                    //placaLetras.Replace('6', 'G');
-                    //placaNumeros.Append(placaLeida);
-                    //placaNumeros.Remove(0, 3);
-                    //if (digitosPlaca == true)
-                    //    placaNumeros.Insert(0, '0');
+                    digitosPlaca = placaLeida.Length == 6 ? true : false;
+                    placaLetras.Append(placaLeida);
+                    placaLetras.Remove(3, placaLeida.Length - 3);
+                    placaLetras.Replace('0', 'O');
+                    placaLetras.Replace('1', 'I');
+                    placaLetras.Replace('8', 'B');
+                    placaLetras.Replace('6', 'G');
+                    placaNumeros.Append(placaLeida);
+                    placaNumeros.Remove(0, 3);
+                    if (digitosPlaca == true)
+                        placaNumeros.Insert(0, '0');
 
-                    //placaNumeros.Replace('O', '0');
-                    //placaNumeros.Replace('Q', '0');
-                    //placaNumeros.Replace('I', '1');
-                    //placaNumeros.Replace('B', '8');
-                    //placaNumeros.Replace('G', '6');
-                    //placaLeida.Clear();
-                    //placaLeida.Append(placaLetras);
-                    //placaLeida.Append(placaNumeros);
+                    placaNumeros.Replace('O', '0');
+                    placaNumeros.Replace('Q', '0');
+                    placaNumeros.Replace('I', '1');
+                    placaNumeros.Replace('B', '8');
+                    placaNumeros.Replace('G', '6');
+                    placaLeida.Clear();
+                    placaLeida.Append(placaLetras);
+                    placaLeida.Append(placaNumeros);
                     placa = placaLeida.ToString();
 
 
@@ -350,6 +348,36 @@ namespace PronacaPlugin
 
         }
 
+        private static string ObtenerUltimaPlaca(string path_ultimo, string path_temporal)
+        {
+            string[] array_temporal = path_temporal.ToString().Split('_');
+            string FEC_temporal = array_temporal[1];
+            string placa_temporal = array_temporal[2];
+            DateTime Fecha_Leida_temporal = new DateTime(Convert.ToInt32(FEC_temporal.Substring(0, 4)),
+                Convert.ToInt32(FEC_temporal.Substring(4, 2)),
+                Convert.ToInt32(FEC_temporal.Substring(6, 2)),
+                Convert.ToInt32(FEC_temporal.Substring(8, 2)),
+                Convert.ToInt32(FEC_temporal.Substring(10, 2)),
+                Convert.ToInt32(FEC_temporal.Substring(12, 2)));
+
+            string[] array_ultimo = path_ultimo.ToString().Split('_');
+            string FEC_ultimo = array_ultimo[1];
+            string placa_ultimo = array_ultimo[2];
+            DateTime Fecha_Leida_ultima = new DateTime(Convert.ToInt32(FEC_ultimo.Substring(0, 4)),
+                Convert.ToInt32(FEC_ultimo.Substring(4, 2)),
+                Convert.ToInt32(FEC_ultimo.Substring(6, 2)),
+                Convert.ToInt32(FEC_ultimo.Substring(8, 2)),
+                Convert.ToInt32(FEC_ultimo.Substring(10, 2)),
+                Convert.ToInt32(FEC_ultimo.Substring(12, 2)));
+
+            if (Fecha_Leida_temporal > Fecha_Leida_ultima)
+                path_ultimo = path_temporal;
+
+
+
+            return path_ultimo;
+        }
+
 
         #endregion
         #region Biometrico
@@ -373,7 +401,7 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Biométrico: " + ex.Message);
             }
 
 
@@ -398,7 +426,7 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Biométrico: " + ex.Message);
             }
 
 
@@ -428,7 +456,7 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD DataBridge: " + ex.Message);
             }
 
 
@@ -585,11 +613,11 @@ namespace PronacaPlugin
                 }
 
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 estatusAries = 1;
-                mensajeAries = e.Message;
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                mensajeAries = ex.Message;
+                throw new ExcepcionSQL("BDD Plugin: "+ex.Message);
             }
 
         }
@@ -702,11 +730,11 @@ namespace PronacaPlugin
                 }
 
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 estatusAries = 1;
-                mensajeAries = e.Message;
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                mensajeAries = ex.Message;
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
         }
@@ -959,7 +987,7 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
 
@@ -999,11 +1027,11 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: "+ex.Message);
             }
 
         }
-        public string consulta_PinSalida(string N_Transaccion)
+        public string consulta_PinSalida(string N_Transaccion,int bascula)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
             string consulta = "";
@@ -1012,16 +1040,17 @@ namespace PronacaPlugin
                 using (var Conn = new SqlConnection(Conexion_Bd))
                 {
                     Conn.Open();
-                    using (var command = new SqlCommand("SELECT Veh_PinSalida FROM tb_vehiculos WHERE veh_ticket=@transaccion AND  Veh_Estado='SP' ", Conn))
+                    using (var command = new SqlCommand("SELECT Veh_PinSalida FROM tb_vehiculos WHERE veh_ticket=@transaccion AND  Veh_BasculaSalida=@bascula AND Veh_Estado='SP' ", Conn))
                     {
                         command.Parameters.Add(new SqlParameter("@transaccion", N_Transaccion));
+                        command.Parameters.Add(new SqlParameter("@bascula",bascula));
                         consulta = Convert.ToString(command.ExecuteScalar());
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: "+ex.Message);
             }
 
 
@@ -1050,14 +1079,14 @@ namespace PronacaPlugin
 
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
 
             return consulta;
 
         }
-        public string consulta_PlacaIngreso(string Placa_Seleccionada)
+        public string consulta_PinIngreso(string Placa_Seleccionada,int bascula)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
             string consulta = "";
@@ -1066,16 +1095,17 @@ namespace PronacaPlugin
                 using (var Conn = new SqlConnection(Conexion_Bd))
                 {
                     Conn.Open();
-                    using (var command = new SqlCommand("SELECT Veh_PinEntrada from tb_vehiculos WHERE veh_placa=@placa AND veh_estado ='IP'", Conn))
+                    using (var command = new SqlCommand("SELECT Veh_PinEntrada from tb_vehiculos WHERE Veh_Placa=@placa AND Veh_Bascula=@bascula AND veh_estado ='IP'", Conn))
                     {
                         command.Parameters.Add(new SqlParameter("@placa", Placa_Seleccionada));
+                        command.Parameters.Add(new SqlParameter("@bascula", bascula));
                         consulta = Convert.ToString(command.ExecuteScalar());
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
             return consulta;
@@ -1098,7 +1128,7 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
 
@@ -1122,13 +1152,13 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
 
 
         }
-        public int anularTransacción(string transaccion)
+        public int anularTransacción(string transaccion,string vehiculo)
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
             int consulta = 0;
@@ -1141,16 +1171,17 @@ namespace PronacaPlugin
                 using (var Conn = new SqlConnection(Conexion_Bd))
                 {
                     Conn.Open();
-                    using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_Estado='TA' Where Veh_Codigo=(SELECT TOP(1) Veh_Codigo FROM Tb_Vehiculos WHERE  Veh_Ticket=@transaccion ORDER BY Veh_Codigo DESC)", Conn))
+                    using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_Estado='TA' Where Veh_Codigo=(SELECT TOP(1) Veh_Codigo FROM Tb_Vehiculos WHERE  Veh_Ticket=@transaccion AND Veh_Placa=@vehiculo ORDER BY Veh_Codigo DESC)", Conn))
                     {
                         command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
+                        command.Parameters.Add(new SqlParameter("@vehiculo",vehiculo));
                         consulta = command.ExecuteNonQuery();
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
             //consulto si tiene peso de salida
@@ -1212,7 +1243,7 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
             return consultaOperador;
@@ -1238,7 +1269,7 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Error en la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
         }
@@ -1263,37 +1294,9 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
-        }
-        public void actualizarImagenesPINEntrada(string imgEntrada, string transaccion)
-        {
-            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-            using (var Conn = new SqlConnection(Conexion_Bd))
-            {
-                Conn.Open();
-                using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_RutaImgIng=@imgEntrada WHERE Veh_Ticket=@transaccion", Conn))
-                {
-                    command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
-                    command.Parameters.Add(new SqlParameter("@imgEntrada", imgEntrada));
-                    int rowsAdded = command.ExecuteNonQuery();
-                }
-            }
-        }
-        public void actualizarImagenesPINSalida(string imgSalida, string transaccion)
-        {
-            string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
-            using (var Conn = new SqlConnection(Conexion_Bd))
-            {
-                Conn.Open();
-                using (var command = new SqlCommand("UPDATE Tb_Vehiculos SET Veh_RutaImgSal=@imgSalida WHERE Veh_Ticket=@transaccion", Conn))
-                {
-                    command.Parameters.Add(new SqlParameter("@transaccion", transaccion));
-                    command.Parameters.Add(new SqlParameter("@imgSalida", imgSalida));
-                    int rowsAdded = command.ExecuteNonQuery();
-                }
-            }
         }
         public string estatusRecibidoAries(string transaccion)
         {
@@ -1313,7 +1316,7 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
             return estado;
@@ -1368,7 +1371,7 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
             return estado;
@@ -1415,7 +1418,7 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
             return estado;
@@ -1440,10 +1443,10 @@ namespace PronacaPlugin
             }catch(Exception ex)
             {
                 return rowsAdded;
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
         }
-        public int revisarTransaccionEntradaTerminada()
+        public int terminarTransaccionEntrada()
         {
             string Conexion_Bd = cfg.AppSettings.Settings["Conexion_Local"].Value;
             int rowAdded=0;
@@ -1452,7 +1455,7 @@ namespace PronacaPlugin
                 using (var Conn = new SqlConnection(Conexion_Bd))
                 {
                     Conn.Open();
-                    using (var command = new SqlCommand("RevisarTransaccionEntradaTerminada", Conn))
+                    using (var command = new SqlCommand("SP_TerminarTransaccionEntrada", Conn))
                     {
                         command.CommandType = CommandType.StoredProcedure;
                         rowAdded = command.ExecuteNonQuery();
@@ -1461,7 +1464,7 @@ namespace PronacaPlugin
             }
             catch (Exception ex)
             {
-                throw new ExcepcionSQL("Se perdió la conexión con la base de datos");
+                throw new ExcepcionSQL("BDD Plugin: " + ex.Message);
             }
 
             return rowAdded;

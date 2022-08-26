@@ -8,7 +8,8 @@ namespace PronacaPlugin
 {
     public class Ticket
     {
-        public Ticket()
+
+        private Ticket()
         {
             BasculaSalida = 0;
             Bascula = 0;
@@ -30,6 +31,36 @@ namespace PronacaPlugin
             Val3 = "";
         }
 
+        private static Ticket _instance;
+        public static Ticket GetInstance()
+        {
+            if (_instance == null)
+            {
+                _instance = new Ticket();
+            }
+            return _instance;
+        }
+        public void Nuevo()
+        {
+            BasculaSalida = 0;
+            Bascula = 0;
+            Placa = "";
+            Chofer = "";
+            PesoIngreso = "0";
+            PesoSalida = "0";
+            NumeroTicket = "0";
+            FechaIngreso = DateTime.Now;
+            FechaSalida = DateTime.Now;
+            OperadorIngreso = "";
+            OperadorSalida = "";
+            PinEntrada = "";
+            PinSalida = "";
+            PesosObtenidos = "";
+            Estado = "";
+            Val1 = "";
+            Val2 = "";
+            Val3 = "";
+        }
 
         public int Bascula { get; set; }
         public int BasculaSalida { get; set; }

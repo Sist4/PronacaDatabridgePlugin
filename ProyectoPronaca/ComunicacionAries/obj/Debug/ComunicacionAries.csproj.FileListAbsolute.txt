@@ -28,3 +28,12 @@ C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Comun
 C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.exe
 C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.pdb
 C:\Users\Sistemas\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.csproj.AssemblyReference.cache
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\bin\Debug\ComunicacionAries.exe.config
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\bin\Debug\ComunicacionAries.exe
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\bin\Debug\ComunicacionAries.pdb
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.Form1.resources
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.Properties.Resources.resources
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.csproj.GenerateResource.cache
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.csproj.CoreCompileInputs.cache
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.exe
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.pdb

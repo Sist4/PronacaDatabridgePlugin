@@ -28,6 +28,7 @@ namespace PronacaPlugin
         {
             string operador = myLoggedInUser.Name;
             DateTime fecha = DateTime.Now;
+            Log.operadorActual(operador);
             registrarOperador(operador,fecha);
 
         }

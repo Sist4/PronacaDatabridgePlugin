@@ -37,8 +37,6 @@ namespace PronacaPlugin
    public class Transacciones : TransactionProcessing
     {
         //Variables globales
-
-
         double[] pesoActualBascula;
         int[] transaccionEnviada;
         string[] conductorEnviado;
@@ -65,6 +63,8 @@ namespace PronacaPlugin
             pesoObtenido = new int[2];
             pesosObtenidos = new string[2];
             ticket = new Ticket[2];
+            ticket[0] = Ticket.GetInstance();
+            ticket[1] = Ticket.GetInstance();
             codeBase = Assembly.GetExecutingAssembly().CodeBase;
             uri = new UriBuilder(codeBase);
             path = Uri.UnescapeDataString(uri.Path);
@@ -132,11 +132,8 @@ namespace PronacaPlugin
         {
             int rowAdded = 0;
             try
-            {
-                do
-                {
-                    rowAdded = anularTransaccion(nScaleId, myTransaction);
-                } while (rowAdded == 0);
+            {  
+              rowAdded = anularTransaccion(nScaleId, myTransaction);
                 
             }
             catch (Exception ex)
@@ -253,6 +250,7 @@ namespace PronacaPlugin
         {
             double peso = pesoActualBascula[nScaleId];
             string operador = VEH.obtenerOperador();
+            string texto = " Se ha detenido la secuencia de pesaje en DataBridge ";
             //bandera de transacción enviada
             transaccionEnviada[nScaleId] = 5;
             pesosObtenidos[nScaleId] = "";
@@ -266,17 +264,59 @@ namespace PronacaPlugin
                 razon = ventanaImput("¡Se detuvo la secuencia!", "DataBridge Plugin", "ingrese la Razón");
             } while (razon == "");
             VEH.detenerSecuencia(VEH.obtenerOperador(), razon, nScaleId, pesoObtenido[nScaleId].ToString(), peso.ToString()) ;
-            VEH.EnvioCorreoSecuenciaDetenida(razon, operador, ruta1, ruta2, pesoObtenido[nScaleId].ToString(), peso.ToString());
+            VEH.EnvioCorreoSecuenciaDetenida(razon, operador, ruta1, ruta2, pesoObtenido[nScaleId].ToString(), peso.ToString(),texto);
             VEH.actualizarEstadoPendienteEntrada(nScaleId,ticket[nScaleId], 
-                pesoActualBascula[nScaleId].ToString(), "IO Stopped");
+            pesoActualBascula[nScaleId].ToString(), "IO Stopped");
         }
         public override void PhotoeyeStateChanged(int nScaleId, PhotoeyeStateChangedEventArgs args)
         {
             //ventanaOK(args.CurrentState.ToString(), "ventana");
-            if (args.CurrentState.ToString() == "Broken" && transaccionEnviada[nScaleId] == 1)
-                ventanaOK("Se interrumpió un Fotosensor. Asegurese de volver a presionar el botón Aceptar o Completar y terminar la transacción", "DataBridge Plugin");
+            //if (args.CurrentState.ToString() == "Broken" && transaccionEnviada[nScaleId] == 1 )
+            //    ventanaOK("Se interrumpió un Fotosensor. Asegurese de volver a presionar el botón Aceptar o Completar y terminar la transacción", "DataBridge Plugin");
+        }
+        public override void TransactionStateChanged(int nScaleId, TransactionStateChangedEventArgs args)
+        {
+            //double peso = pesoActualBascula[nScaleId];
+            //string razon = "";
+            //transaccionEnviada[nScaleId] = 5;
+            //pesosObtenidos[nScaleId] = "";
+            //string ruta1 = "";
+            //string ruta2 = "";
+            //string texto = " Se ha abortado la transacción en DataBridge ";
+            //NotificacionCorreoSecuencia(nScaleId, peso.ToString(), ref ruta1, ref ruta2);
+            //if (args.CurrentState.ToString().Equals("Aborted"))
+            //{
+            //    do
+            //    {
+            //        razon = ventanaImput("¡Transacción abortada!", "DataBridge Plugin", "ingrese la Razón");
+            //    } while (razon == "");
+            //    VEH.detenerSecuencia(VEH.obtenerOperador(), "Abortado - "+razon, nScaleId, pesoObtenido[nScaleId].ToString(), peso.ToString());
+            //    VEH.EnvioCorreoSecuenciaDetenida("Abortado:"+razon,VEH.obtenerOperador(), ruta1, ruta2, pesoObtenido[nScaleId].ToString(), peso.ToString(),texto);
+            //    VEH.actualizarEstadoPendienteEntrada(nScaleId, ticket[nScaleId],
+            //    pesoActualBascula[nScaleId].ToString(), "IO Aborted");
+            //}
+                
         }
 
+        public override string SettingOperationalData(int nScaleId, TransactionModel myTransaction, OperationalDataType myOperationalDataType, BaseOperationalDataModel myOperationalData)
+        {
+            //if (myOperationalDataType == OperationalDataType.Vehicle)
+            //{
+            //    //ventanaOK(myOperationalData.Name,"ventana");
+            //    if(myOperationalData.Name.Equals("PDO6160"))
+            //    {
+            //        ventanaOK("el vehiculo si está bien", "ventana");
+            //    }
+
+            //}
+            return "";
+        }
+
+        public override string OutputsSignaling(int nScaleId, OutputsSignaledEventArgs args)
+        {
+            //args.
+            return "";
+        }
         #endregion
 
         #region Métodos privados
@@ -617,13 +657,15 @@ namespace PronacaPlugin
                     if (estado.Equals("entrada"))
                     {
                         ticket.PesosObtenidos = pesosObtenidos[nScaleId];
-                        if(VEH.EnvioCorreoPin(VEH.consulta_TransaccionDB(), ticket.PinEntrada, ticket.Placa, Obtener_ruta1, Obtener_ruta2)==true)
+                        ticket.PinEntrada = generarPin();
+                        if (VEH.EnvioCorreoPin(VEH.consulta_TransaccionDB(), ticket.PinEntrada, ticket.Placa, Obtener_ruta1, Obtener_ruta2)==true)
                             VEH.Gestion_Pesaje(ticket);
                     }
                     else
                     {
                         ticket.PesosObtenidos = pesosObtenidos[nScaleId];
-                        if(VEH.EnvioCorreoPin(ticket.NumeroTicket, ticket.PinSalida, ticket.Placa, Obtener_ruta1, Obtener_ruta2)==true)
+                        ticket.PinSalida = generarPin();
+                        if (VEH.EnvioCorreoPin(ticket.NumeroTicket, ticket.PinSalida, ticket.Placa, Obtener_ruta1, Obtener_ruta2)==true)
                             VEH.Gestion_Pesaje(ticket);
                     }                    
 
@@ -635,14 +677,16 @@ namespace PronacaPlugin
                     if (estado.Equals("entrada"))
                     {
                         ticket.PesosObtenidos = pesosObtenidos[nScaleId];
-                        if(VEH.EnvioCorreoPin(VEH.consulta_TransaccionDB(), ticket.PinEntrada, ticket.Placa, "", "")==true)
+                        ticket.PinEntrada = generarPin();
+                        if (VEH.EnvioCorreoPin(VEH.consulta_TransaccionDB(), ticket.PinEntrada, ticket.Placa, "", "")==true)
                             VEH.Gestion_Pesaje(ticket);
                     }
                         
                     else
                     {
                         ticket.PesosObtenidos = pesosObtenidos[nScaleId];
-                        if(VEH.EnvioCorreoPin(ticket.NumeroTicket, ticket.PinSalida, ticket.Placa, "", "")==true)
+                        ticket.PinSalida = generarPin();
+                        if (VEH.EnvioCorreoPin(ticket.NumeroTicket, ticket.PinSalida, ticket.Placa, "", "")==true)
                             VEH.Gestion_Pesaje(ticket);
                     }
 
@@ -669,13 +713,15 @@ namespace PronacaPlugin
                     if (estado.Equals("entrada"))
                     {
                         ticket.PesosObtenidos = pesosObtenidos[nScaleId];
-                        if(VEH.EnvioCorreoPin(VEH.consulta_TransaccionDB(),ticket.PinEntrada,ticket.Placa, Obtener_ruta1, Obtener_ruta2)==true)
+                        ticket.PinEntrada = generarPin();
+                        if (VEH.EnvioCorreoPin(VEH.consulta_TransaccionDB(),ticket.PinEntrada,ticket.Placa, Obtener_ruta1, Obtener_ruta2)==true)
                             VEH.Gestion_Pesaje(ticket);
                     }
                     else
                     {
                         ticket.PesosObtenidos = pesosObtenidos[nScaleId];
-                        if(VEH.EnvioCorreoPin(ticket.NumeroTicket,ticket.PinSalida,ticket.Placa, Obtener_ruta1, Obtener_ruta2)==true)
+                        ticket.PinSalida = generarPin();
+                        if (VEH.EnvioCorreoPin(ticket.NumeroTicket,ticket.PinSalida,ticket.Placa, Obtener_ruta1, Obtener_ruta2)==true)
                             VEH.Gestion_Pesaje(ticket);
 
                     }
@@ -687,13 +733,15 @@ namespace PronacaPlugin
                     if (estado.Equals("entrada"))
                     {
                         ticket.PesosObtenidos = pesosObtenidos[nScaleId];
-                        if(VEH.EnvioCorreoPin(VEH.consulta_TransaccionDB(),ticket.PinEntrada,ticket.Placa, "", "")==true)
+                        ticket.PinEntrada = generarPin();
+                        if (VEH.EnvioCorreoPin(VEH.consulta_TransaccionDB(),ticket.PinEntrada,ticket.Placa, "", "")==true)
                             VEH.Gestion_Pesaje(ticket);
                     }
                     else
                     {
                         ticket.PesosObtenidos = pesosObtenidos[nScaleId];
-                        if(VEH.EnvioCorreoPin(ticket.NumeroTicket, ticket.PinSalida, ticket.Placa, "", "")==true)
+                        ticket.PinSalida = generarPin();
+                        if (VEH.EnvioCorreoPin(ticket.NumeroTicket, ticket.PinSalida, ticket.Placa, "", "")==true)
                             VEH.Gestion_Pesaje(ticket);
                     }
                      
@@ -745,21 +793,9 @@ namespace PronacaPlugin
             pesoActualBascula[nScaleId] = peso;
         }
 
-        private void actualizarRutasImagenesEntrada(string img1,string img2,string transaccion)
-        {
-            string imgEntrada = img1 + "; " + img2;
-            VEH.actualizarImagenesPINEntrada(imgEntrada,transaccion);
-        }
-        private void actualizarRutasImagenesSalida(string img1, string img2, string transaccion)
-        {
-            string imgSalida = img1 + "; " + img2;
-            VEH.actualizarImagenesPINSalida(imgSalida, transaccion);
-        }
-
         private string validarTicketEntrada(int nScaleId, TransactionModel myTransaction)
         {
             ticket[nScaleId] = llenarTicketEntrada(nScaleId, myTransaction);
-            ticket[nScaleId].Estado = "IP";
             pesoObtenido[nScaleId] = Convert.ToInt32(myTransaction.Loads[0].GrossWeight);
             string T_Chofer = cfg.AppSettings.Settings["T_Chofer"].Value; //tiempo que tiene el chofer para timbrar en el biometrico
             estado = "entrada";
@@ -776,7 +812,7 @@ namespace PronacaPlugin
                 if (conductorEnviado[nScaleId] == ticket[nScaleId].Chofer && vehiculoEnviado[nScaleId] == ticket[nScaleId].Placa)
                     return "";
                 else
-                    return "No puede seleccionar otro conductor ni otro vehículo al enviado a ARIES";
+                    return "No puede terminar la transacción en DataBridge con datos diferentes a los enviados a Aries. Seleccione el chofer y el vehículo previamente seleccionados.";
             }
             else
             {
@@ -796,7 +832,7 @@ namespace PronacaPlugin
                         {
                             //pasa el primer filtro del chofer 
                             //********************** FILTRO DE LA PLACA AL INGRESO*******************************************************************   
-                            string Ping_Ingreso = VEH.consulta_PlacaIngreso(myTransaction.Loads[0].Vehicle.Name);
+                            string Ping_Ingreso = VEH.consulta_PinIngreso(myTransaction.Loads[0].Vehicle.Name,nScaleId);
                             //ventanaOK("Si timbro el chofer", "DataBridge Plugin");
                             if (Ping_Ingreso != "")
                             {
@@ -836,7 +872,6 @@ namespace PronacaPlugin
                                         //************************************************NOTIFICACION POR CORREO **************************************************
                                         if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
                                         {
-                                            ticket[nScaleId].PinEntrada = generarPin();
                                             return NotificacionCorreo(ticket[nScaleId], nScaleId, banderaCamaras, estado);
                                         }
                                         else
@@ -853,7 +888,6 @@ namespace PronacaPlugin
                                     //************************************************NOTIFICACION POR CORREO *****************************************************   
                                     if (ventanaOKCancel("¿La báscula escogida para la transacción es la correcta?", "DataBridge Plugin"))
                                     {
-                                        ticket[nScaleId].PinEntrada = generarPin();
                                         return NotificacionCorreo(ticket[nScaleId], nScaleId, banderaCamaras, estado);
                                     }
                                     else
@@ -886,9 +920,7 @@ namespace PronacaPlugin
         }
         private string validarTicketSalida(int nScaleId, TransactionModel myTransaction)
         {
-
             ticket[nScaleId] = llenarTicketSalida(nScaleId, myTransaction);
-            ticket[nScaleId].Estado = "SP";
             pesoObtenido[nScaleId] = Convert.ToInt32(myTransaction.Loads[0].GrossWeight);
             string T_Chofer = cfg.AppSettings.Settings["T_Chofer"].Value;
             estado = "salida";
@@ -902,10 +934,10 @@ namespace PronacaPlugin
             }
             if ((nScaleId == 0 && transaccionEnviada[nScaleId] == 1) || (nScaleId == 1 && transaccionEnviada[nScaleId] == 1))
             {
-                if (conductorEnviado[nScaleId] == ticket[nScaleId].Placa && vehiculoEnviado[nScaleId] == ticket[nScaleId].Chofer)
+                if (conductorEnviado[nScaleId] == ticket[nScaleId].Chofer && vehiculoEnviado[nScaleId] == ticket[nScaleId].Placa)
                     return "";
                 else
-                    return "No puede seleccionar otro conductor ni otro vehículo al enviado a ARIES";
+                    return "No puede terminar la transacción en DataBridge con datos diferentes a los enviados a Aries. Seleccione el chofer y el vehículo previamente seleccionados.";
             }
             else
             {
@@ -915,7 +947,7 @@ namespace PronacaPlugin
                     {
                         if (myTransaction.Loads[0].Pass2Weight >= (pesoActualBascula[nScaleId] - 10) && myTransaction.Loads[0].Pass2Weight <= (pesoActualBascula[nScaleId] + 10))
                         {
-                            string Ping_Salida = VEH.consulta_PinSalida(myTransaction.TransactionNumber);
+                            string Ping_Salida = VEH.consulta_PinSalida(myTransaction.TransactionNumber,nScaleId);
                             if (Ping_Salida != "")
                             {
                                 string Nota = ventanaImput("Ingrese el PIN:", "DataBridge Plugin", "PIN");
@@ -943,7 +975,6 @@ namespace PronacaPlugin
                                         {
                                             try
                                             {
-                                                ticket[nScaleId].PinSalida = generarPin();
                                                 return NotificacionCorreo(ticket[nScaleId], nScaleId, banderaCamaras, estado);
                                             }
                                             catch (Exception ex)
@@ -964,7 +995,6 @@ namespace PronacaPlugin
                                     {
                                         try
                                         {
-                                            ticket[nScaleId].PinSalida = generarPin();
                                             return NotificacionCorreo(ticket[nScaleId], nScaleId, banderaCamaras, estado);
                                         }
                                         catch (Exception ex)
@@ -1007,30 +1037,34 @@ namespace PronacaPlugin
         }
         private Ticket llenarTicketEntrada(int nScaleId, TransactionModel myTransaction)
         {
-            Ticket ticket = new Ticket();
+            Ticket ticket = Ticket.GetInstance();
+            ticket.Nuevo();
             ticket.Bascula = nScaleId;
             ticket.NumeroTicket = VEH.consulta_TransaccionDB();
             ticket.Placa = myTransaction.Loads[0].Vehicle.Name;
             ticket.Chofer = myTransaction.Loads[0].Driver.Name;
             ticket.OperadorIngreso = myTransaction.Loads[0].Pass1Operator;
             ticket.PesoIngreso = myTransaction.Loads[0].Pass1Weight.ToString();
+            ticket.Estado = "IP";
             return ticket;
         }
         private Ticket llenarTicketSalida(int nScaleId,TransactionModel myTransaction)
         {
-            Ticket ticket = new Ticket();
+            Ticket ticket = Ticket.GetInstance();
+            ticket.Nuevo();
             ticket.BasculaSalida = nScaleId;
             ticket.NumeroTicket = myTransaction.TransactionNumber;
             ticket.Placa = myTransaction.Loads[0].Vehicle.Name;
             ticket.Chofer = myTransaction.Loads[0].Driver.Name;
             ticket.OperadorSalida = myTransaction.Loads[0].Pass2Operator;
             ticket.PesoSalida = myTransaction.Loads[0].Pass2Weight.ToString();
+            ticket.Estado = "SP";
             return ticket;
         }
         private int actualizarTicketEntrada(int nScaleId, TransactionModel myTransaction)
         {
             int rowsAdded = 0;
-            rowsAdded=VEH.revisarTransaccionEntradaTerminada();
+            rowsAdded=VEH.terminarTransaccionEntrada();
             //VEH.Gestion_Pesaje(ticket[nScaleId]);
             if (VEH.estatusRecibidoAriesEntrada(myTransaction.TransactionNumber) == "3")
                 VEH.actualizarEstadoRecibidoEntrada(nScaleId, myTransaction.TransactionNumber);
@@ -1052,7 +1086,7 @@ namespace PronacaPlugin
 
         private int anularTransaccion(int nScaleId, TransactionModel myTransaction)
         {
-            return VEH.anularTransacción(myTransaction.TransactionNumber);
+            return VEH.anularTransacción(myTransaction.TransactionNumber,myTransaction.Loads[0].Vehicle.Name);
         }
 
         #endregion

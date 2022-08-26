@@ -79,3 +79,4 @@ C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\Proyec
 C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.xml
 C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\XamlC.stamp
 C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CopyComplete
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.AssemblyReference.cache
