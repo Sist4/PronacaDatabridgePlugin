@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PronacaPlugin</name>
+    </assembly>
+    <members>
+        <member name="M:PronacaPlugin.GestionTicket.EnviarCorreo(PronacaPlugin.Correo,System.String,System.String,System.Object)">
+            <summary>
+            Se envía un correo por dos razones:
+            1. Las cámaras no detectaron la placa, por lo tanto no se pudo validar que la placa seleccionada por DataBridge es la placa del camión
+            en la báscula, se envía un correo con la información de fecha y hora, N# de transacción, placa seleccionada, 
+            PIN(Código numérico randómico de 4 digitos) e imagenes capturadas en ese momento del vehículo por delante y detrás.
+            2. Se presionó el botón verde para detener la secuencia, se levantan las barreras y se permite entrar o salir algún vehículo sin ser
+            registrado, se envía un correo con la información de fecha y hora, razón de la detención, operador, peso obtenido, peso en báscula e imagenes
+            capturadas en ese momento del vehículo por delante y por detrás.
+            Se cargan los correos de destino, correo de envío, contraseña, host, puerto, ssl del archivo de configuración, 
+            se añaden ls imagenes como archivo adjunto si esque las hay y se envía el email a los correos de destino.
+            </summary>
+            <param name="correo">Objeto donde se enceuntran los datos del correo que se va a enviar</param>
+            <param name="nombreImagen1">ruta de la imagen  capturada por la cámara de entrada que se va a adjuntar en el correo</param>
+            <param name="nombreImagen2">ruta de la imagen  capturada por la cámara de salida que se va a adjuntar en el correo</param>
+            <param name="objeto"> Objeto Ticket si esque el correo es envio de PIN, o Secuencia si es por detención de secuencia</param>
+            <returns></returns>
+            <exception cref="T:PronacaPlugin.ExcepcionNegocio"></exception>
+        </member>
+        <member name="M:PronacaPlugin.GestionTicket.escribirImagen(System.String,System.String)">
+            <summary>
+            Se escribe en la imagen capturada por las cámaras  que se enviará por correo el peso actual en báscula en color rojo
+            </summary>
+            <param name="ruta">ruta de la imagen capturada por la cámara</param>
+            <param name="pesoBascula">peso actual que se registra en el terminal de peso</param>
+        </member>
+        <member name="M:PronacaPlugin.GestionTicket.GuardarCorreo(PronacaPlugin.Correo)">
+            <summary>
+            Se guardan las imagenes que se enviarán como un arreglos de bytes y se insertan en la base de datos
+            en el campo id  se inserta un autonomérico con identificador CORR_, en el campo tipo  se inserta si es un correo por PIN o por Secuencia, 
+            en el campo PIN se inserta el codigo randomico numérico si esque lo hubo, se insertan los campos asunto, remitente, destinatarios
+            y las imagenes si esque las hubo
+            </summary>
+            <param name="correo">Objeto que contiene toda los datos del correo</param>
+        </member>
+        <member name="M:PronacaPlugin.GestionTicket.ObtenerUltimoConductorPendiente(System.String,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Obtengo el último registro del conductor por fecha más reciente, que se encuentre en estado P (Pendiente) y en el dispositivo
+            biométrico que tenga en el archivo de configuración estado true.
+            </summary>
+            <param name="biometricoEntrada">nombre deldispositivo  biometrico de la entrada</param>
+            <param name="biometricoSalida">nombre del dispositivo biométrico de la salida</param>
+            <param name="entrada">estado del dispositivo biométrico de entrada</param>
+            <param name="salida">estado del dispositivo biométrico de salida</param>
+            <returns>Objeto Conductor que contiene toda la información del conductor</returns>
+        </member>
+        <member name="M:PronacaPlugin.GestionTicket.ExisteTimbrado(System.String)">
+            <summary>
+            Comparo si el ultimo conductor obtenido es el mismo que el conductor seleccionado en el software DataBridge
+            comparanando las cédulas.
+            </summary>
+            <param name="cedulaSeleccionada">Cédula del conductor seleccionada en el software DataBridge</param>
+            <returns>Si las cédulas son las mismas se devuelve true, caso contrario false</returns>
+        </member>
+        <member name="M:PronacaPlugin.GestionTicket.ExisteConductor(System.String)">
+            <summary>
+            Busco la cédula seleccionada en la base de datos del dispositivo biométrico
+            </summary>
+            <param name="cedulaSeleccionada">Cédula del conductor seleccionada en el software DataBridge</param>
+            <returns> si se encuentra la cédula se devuelve true, caso contrario false</returns>
+        </member>
+        <member name="M:PronacaPlugin.GestionTicket.consulta_TransaccionDB">
+            <summary>
+            Obtengo el número de transacción en la base de datos de DataBridge, convierto en tipo de datos numérico y sumo uno
+            </summary>
+            <returns>devuelvo el siguiente número de transacción de DataBridge</returns>
+        </member>
+        <member name="M:PronacaPlugin.GestionTicket.InvocarServicio(PronacaPlugin.Ticket,System.String,System.String,System.String@,System.Int32@)">
+            <summary>
+            Se crea el XML con los datos que se enviarán a ARIES mediante Web Service, se llama al ejecutable de comunicación y se le pasa como
+            parametro el número de ticket, que será un identificador único por transacción, se selecciona el registro que tiene como id de ticket
+            enviado y con estado E (Enviado), se guarda el mensaje y estatus devueltos por el Web Service, si existe el mensaje se cambia de 
+            estado a T (Terminado).
+            </summary>
+            <param name="ticket">Objeto que contiene toda datos relacionados a la transacción</param>
+            <param name="centroTransaccion">Centro seleccionado en el software DataBridge</param>
+            <param name="nombreConductor">Nombre del conductor seleccionado en el software DataBridge</param>
+            <param name="mensajeAries">Mensaje que devuelve ARIES al Web Service</param>
+            <param name="estatusAries">Estatis que devuekve ARIES al Web Service</param>
+        </member>
+        <member name="M:PronacaPlugin.GestionTicket.GuardarMensajeEnviado(System.String,System.String)">
+            <summary>
+            Se crear un registro con los datos de id, número de ticket, fecha, xml enviado
+            </summary>
+            <param name="Mensaje">xml encriotado con los datos del ticket enviado</param>
+            <param name="IdTicket"> número de ticket al que está asociado el mensaje xml enviado</param>w
+        </member>
+        <member name="M:PronacaPlugin.GestionTicket.DecodeBase64ToString(System.String)">
+            <summary>
+            Se desencripta el texto recibido en algormitrmo de cifrado por bloque de 64 bits
+            </summary>
+            <param name="valor">mensaje xml encriotado</param>
+            <returns>mensaje en xml desenciptado</returns>
+        </member>
+        <member name="M:PronacaPlugin.GestionTicket.EncodeStrToBase64(System.String)">
+            <summary>
+            Se encripta el texto recibido con el algoritmo de cifrado por bloques de 64 bits
+            </summary>
+            <param name="valor">mensaje en xml que se va a encriptar</param>
+            <returns> mensaje en xml encriptado</returns>
+        </member>
+        <member name="M:PronacaPlugin.GestionTicket.ObtenerPIN(System.String)">
+            <summary>
+            Obtengo Código PIN asociado a la transacción en la que no se leyeron las placas al vehículo 
+            y que la transaccion se encuentra ne estado P (Pendiente).
+            </summary>
+            <param name="placaSeleccionada">placa seleccionada en el software DataBridge</param>
+            <returns>devuelvo código PIN que concuerde con la placa seleccionada</returns>
+        </member>
+        <member name="M:PronacaPlugin.GestionTicket.ObtenerIdTicketPendientePIN(System.String)">
+            <summary>
+            Obtengo Id del ticket que concuerde con la placa seleccionada y se encuentre en estado P(Pendiente).
+            </summary>
+            <param name="placaSeleccionada">placa seleccionada en el software DataBridge</param>
+            <returns>devuelvo id de ticket</returns>
+        </member>
+        <member name="M:PronacaPlugin.GestionTicket.ObtenerVehiculosPendientesCamDelantera(System.Int32)">
+            <summary>
+            Obtengo un listado de vehículos en estado P (Pendiente) capturados por la cámara delantera
+            </summary>
+            <param name="bascula">número de báscula</param>
+            <returns>devuelve el listado de vehículos en estado pendiente</returns>
+        </member>
+    </members>
+</doc>

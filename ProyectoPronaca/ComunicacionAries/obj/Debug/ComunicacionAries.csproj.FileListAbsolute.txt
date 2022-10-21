@@ -37,3 +37,5 @@ C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\Proyec
 C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.csproj.CoreCompileInputs.cache
 C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.exe
 C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.pdb
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.csproj.AssemblyReference.cache
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\ComunicacionAries\obj\Debug\ComunicacionAries.csproj.SuggestedBindingRedirects.cache

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Profile;
 
 namespace PronacaPlugin
 {
@@ -11,24 +12,20 @@ namespace PronacaPlugin
 
         private Ticket()
         {
-            BasculaSalida = 0;
+            Id = "";
+            IdCorreo = "";
+            PlacaVehiculo = "";
+            CedulaConductor = "";
+            Fecha = DateTime.Now;
+            Hora = DateTime.Now;
+            Numero = 0;
+            Tipo = "";
             Bascula = 0;
-            Placa = "";
-            Chofer = "";
-            PesoIngreso = "0";
-            PesoSalida = "0";
-            NumeroTicket = "0";
-            FechaIngreso = DateTime.Now;
-            FechaSalida = DateTime.Now;
-            OperadorIngreso = "";
-            OperadorSalida = "";
-            PinEntrada = "";
-            PinSalida = "";
+            Operador = "";
+            PesoEnviado = "0";
             PesosObtenidos = "";
             Estado = "";
-            Val1 = "";
-            Val2 = "";
-            Val3 = "";
+
         }
 
         private static Ticket _instance;
@@ -42,43 +39,34 @@ namespace PronacaPlugin
         }
         public void Nuevo()
         {
-            BasculaSalida = 0;
+            Id = "";
+            IdCorreo = "";
+            PlacaVehiculo = "";
+            CedulaConductor = "";
+            Fecha = DateTime.Now;
+            Hora = DateTime.Now;
+            Numero = 0;
+            Tipo = "";
             Bascula = 0;
-            Placa = "";
-            Chofer = "";
-            PesoIngreso = "0";
-            PesoSalida = "0";
-            NumeroTicket = "0";
-            FechaIngreso = DateTime.Now;
-            FechaSalida = DateTime.Now;
-            OperadorIngreso = "";
-            OperadorSalida = "";
-            PinEntrada = "";
-            PinSalida = "";
+            Operador = "";
+            PesoEnviado = "0";
             PesosObtenidos = "";
             Estado = "";
-            Val1 = "";
-            Val2 = "";
-            Val3 = "";
         }
-
+        public string Id { get; set; }
+        public string IdCorreo { get; set; }
+        public string PlacaVehiculo { get; set; }
+        public string CedulaConductor { get; set; }
+        public DateTime Fecha { get; set; }
+        public DateTime Hora { get; set; }
+        public int Numero { get; set; }
+        public string Tipo { get; set; }
         public int Bascula { get; set; }
-        public int BasculaSalida { get; set; }
-        public string Placa{ get; set; }
-        public string Chofer { get; set; }
-        public string PesoIngreso { get; set; }
-        public string PesoSalida { get; set; }
-        public string NumeroTicket { get; set; }
-        public DateTime FechaIngreso { get; set; }
-        public DateTime FechaSalida { get; set; }
-        public string OperadorIngreso { get; set; }
-        public string OperadorSalida { get; set; }
-        public string PinEntrada { get; set; }
-        public string PinSalida { get; set; }
+        public string Operador { get; set; }
+        public string PesoEnviado { get; set; }
         public string PesosObtenidos { get; set; }
-        public string  Estado { get; set; }
-        public string Val1  { get; set; }
-        public string Val2 { get; set; }
-        public string Val3 { get; set; }
+        public string Estado { get; set; }
+
+
     }
 }

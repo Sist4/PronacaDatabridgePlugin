@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Aries.cs" />
     <Compile Include="Connected Services\WsPronProduccion\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

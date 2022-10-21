@@ -60,3 +60,4 @@ C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\Proyec
 C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.CoreCompileInputs.cache
 C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.dll
 C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.pdb
+C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\Camaras\obj\Debug\Camaras.csproj.AssemblyReference.cache
