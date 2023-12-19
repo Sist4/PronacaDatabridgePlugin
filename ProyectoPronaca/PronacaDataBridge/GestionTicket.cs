@@ -617,7 +617,7 @@ namespace PronacaPlugin
                 //Process.Start(ejecutable);
                 // Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\Comunicación Aries\PruebasComunicacion.exe");
                 Process.Start(@"C:\Program Files (x86)\METTLER TOLEDO\DataBridge\Comunicación Aries\ComunicacionAries.exe ", ticket.Id);
-                System.Threading.Thread.Sleep(10000);
+                System.Threading.Thread.Sleep(2000);
                 // G_Msg2();
                 //CONSULTA DE DATOS
                 Aries aries = new Aries();
