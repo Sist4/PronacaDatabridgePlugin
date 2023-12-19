@@ -30,11 +30,8 @@ C:\Users\User\Documents\Pronaca Puembo\Pronaca_Final\ProyectoPronaca\PronacaData
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.dll.config
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.dll
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.pdb
-C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.dll
-C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\Renci.SshNet.xml
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CoreCompileInputs.cache
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\XamlC.stamp
-C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.CopyComplete
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.dll
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.pdb
 C:\Users\User\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.csproj.AssemblyReference.cache
@@ -78,3 +75,4 @@ C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\Proyec
 C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.dll
 C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\obj\Debug\PronacaPlugin.pdb
 C:\Users\PrecitrolSist\OneDrive\Documentos\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.xml
+C:\Users\user\Documents\GitHub\PronacaDatabridgePlugin\ProyectoPronaca\PronacaDataBridge\bin\Debug\PronacaPlugin.xml

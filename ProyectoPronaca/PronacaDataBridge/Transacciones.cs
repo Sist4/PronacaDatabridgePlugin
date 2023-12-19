@@ -191,8 +191,8 @@ namespace PronacaPlugin
             pesosObtenidos[nScaleId] = "";
 
             gest.ActualizarEstadoConductoresTerminados();
-            gest.ActualizarEstadoTicketInvalidos(ticket[nScaleId], pesoActualBascula[nScaleId].ToString(), "TransactionAccepted",nScaleId);
-            gest.ActualizarEstadoVehiculosTerminados(nScaleId,"dentro",Dir_Loop);
+            gest.ActualizarEstadoTicketInvalidos(ticket[nScaleId], pesoActualBascula[nScaleId].ToString(), "TransactionAccepted", nScaleId);
+            gest.ActualizarEstadoVehiculosTerminados(nScaleId, "dentro", Dir_Loop);
             ticket[nScaleId].Nuevo();
 
 
@@ -231,7 +231,7 @@ namespace PronacaPlugin
 
             gest.ActualizarEstadoConductoresTerminados();
             gest.ActualizarEstadoTicketInvalidos(ticket[nScaleId], pesoActualBascula[nScaleId].ToString(), "TransactionCompleted", nScaleId);
-            gest.ActualizarEstadoVehiculosTerminados(nScaleId,"dentro",Dir_Loop);
+            gest.ActualizarEstadoVehiculosTerminados(nScaleId, "dentro", Dir_Loop);
             ticket[nScaleId].Nuevo();
         }
 
@@ -397,7 +397,9 @@ namespace PronacaPlugin
             gest.GuardarTicket(ticket);
             try
             {
-                gest.InvocarServicio(ticket, centro, NombreConductor, ref mensajeAries, ref estatusAries);
+                //gest.InvocarServicio(ticket, centro, NombreConductor, ref mensajeAries, ref estatusAries);
+                estatusAries = 3;
+                mensajeAries = "EXITO";
             }
             catch (Exception ex)
             {
@@ -457,6 +459,7 @@ namespace PronacaPlugin
             }
             else
             {
+
                 if (gest.ExisteConductor(myTransaction.Loads[0].Driver.Name))
                 {
                     if (gest.ExisteTimbrado(myTransaction.Loads[0].Driver.Name))
@@ -480,14 +483,14 @@ namespace PronacaPlugin
                             }
                             else
                             {
-                                if (gest.ValidarVehiculo(myTransaction.Loads[0].Vehicle.Name, nScaleId,Dir_Camaras,Dir_Loop))
+                                if (gest.ValidarVehiculo(myTransaction.Loads[0].Vehicle.Name, nScaleId, Dir_Camaras, Dir_Loop))
                                 {
                                     return EnviarAries(myTransaction, nScaleId, ticket[nScaleId]);
                                 }
                                 else
                                 {
                                     int bascula = nScaleId == 0 ? 1 : 0;
-                                    if (gest.ValidarVehiculo(myTransaction.Loads[0].Vehicle.Name,bascula,Dir_Camaras,Dir_Loop))
+                                    if (gest.ValidarVehiculo(myTransaction.Loads[0].Vehicle.Name, bascula, Dir_Camaras, Dir_Loop))
                                     {
                                         return "La placa seleccionada se encuentra en la otra báscula";
                                     }
@@ -497,12 +500,13 @@ namespace PronacaPlugin
                                             "¿Desea enviar un PIN para continuar con la transacción?", "DataBridge Plugin"))
                                         {
                                             return NotificarPIN(nScaleId, ticket[nScaleId]);
+
                                         }
                                         else
                                         {
                                             return "Porfavor vuelva a presionar el botón Aceptar/Completar para proseguir con la transacción";
-                                        }                                      
-                                        
+                                        }
+
                                     }
                                 }
 
@@ -524,7 +528,7 @@ namespace PronacaPlugin
                 }
 
 
-                
+
 
             }
         }
@@ -572,14 +576,14 @@ namespace PronacaPlugin
                             }
                             else
                             {
-                                if (gest.ValidarVehiculo(myTransaction.Loads[0].Vehicle.Name, nScaleId,Dir_Camaras,Dir_Loop))
+                                if (gest.ValidarVehiculo(myTransaction.Loads[0].Vehicle.Name, nScaleId, Dir_Camaras, Dir_Loop))
                                 {
                                     return EnviarAries(myTransaction, nScaleId, ticket[nScaleId]);
                                 }
                                 else
                                 {
                                     int bascula = nScaleId == 0 ? 1 : 0;
-                                    if (gest.ValidarVehiculo(myTransaction.Loads[0].Vehicle.Name, bascula,Dir_Camaras,Dir_Loop))
+                                    if (gest.ValidarVehiculo(myTransaction.Loads[0].Vehicle.Name, bascula, Dir_Camaras, Dir_Loop))
                                     {
                                         return "La placa seleccionada se encuentra en la otra báscula";
                                     }
